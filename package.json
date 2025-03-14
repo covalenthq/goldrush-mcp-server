@@ -1,0 +1,24 @@
+{
+  "name": "goldrush-mcp-server",
+  "version": "1.0.0",
+  "description": "GoldRush MCP Server for interacting with Covalent GoldRush API",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node --esm src/index.ts",
+    "example": "ts-node --esm src/example-client.ts"
+  },
+  "dependencies": {
+    "@covalenthq/client-sdk": "^2.2.4",
+    "@modelcontextprotocol/sdk": "^1.7.0",
+    "dotenv": "^16.4.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.24",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
+  }
+} 
