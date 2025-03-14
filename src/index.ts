@@ -82,7 +82,12 @@ function addBalanceServiceTools(server: McpServer) {
           }
         );
         return {
-          content: [{ type: "text", text: JSON.stringify(response.data, null, 2) }]
+          content: [{ 
+            type: "text", 
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            , 2) 
+          }]
         };
       } catch (error) {
         return {
@@ -123,7 +128,9 @@ function addBalanceServiceTools(server: McpServer) {
           }
         );
         return {
-          content: [{ type: "text", text: JSON.stringify(response.data, null, 2) }]
+          content: [{ type: "text", text: JSON.stringify(response.data, (_, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+          , 2) }]
         };
       } catch (error) {
         return {
@@ -172,7 +179,9 @@ function addTransactionServiceTools(server: McpServer) {
         }
         
         return {
-          content: [{ type: "text", text: JSON.stringify({ items: transactions }, null, 2) }]
+          content: [{ type: "text", text: JSON.stringify({ items: transactions }, (_, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+          , 2) }]
         };
         
         // Option 2 (Alternative): Return just the first page
@@ -208,7 +217,9 @@ function addTransactionServiceTools(server: McpServer) {
           params.txHash
         );
         return {
-          content: [{ type: "text", text: JSON.stringify(response.data, null, 2) }]
+          content: [{ type: "text", text: JSON.stringify(response.data, (_, value) =>
+            typeof value === 'bigint' ? value.toString() : value
+          , 2) }]
         };
       } catch (error) {
         return {
