@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { Chain, GoldRushClient, Quote } from "@covalenthq/client-sdk";
+import { Chain, ChainName, GoldRushClient, Quote } from "@covalenthq/client-sdk";
 import { z } from "zod";
 import dotenv from "dotenv";
 
@@ -60,7 +60,7 @@ function addBalanceServiceTools(server: McpServer) {
   server.tool(
     "getTokenBalancesForWalletAddress",
     {
-      chainName: z.string(),
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
       address: z.string(),
       quoteCurrency: z.string().optional(),
       nft: z.boolean().optional(),
