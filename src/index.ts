@@ -33,6 +33,30 @@ const server = new McpServer({
   version: "1.0.0"
 });
 
+// Add the Goldrush supported chains as static resource
+server.resource(
+  "supported-chains",
+  "config://supported-chains",
+  async (uri) => ({
+    contents: [{
+      uri: uri.href,
+      text: JSON.stringify(Object.values(ChainName), null, 2)
+    }]
+  })
+);
+
+// Add the Goldrush supported quote currencies as static resource
+server.resource(
+  "quote-currencies",
+  "config://quote-currencies",
+  async (uri) => ({
+    contents: [{
+      uri: uri.href,
+      text: JSON.stringify(Object.values(validQuoteValues), null, 2)
+    }]
+  })
+);
+
 // Add the BaseService tools
 addBaseServiceTools(server);
 
