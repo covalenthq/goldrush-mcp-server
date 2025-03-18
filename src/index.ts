@@ -7,6 +7,16 @@ import dotenv from "dotenv";
 // Load environment variables
 dotenv.config();
 
+// Create a type-safe enum object that matches the Quote type
+const QUOTE_VALUES = z.enum([
+  "USD", "CAD", "EUR", "SGD", "INR", "JPY", "VND", "CNY", 
+  "KRW", "RUB", "TRY", "NGN", "ARS", "AUD", "CHF", "GBP"
+]);
+
+// This ensures the values are valid Quote types
+// Validates at build-time through TypeScript
+const validQuoteValues: readonly Quote[] = QUOTE_VALUES.options as Quote[];
+
 // Get the API key from environment variables
 const apiKey = process.env.GOLDRUSH_API_KEY;
 if (!apiKey) {
@@ -31,6 +41,7 @@ addBalanceServiceTools(server);
 
 // Add the TransactionService tools
 addTransactionServiceTools(server);
+
 
 // Helper function to add BaseService tools
 function addBaseServiceTools(server: McpServer) {
@@ -62,7 +73,7 @@ function addBalanceServiceTools(server: McpServer) {
     {
       chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
       address: z.string(),
-      quoteCurrency: z.string().optional(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
       nft: z.boolean().optional(),
       noNftFetch: z.boolean().optional(),
       noSpam: z.boolean().optional(),
@@ -102,9 +113,9 @@ function addBalanceServiceTools(server: McpServer) {
   server.tool(
     "getHistoricalTokenBalancesForWalletAddress",
     {
-      chainName: z.string(),
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
       address: z.string(),
-      quoteCurrency: z.string().optional(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
       nft: z.boolean().optional(),
       noNftFetch: z.boolean().optional(),
       noSpam: z.boolean().optional(),
@@ -148,9 +159,9 @@ function addTransactionServiceTools(server: McpServer) {
   server.tool(
     "getAllTransactionsForAddress",
     {
-      chainName: z.string(),
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
       address: z.string(),
-      quoteCurrency: z.string().optional(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
       noLogs: z.boolean().optional(),
       blockSignedAtAsc: z.boolean().optional(),
       withInternal: z.boolean().optional(),
@@ -207,7 +218,7 @@ function addTransactionServiceTools(server: McpServer) {
   server.tool(
     "getTransaction",
     {
-      chainName: z.string(),
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
       txHash: z.string(),
     },
     async (params) => {

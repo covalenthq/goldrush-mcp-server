@@ -137,8 +137,11 @@ $ claude mcp add goldrush-server -e GOLDRUSH_API_KEY=<YOUR_API_KEY> -- <NODE_EXE
 
 - [ ] add validation for input params that need to match specific supported values in `Generic.types.d.ts`. Interation should be robust enough to flag to client if there's no supported match or ask for clarification in case of multiple match
 - [ ] address pagination for best user / agent experience. Maybe return only first page for paginated methods and inform total / provide options to retrieve all
-- [ ] add all remaining public GoldRush API SDK methods as tools 
+- [ ] expose relevant types and usage docs as mcp resources
+- [ ] expose usage examples as prompt templates
+- [ ] add all remaining public GoldRush API SDK methods as tools
 - [ ] add CI for publishing server npm package
+- [ ] Tests
 
 ## Contributing
 
