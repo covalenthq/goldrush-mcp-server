@@ -51,6 +51,8 @@ describe("AllChainsService Tools", () => {
         walletAddress: "demo.eth"
       }
     });
+    // Log the full API response
+    console.log("getAddressActivity response:", response.content);
     // We won't parse deeply, just ensure no error
     expect(response.isError).toBeFalsy();
     expect(response.content).toBeDefined();
@@ -66,6 +68,8 @@ describe("AllChainsService Tools", () => {
         limit: 1
       }
     });
+    // Log the full API response
+    console.log("getMultiChainBalances response:", response.content);
     expect(response.isError).toBeFalsy();
     expect(response.content).toBeDefined();
   }, 30000);
@@ -78,6 +82,8 @@ describe("AllChainsService Tools", () => {
         limit: 1
       }
     });
+    // Log the full API response
+    console.log("getMultiChainMultiAddressTransactions response:", response.content);
     expect(response.isError).toBeFalsy();
     expect(response.content).toBeDefined();
   }, 30000);
