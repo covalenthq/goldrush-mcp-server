@@ -2,17 +2,21 @@
  * @file index.ts
  * @description
  * The main entry point for the GoldRush MCP Server. This file sets up an MCP server
- * providing tools (BaseService, BalanceService, TransactionService, and now AllChainsService)
+ * providing tools (AllChainsService, BaseService, BalanceService, TransactionService),
  * and static resources. It connects with Covalent's GoldRush API using the @covalenthq/client-sdk.
- * 
+ *
  * Key Features:
- *  - Tools for AllChainsService, BaseService, BalanceService, TransactionService
+ *  - Tools for:
+ *    * AllChainsService (cross-chain wallet queries)
+ *    * BalanceService (token balances, historical info, token holders, etc.)
+ *    * BaseService (general chain data)
+ *    * TransactionService (transaction details, iteration)
  *  - Static resources listing supported chains and quote currencies
- * 
+ *
  * @notes
  *  - The GOLDRUSH_API_KEY environment variable must be set
  *  - Tools are implemented using zod for argument validation
- *  - The entire file is rewritten as part of step 1 in the plan
+ *  - Additional BalanceService coverage for Step #2 of the plan
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -25,10 +29,11 @@ import dotenv from "dotenv";
 dotenv.config();
 
 /**
- * A type-safe Zod enum referencing valid quote currencies for Covalent/GolRush
+ * A type-safe Zod enum referencing valid quote currencies for Covalent/GolRush.
+ * If Covalent adds new ones, we can add them here.
  */
 const QUOTE_VALUES = z.enum([
-  "USD", "CAD", "EUR", "SGD", "INR", "JPY", "VND", "CNY", 
+  "USD", "CAD", "EUR", "SGD", "INR", "JPY", "VND", "CNY",
   "KRW", "RUB", "TRY", "NGN", "ARS", "AUD", "CHF", "GBP"
 ]);
 
@@ -40,7 +45,7 @@ const validQuoteValues: readonly Quote[] = QUOTE_VALUES.options as Quote[];
 // Retrieve API key from environment
 const apiKey = process.env.GOLDRUSH_API_KEY;
 if (!apiKey) {
-  console.error("GOLDRUSH_API_KEY environment variable is not set");
+  console.error("GOLDRUSH_API_KEY environment variable is not set.");
   process.exit(1);
 }
 
@@ -97,6 +102,7 @@ addBaseServiceTools(server);
 
 /**
  * Add BalanceService Tools
+ * (Now includes the newly added methods for Step #2)
  */
 addBalanceServiceTools(server);
 
@@ -115,7 +121,7 @@ addTransactionServiceTools(server);
  *  - getMultiChainMultiAddressTransactions
  *  - getMultiChainBalances
  *  - getAddressActivity
- * 
+ *
  * Each tool calls the respective method on goldRushClient.AllChainsService
  * using zod for argument validation. Returns the data as JSON.
  */
@@ -156,7 +162,7 @@ function addAllChainsServiceTools(server: McpServer) {
             type: "text",
             text: JSON.stringify(response.data, (_, value) =>
               typeof value === 'bigint' ? value.toString() : value
-            , 2)
+              , 2)
           }]
         };
       } catch (error) {
@@ -201,7 +207,7 @@ function addAllChainsServiceTools(server: McpServer) {
             type: "text",
             text: JSON.stringify(response.data, (_, value) =>
               typeof value === 'bigint' ? value.toString() : value
-            , 2)
+              , 2)
           }]
         };
       } catch (error) {
@@ -233,7 +239,7 @@ function addAllChainsServiceTools(server: McpServer) {
             type: "text",
             text: JSON.stringify(response.data, (_, value) =>
               typeof value === 'bigint' ? value.toString() : value
-            , 2)
+              , 2)
           }]
         };
       } catch (error) {
@@ -280,14 +286,20 @@ function addBaseServiceTools(server: McpServer) {
 /**
  * @function addBalanceServiceTools
  * @description
- * Tools for the BalanceService, such as:
+ * Tools for the BalanceService. Previously we had:
  *  - getTokenBalancesForWalletAddress
  *  - getHistoricalTokenBalancesForWalletAddress
- * (We can add more in subsequent steps.)
+ * Now we add more for Step #2:
+ *  - getHistoricalPortfolioForWalletAddress
+ *  - getErc20TransfersForWalletAddress (async iterable)
+ *  - getErc20TransfersForWalletAddressByPage
+ *  - getTokenHoldersV2ForTokenAddress (async iterable)
+ *  - getTokenHoldersV2ForTokenAddressByPage
+ *  - getNativeTokenBalance
  */
 function addBalanceServiceTools(server: McpServer) {
 
-  // getTokenBalancesForWalletAddress
+  // Already existing from Step #1
   server.tool(
     "getTokenBalancesForWalletAddress",
     {
@@ -313,11 +325,11 @@ function addBalanceServiceTools(server: McpServer) {
           }
         );
         return {
-          content: [{ 
-            type: "text", 
+          content: [{
+            type: "text",
             text: JSON.stringify(response.data, (_, value) =>
               typeof value === 'bigint' ? value.toString() : value
-            , 2) 
+              , 2)
           }]
         };
       } catch (error) {
@@ -329,7 +341,7 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  // getHistoricalTokenBalancesForWalletAddress
+  // Already existing from Step #1
   server.tool(
     "getHistoricalTokenBalancesForWalletAddress",
     {
@@ -363,7 +375,276 @@ function addBalanceServiceTools(server: McpServer) {
             type: "text",
             text: JSON.stringify(response.data, (_, value) =>
               typeof value === 'bigint' ? value.toString() : value
-            , 2)
+              , 2)
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getHistoricalPortfolioForWalletAddress
+   */
+  server.tool(
+    "getHistoricalPortfolioForWalletAddress",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      days: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BalanceService.getHistoricalPortfolioForWalletAddress(
+          params.chainName as Chain,
+          params.walletAddress,
+          {
+            quoteCurrency: params.quoteCurrency as Quote,
+            days: params.days
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+              , 2)
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getErc20TransfersForWalletAddress (iterates all pages)
+   */
+  server.tool(
+    "getErc20TransfersForWalletAddress",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      contractAddress: z.string().optional(),
+      startingBlock: z.number().optional(),
+      endingBlock: z.number().optional(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const allTransfers = [];
+        const iterator = goldRushClient.BalanceService.getErc20TransfersForWalletAddress(
+          params.chainName as Chain,
+          params.walletAddress,
+          {
+            quoteCurrency: params.quoteCurrency as Quote,
+            contractAddress: params.contractAddress,
+            startingBlock: params.startingBlock,
+            endingBlock: params.endingBlock,
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber
+          }
+        );
+
+        for await (const page of iterator) {
+          if (page.data?.items) {
+            allTransfers.push(...page.data.items);
+          }
+        }
+
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ items: allTransfers }, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+              , 2)
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getErc20TransfersForWalletAddressByPage (single page)
+   */
+  server.tool(
+    "getErc20TransfersForWalletAddressByPage",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      contractAddress: z.string().optional(),
+      startingBlock: z.number().optional(),
+      endingBlock: z.number().optional(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BalanceService.getErc20TransfersForWalletAddressByPage(
+          params.chainName as Chain,
+          params.walletAddress,
+          {
+            quoteCurrency: params.quoteCurrency as Quote,
+            contractAddress: params.contractAddress,
+            startingBlock: params.startingBlock,
+            endingBlock: params.endingBlock,
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+              , 2)
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getTokenHoldersV2ForTokenAddress (iterates all pages)
+   */
+  server.tool(
+    "getTokenHoldersV2ForTokenAddress",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      tokenAddress: z.string(),
+      blockHeight: z.union([z.string(), z.number()]).optional(),
+      date: z.string().optional(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const allHolders = [];
+        const iterator = goldRushClient.BalanceService.getTokenHoldersV2ForTokenAddress(
+          params.chainName as Chain,
+          params.tokenAddress,
+          {
+            blockHeight: params.blockHeight,
+            date: params.date,
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber
+          }
+        );
+
+        for await (const page of iterator) {
+          if (page.data?.items) {
+            allHolders.push(...page.data.items);
+          }
+        }
+
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ items: allHolders }, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+              , 2)
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getTokenHoldersV2ForTokenAddressByPage (single page)
+   */
+  server.tool(
+    "getTokenHoldersV2ForTokenAddressByPage",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      tokenAddress: z.string(),
+      blockHeight: z.union([z.string(), z.number()]).optional(),
+      date: z.string().optional(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BalanceService.getTokenHoldersV2ForTokenAddressByPage(
+          params.chainName as Chain,
+          params.tokenAddress,
+          {
+            blockHeight: params.blockHeight,
+            date: params.date,
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber
+          }
+        );
+
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+              , 2)
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getNativeTokenBalance
+   */
+  server.tool(
+    "getNativeTokenBalance",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      blockHeight: z.union([z.string(), z.number()]).optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BalanceService.getNativeTokenBalance(
+          params.chainName as Chain,
+          params.walletAddress,
+          {
+            quoteCurrency: params.quoteCurrency as Quote,
+            blockHeight: params.blockHeight
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+              , 2)
           }]
         };
       } catch (error) {
@@ -383,9 +664,8 @@ function addBalanceServiceTools(server: McpServer) {
  * @function addTransactionServiceTools
  * @description
  * Tools for the TransactionService, e.g.:
- *  - getAllTransactionsForAddress
+ *  - getAllTransactionsForAddress (iterates pages)
  *  - getTransaction
- * (We can expand as needed in subsequent steps.)
  */
 function addTransactionServiceTools(server: McpServer) {
 
@@ -417,16 +697,18 @@ function addTransactionServiceTools(server: McpServer) {
             withInputData: params.withInputData
           }
         );
-        
+
         // Gather all pages
         for await (const response of iterator) {
           transactions.push(...(response.data?.items || []));
         }
-        
+
         return {
-          content: [{ type: "text", text: JSON.stringify({ items: transactions }, (_, value) =>
-            typeof value === 'bigint' ? value.toString() : value
-          , 2) }]
+          content: [{
+            type: "text", text: JSON.stringify({ items: transactions }, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+              , 2)
+          }]
         };
       } catch (error) {
         return {
@@ -455,7 +737,7 @@ function addTransactionServiceTools(server: McpServer) {
             type: "text",
             text: JSON.stringify(response.data, (_, value) =>
               typeof value === 'bigint' ? value.toString() : value
-            , 2)
+              , 2)
           }]
         };
       } catch (error) {
@@ -475,15 +757,15 @@ function addTransactionServiceTools(server: McpServer) {
  * Initializes the server using STDIO transport for communication, logs success or failure.
  */
 async function startServer() {
-  console.log("Starting GoldRush MCP server (AllChainsService step 1)...");
-  
+  console.log("Starting GoldRush MCP server...");
+
   try {
     // Create the STDIO transport
     const transport = new StdioServerTransport();
-    
+
     // Connect the server to the transport
     await server.connect(transport);
-    
+
     console.log("GoldRush MCP server started successfully");
   } catch (error) {
     console.error("Failed to start server:", error);
