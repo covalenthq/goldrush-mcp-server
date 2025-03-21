@@ -1,39 +1,65 @@
+/**
+ * @file index.ts
+ * @description
+ * The main entry point for the GoldRush MCP Server. This file sets up an MCP server
+ * providing tools (BaseService, BalanceService, TransactionService, and now AllChainsService)
+ * and static resources. It connects with Covalent's GoldRush API using the @covalenthq/client-sdk.
+ * 
+ * Key Features:
+ *  - Tools for AllChainsService, BaseService, BalanceService, TransactionService
+ *  - Static resources listing supported chains and quote currencies
+ * 
+ * @notes
+ *  - The GOLDRUSH_API_KEY environment variable must be set
+ *  - Tools are implemented using zod for argument validation
+ *  - The entire file is rewritten as part of step 1 in the plan
+ */
+
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { Chain, ChainName, GoldRushClient, Quote } from "@covalenthq/client-sdk";
+import { Chain, ChainID, ChainName, GoldRushClient, Quote } from "@covalenthq/client-sdk";
 import { z } from "zod";
 import dotenv from "dotenv";
 
 // Load environment variables
 dotenv.config();
 
-// Create a type-safe enum object that matches the Quote type
+/**
+ * A type-safe Zod enum referencing valid quote currencies for Covalent/GolRush
+ */
 const QUOTE_VALUES = z.enum([
   "USD", "CAD", "EUR", "SGD", "INR", "JPY", "VND", "CNY", 
   "KRW", "RUB", "TRY", "NGN", "ARS", "AUD", "CHF", "GBP"
 ]);
 
-// This ensures the values are valid Quote types
-// Validates at build-time through TypeScript
+/**
+ * Convert QUOTE_VALUES to a TypeScript array of valid quote currency strings
+ */
 const validQuoteValues: readonly Quote[] = QUOTE_VALUES.options as Quote[];
 
-// Get the API key from environment variables
+// Retrieve API key from environment
 const apiKey = process.env.GOLDRUSH_API_KEY;
 if (!apiKey) {
   console.error("GOLDRUSH_API_KEY environment variable is not set");
   process.exit(1);
 }
 
-// Create a GoldRush client
+/**
+ * Creates a Covalent GoldRush client using the provided API key
+ */
 const goldRushClient = new GoldRushClient(apiKey);
 
-// Create an MCP server
+/**
+ * Create an MCP server instance, specifying meta info
+ */
 const server = new McpServer({
   name: "GoldRush MCP Server",
   version: "1.0.0"
 });
 
-// Add the Goldrush supported chains as static resource
+/**
+ * Provide a static resource listing the supported Covalent chain names
+ */
 server.resource(
   "supported-chains",
   "config://supported-chains",
@@ -45,7 +71,9 @@ server.resource(
   })
 );
 
-// Add the Goldrush supported quote currencies as static resource
+/**
+ * Provide a static resource listing the supported Covalent quote currencies
+ */
 server.resource(
   "quote-currencies",
   "config://quote-currencies",
@@ -57,19 +85,176 @@ server.resource(
   })
 );
 
-// Add the BaseService tools
+/**
+ * Add AllChainsService Tools
+ */
+addAllChainsServiceTools(server);
+
+/**
+ * Add BaseService Tools
+ */
 addBaseServiceTools(server);
 
-// Add the BalanceService tools
+/**
+ * Add BalanceService Tools
+ */
 addBalanceServiceTools(server);
 
-// Add the TransactionService tools
+/**
+ * Add TransactionService Tools
+ */
 addTransactionServiceTools(server);
 
+//==================================================
+//                ALL CHAINS SERVICE
+//==================================================
+/**
+ * @function addAllChainsServiceTools
+ * @description
+ * Adds tools to handle Cross-Chain calls from AllChainsService:
+ *  - getMultiChainMultiAddressTransactions
+ *  - getMultiChainBalances
+ *  - getAddressActivity
+ * 
+ * Each tool calls the respective method on goldRushClient.AllChainsService
+ * using zod for argument validation. Returns the data as JSON.
+ */
+function addAllChainsServiceTools(server: McpServer) {
+  /**
+   * getMultiChainMultiAddressTransactions
+   */
+  server.tool(
+    "getMultiChainMultiAddressTransactions",
+    {
+      // Summarized param schema
+      chains: z.array(z.union([
+        z.enum(Object.values(ChainName) as [string, ...string[]]),
+        z.number()
+      ])).optional(),
+      addresses: z.array(z.string()).optional(),
+      limit: z.number().optional(),
+      before: z.string().optional(),
+      after: z.string().optional(),
+      withLogs: z.boolean().optional(),
+      withDecodedLogs: z.boolean().optional(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.AllChainsService.getMultiChainMultiAddressTransactions({
+          chains: params.chains as Chain[],
+          addresses: params.addresses,
+          limit: params.limit,
+          before: params.before,
+          after: params.after,
+          withLogs: params.withLogs,
+          withDecodedLogs: params.withDecodedLogs,
+          quoteCurrency: params.quoteCurrency as Quote
+        });
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            , 2)
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
 
-// Helper function to add BaseService tools
+  /**
+   * getMultiChainBalances
+   */
+  server.tool(
+    "getMultiChainBalances",
+    {
+      walletAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      before: z.string().optional(),
+      limit: z.number().optional(),
+      chains: z.array(z.union([
+        z.enum(Object.values(ChainName) as [string, ...string[]]),
+        z.number()
+      ])).optional(),
+      cutoffTimestamp: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.AllChainsService.getMultiChainBalances(
+          params.walletAddress,
+          {
+            quoteCurrency: params.quoteCurrency as Quote,
+            before: params.before,
+            limit: params.limit,
+            chains: params.chains as ChainID[] | ChainName[],
+            cutoffTimestamp: params.cutoffTimestamp
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            , 2)
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getAddressActivity
+   */
+  server.tool(
+    "getAddressActivity",
+    {
+      walletAddress: z.string(),
+      testnets: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.AllChainsService.getAddressActivity(
+          params.walletAddress,
+          { testnets: params.testnets }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            , 2)
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+}
+
+//==================================================
+//                BASE SERVICE
+//==================================================
+/**
+ * @function addBaseServiceTools
+ * @description
+ * Adds tools for BaseService, e.g. getAllChains
+ */
 function addBaseServiceTools(server: McpServer) {
-  // Get all chains
   server.tool(
     "getAllChains",
     {},
@@ -89,9 +274,20 @@ function addBaseServiceTools(server: McpServer) {
   );
 }
 
-// Helper function to add BalanceService tools
+//==================================================
+//                BALANCE SERVICE
+//==================================================
+/**
+ * @function addBalanceServiceTools
+ * @description
+ * Tools for the BalanceService, such as:
+ *  - getTokenBalancesForWalletAddress
+ *  - getHistoricalTokenBalancesForWalletAddress
+ * (We can add more in subsequent steps.)
+ */
 function addBalanceServiceTools(server: McpServer) {
-  // Get token balances for address
+
+  // getTokenBalancesForWalletAddress
   server.tool(
     "getTokenBalancesForWalletAddress",
     {
@@ -133,7 +329,7 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  // Get historical portfolio value
+  // getHistoricalTokenBalancesForWalletAddress
   server.tool(
     "getHistoricalTokenBalancesForWalletAddress",
     {
@@ -163,9 +359,12 @@ function addBalanceServiceTools(server: McpServer) {
           }
         );
         return {
-          content: [{ type: "text", text: JSON.stringify(response.data, (_, value) =>
-            typeof value === 'bigint' ? value.toString() : value
-          , 2) }]
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            , 2)
+          }]
         };
       } catch (error) {
         return {
@@ -177,9 +376,20 @@ function addBalanceServiceTools(server: McpServer) {
   );
 }
 
-// Helper function to add TransactionService tools
+//==================================================
+//             TRANSACTION SERVICE
+//==================================================
+/**
+ * @function addTransactionServiceTools
+ * @description
+ * Tools for the TransactionService, e.g.:
+ *  - getAllTransactionsForAddress
+ *  - getTransaction
+ * (We can expand as needed in subsequent steps.)
+ */
 function addTransactionServiceTools(server: McpServer) {
-  // Get transactions for address
+
+  // getAllTransactionsForAddress
   server.tool(
     "getAllTransactionsForAddress",
     {
@@ -208,9 +418,9 @@ function addTransactionServiceTools(server: McpServer) {
           }
         );
         
-        // Option 1: Get all pages (could be a lot of data)
+        // Gather all pages
         for await (const response of iterator) {
-          transactions.push(...response.data?.items || []);
+          transactions.push(...(response.data?.items || []));
         }
         
         return {
@@ -218,17 +428,6 @@ function addTransactionServiceTools(server: McpServer) {
             typeof value === 'bigint' ? value.toString() : value
           , 2) }]
         };
-        
-        // Option 2 (Alternative): Return just the first page
-        // const firstPage = await iterator.next();
-        // if (firstPage.done) {
-        //   return {
-        //     content: [{ type: "text", text: JSON.stringify({ items: [] }, null, 2) }]
-        //   };
-        // }
-        // return {
-        //   content: [{ type: "text", text: JSON.stringify(firstPage.value.data, null, 2) }]
-        // };
       } catch (error) {
         return {
           content: [{ type: "text", text: `Error: ${error}` }],
@@ -238,7 +437,7 @@ function addTransactionServiceTools(server: McpServer) {
     }
   );
 
-  // Get transaction by hash
+  // getTransaction by hash
   server.tool(
     "getTransaction",
     {
@@ -252,9 +451,12 @@ function addTransactionServiceTools(server: McpServer) {
           params.txHash
         );
         return {
-          content: [{ type: "text", text: JSON.stringify(response.data, (_, value) =>
-            typeof value === 'bigint' ? value.toString() : value
-          , 2) }]
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value
+            , 2)
+          }]
         };
       } catch (error) {
         return {
@@ -266,9 +468,14 @@ function addTransactionServiceTools(server: McpServer) {
   );
 }
 
-// Start the server with STDIO transport
+/**
+ * @async
+ * @function startServer
+ * @description
+ * Initializes the server using STDIO transport for communication, logs success or failure.
+ */
 async function startServer() {
-  console.log("Starting GoldRush MCP server...");
+  console.log("Starting GoldRush MCP server (AllChainsService step 1)...");
   
   try {
     // Create the STDIO transport
@@ -285,4 +492,4 @@ async function startServer() {
 }
 
 // Start the server
-startServer().catch(console.error); 
+startServer().catch(console.error);

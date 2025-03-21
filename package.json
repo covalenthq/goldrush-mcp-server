@@ -8,7 +8,8 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node --esm src/index.ts",
-    "example": "ts-node --esm src/example-client.ts"
+    "example": "ts-node --esm src/example-client.ts",
+    "test": "vitest"
   },
   "dependencies": {
     "@covalenthq/client-sdk": "^2.2.4",
@@ -19,6 +20,7 @@
   "devDependencies": {
     "@types/node": "^20.17.24",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
   }
-} 
+}
