@@ -2,21 +2,21 @@
  * @file index.ts
  * @description
  * The main entry point for the GoldRush MCP Server. This file sets up an MCP server
- * providing tools (AllChainsService, BaseService, BalanceService, TransactionService),
+ * providing tools (AllChainsService, BaseService, BalanceService, TransactionService, BitcoinService),
  * and static resources. It connects with Covalent's GoldRush API using the @covalenthq/client-sdk.
  *
  * Key Features:
  *  - Tools for:
  *    * AllChainsService (cross-chain wallet queries: getMultiChainMultiAddressTransactions, getMultiChainBalances, getAddressActivity)
- *    * BaseService (general chain data, now including getBlock, getResolvedAddress, getBlockHeights, getLogs, etc.)
+ *    * BaseService (general chain data: getBlock, getResolvedAddress, getBlockHeights, getLogs, etc.)
  *    * BalanceService (token balances, historical info, token holders, etc.)
  *    * TransactionService (transaction details, iteration)
+ *    * BitcoinService (btc-based queries: getBitcoinHdWalletBalances, getTransactionsForBtcAddress, getBitcoinNonHdWalletBalances)
  *  - Static resources listing supported chains and quote currencies
  *
  * @notes
  *  - The GOLDRUSH_API_KEY environment variable must be set
  *  - Tools are implemented using zod for argument validation
- *  - This file fully implements BaseService coverage for Step #3 of the plan
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -35,8 +35,8 @@ import dotenv from "dotenv";
 dotenv.config();
 
 /**
- * A type-safe Zod enum referencing valid quote currencies for Covalent/GolRush.
- * If Covalent adds new ones, we can add them here.
+ * A type-safe Zod enum referencing valid quote currencies for Covalent/GoldRush.
+ * If Covalent adds new ones, we can add them here as needed.
  */
 const QUOTE_VALUES = z.enum([
   "USD", "CAD", "EUR", "SGD", "INR", "JPY", "VND", "CNY",
@@ -44,11 +44,13 @@ const QUOTE_VALUES = z.enum([
 ]);
 
 /**
- * Convert QUOTE_VALUES to a TypeScript array of valid quote currency strings
+ * Convert QUOTE_VALUES to a TypeScript array of valid quote currency strings.
  */
 const validQuoteValues: readonly Quote[] = QUOTE_VALUES.options as Quote[];
 
-// Retrieve API key from environment
+/**
+ * Retrieve API key from environment
+ */
 const apiKey = process.env.GOLDRUSH_API_KEY;
 if (!apiKey) {
   console.error("GOLDRUSH_API_KEY environment variable is not set.");
@@ -56,7 +58,7 @@ if (!apiKey) {
 }
 
 /**
- * Creates a Covalent GoldRush client using the provided API key
+ * Create a Covalent GoldRush client using the provided API key.
  */
 const goldRushClient = new GoldRushClient(apiKey);
 
@@ -102,7 +104,7 @@ server.resource(
 addAllChainsServiceTools(server);
 
 /**
- * Add BaseService Tools (Now includes the newly added methods for Step #3)
+ * Add BaseService Tools
  */
 addBaseServiceTools(server);
 
@@ -116,6 +118,11 @@ addBalanceServiceTools(server);
  */
 addTransactionServiceTools(server);
 
+/**
+ * Add BitcoinService Tools (New for Step #4)
+ */
+addBitcoinServiceTools(server);
+
 //==================================================
 //                ALL CHAINS SERVICE
 //==================================================
@@ -126,14 +133,8 @@ addTransactionServiceTools(server);
  *  - getMultiChainMultiAddressTransactions
  *  - getMultiChainBalances
  *  - getAddressActivity
- *
- * Each tool calls the respective method on goldRushClient.AllChainsService
- * using zod for argument validation. Returns the data as JSON.
  */
 function addAllChainsServiceTools(server: McpServer) {
-  /**
-   * getMultiChainMultiAddressTransactions
-   */
   server.tool(
     "getMultiChainMultiAddressTransactions",
     {
@@ -180,9 +181,6 @@ function addAllChainsServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getMultiChainBalances
-   */
   server.tool(
     "getMultiChainBalances",
     {
@@ -227,9 +225,6 @@ function addAllChainsServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getAddressActivity
-   */
   server.tool(
     "getAddressActivity",
     {
@@ -279,15 +274,8 @@ function addAllChainsServiceTools(server: McpServer) {
  *  - getLogs
  *  - getLogEventsByAddress, getLogEventsByAddressByPage
  *  - getLogEventsByTopicHash, getLogEventsByTopicHashByPage
- *
- * Each tool calls the relevant BaseService method from goldRushClient. The
- * async-iterable endpoints are handled with for-await-of to gather all pages.
  */
 function addBaseServiceTools(server: McpServer) {
-  /**
-   * getAllChains
-   * (existing implementation)
-   */
   server.tool(
     "getAllChains",
     {},
@@ -309,9 +297,6 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getAllChainStatus
-   */
   server.tool(
     "getAllChainStatus",
     {},
@@ -335,9 +320,6 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getGasPrices
-   */
   server.tool(
     "getGasPrices",
     {
@@ -371,9 +353,6 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getBlock
-   */
   server.tool(
     "getBlock",
     {
@@ -403,9 +382,6 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getResolvedAddress
-   */
   server.tool(
     "getResolvedAddress",
     {
@@ -435,9 +411,6 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getBlockHeights (async iterable, gather all pages)
-   */
   server.tool(
     "getBlockHeights",
     {
@@ -481,9 +454,6 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getBlockHeightsByPage (single page)
-   */
   server.tool(
     "getBlockHeightsByPage",
     {
@@ -521,15 +491,12 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getLogs (single page)
-   */
   server.tool(
     "getLogs",
     {
       chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
       startingBlock: z.number().optional(),
-      endingBlock: z.string().optional(), // TODO: bug in the SDK GetLogsQueryParamOpts, change to number once fixed
+      endingBlock: z.string().optional(),
       address: z.string().optional(),
       topics: z.string().optional(),
       blockHash: z.string().optional(),
@@ -565,9 +532,6 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getLogEventsByAddress (async iterable)
-   */
   server.tool(
     "getLogEventsByAddress",
     {
@@ -614,9 +578,6 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getLogEventsByAddressByPage (single page)
-   */
   server.tool(
     "getLogEventsByAddressByPage",
     {
@@ -657,9 +618,6 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getLogEventsByTopicHash (async iterable)
-   */
   server.tool(
     "getLogEventsByTopicHash",
     {
@@ -708,9 +666,6 @@ function addBaseServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getLogEventsByTopicHashByPage (single page)
-   */
   server.tool(
     "getLogEventsByTopicHashByPage",
     {
@@ -755,12 +710,12 @@ function addBaseServiceTools(server: McpServer) {
 }
 
 //==================================================
-//                BALANCE SERVICE
+//             BALANCE SERVICE
 //==================================================
 /**
  * @function addBalanceServiceTools
  * @description
- * Tools for the BalanceService. This includes:
+ * Tools for the BalanceService:
  *  - getTokenBalancesForWalletAddress
  *  - getHistoricalTokenBalancesForWalletAddress
  *  - getHistoricalPortfolioForWalletAddress
@@ -771,8 +726,6 @@ function addBaseServiceTools(server: McpServer) {
  *  - getNativeTokenBalance
  */
 function addBalanceServiceTools(server: McpServer) {
-
-  // getTokenBalancesForWalletAddress
   server.tool(
     "getTokenBalancesForWalletAddress",
     {
@@ -816,7 +769,6 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  // getHistoricalTokenBalancesForWalletAddress
   server.tool(
     "getHistoricalTokenBalancesForWalletAddress",
     {
@@ -864,7 +816,6 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  // getHistoricalPortfolioForWalletAddress
   server.tool(
     "getHistoricalPortfolioForWalletAddress",
     {
@@ -902,7 +853,6 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  // getErc20TransfersForWalletAddress (iterates all pages)
   server.tool(
     "getErc20TransfersForWalletAddress",
     {
@@ -955,7 +905,6 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  // getErc20TransfersForWalletAddressByPage (single page)
   server.tool(
     "getErc20TransfersForWalletAddressByPage",
     {
@@ -1001,7 +950,6 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  // getTokenHoldersV2ForTokenAddress (iterates all pages)
   server.tool(
     "getTokenHoldersV2ForTokenAddress",
     {
@@ -1050,7 +998,6 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  // getTokenHoldersV2ForTokenAddressByPage (single page)
   server.tool(
     "getTokenHoldersV2ForTokenAddressByPage",
     {
@@ -1093,7 +1040,6 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  // getNativeTokenBalance
   server.tool(
     "getNativeTokenBalance",
     {
@@ -1141,10 +1087,9 @@ function addBalanceServiceTools(server: McpServer) {
  * Tools for the TransactionService, e.g.:
  *  - getAllTransactionsForAddress (iterates pages)
  *  - getTransaction
+ *  (Others to be implemented in subsequent steps)
  */
 function addTransactionServiceTools(server: McpServer) {
-
-  // getAllTransactionsForAddress
   server.tool(
     "getAllTransactionsForAddress",
     {
@@ -1195,7 +1140,6 @@ function addTransactionServiceTools(server: McpServer) {
     }
   );
 
-  // getTransaction by hash
   server.tool(
     "getTransaction",
     {
@@ -1221,6 +1165,145 @@ function addTransactionServiceTools(server: McpServer) {
       } catch (error) {
         return {
           content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+}
+
+//==================================================
+//                BITCOIN SERVICE
+//==================================================
+/**
+ * @function addBitcoinServiceTools
+ * @description
+ * Adds tools for the BitcoinService:
+ *   1) getBitcoinHdWalletBalances
+ *   2) getTransactionsForBtcAddress
+ *   3) getBitcoinNonHdWalletBalances
+ *
+ * The Covalent client internally knows the chain is BTC mainnet by default for these methods.
+ * The user only passes the relevant addresses, page info, etc. The chainName isn't needed.
+ */
+function addBitcoinServiceTools(server: McpServer) {
+  /**
+   * getBitcoinHdWalletBalances
+   * 
+   * Covalent docs mention passing HD wallet address (xpub or ypub).
+   * In minimal usage, user can pass a typical "xpub..." or "demo".
+   */
+  server.tool(
+    "getBitcoinHdWalletBalances",
+    {
+      walletAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BitcoinService.getBitcoinHdWalletBalances(
+          params.walletAddress,
+          {
+            quoteCurrency: params.quoteCurrency as Quote
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [
+            { type: "text", text: `Error: ${error}` }
+          ],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getTransactionsForBtcAddress
+   * 
+   * Covalent doc usage: we pass { address, pageSize, pageNumber }.
+   * We'll do the same. We'll gather a single page only.
+   */
+  server.tool(
+    "getTransactionsForBtcAddress",
+    {
+      address: z.string(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BitcoinService.getTransactionsForBtcAddress({
+          address: params.address,
+          pageSize: params.pageSize,
+          pageNumber: params.pageNumber
+        });
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [
+            { type: "text", text: `Error: ${error}` }
+          ],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getBitcoinNonHdWalletBalances
+   * 
+   * For non-HD addresses. Similar usage as HD, except use getBitcoinNonHdWalletBalances.
+   * We'll pass walletAddress, optional quoteCurrency, etc.
+   */
+  server.tool(
+    "getBitcoinNonHdWalletBalances",
+    {
+      walletAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BitcoinService.getBitcoinNonHdWalletBalances(
+          params.walletAddress,
+          {
+            quoteCurrency: params.quoteCurrency as Quote
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [
+            { type: "text", text: `Error: ${error}` }
+          ],
           isError: true
         };
       }
