@@ -7,21 +7,27 @@
  *
  * Key Features:
  *  - Tools for:
- *    * AllChainsService (cross-chain wallet queries)
+ *    * AllChainsService (cross-chain wallet queries: getMultiChainMultiAddressTransactions, getMultiChainBalances, getAddressActivity)
+ *    * BaseService (general chain data, now including getBlock, getResolvedAddress, getBlockHeights, getLogs, etc.)
  *    * BalanceService (token balances, historical info, token holders, etc.)
- *    * BaseService (general chain data)
  *    * TransactionService (transaction details, iteration)
  *  - Static resources listing supported chains and quote currencies
  *
  * @notes
  *  - The GOLDRUSH_API_KEY environment variable must be set
  *  - Tools are implemented using zod for argument validation
- *  - Additional BalanceService coverage for Step #2 of the plan
+ *  - This file fully implements BaseService coverage for Step #3 of the plan
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { Chain, ChainID, ChainName, GoldRushClient, Quote } from "@covalenthq/client-sdk";
+import {
+  Chain,
+  ChainID,
+  ChainName,
+  GoldRushClient,
+  Quote
+} from "@covalenthq/client-sdk";
 import { z } from "zod";
 import dotenv from "dotenv";
 
@@ -96,13 +102,12 @@ server.resource(
 addAllChainsServiceTools(server);
 
 /**
- * Add BaseService Tools
+ * Add BaseService Tools (Now includes the newly added methods for Step #3)
  */
 addBaseServiceTools(server);
 
 /**
  * Add BalanceService Tools
- * (Now includes the newly added methods for Step #2)
  */
 addBalanceServiceTools(server);
 
@@ -132,7 +137,6 @@ function addAllChainsServiceTools(server: McpServer) {
   server.tool(
     "getMultiChainMultiAddressTransactions",
     {
-      // Summarized param schema
       chains: z.array(z.union([
         z.enum(Object.values(ChainName) as [string, ...string[]]),
         z.number()
@@ -160,9 +164,11 @@ function addAllChainsServiceTools(server: McpServer) {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(response.data, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -205,9 +211,11 @@ function addAllChainsServiceTools(server: McpServer) {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(response.data, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -237,9 +245,11 @@ function addAllChainsServiceTools(server: McpServer) {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(response.data, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -258,9 +268,26 @@ function addAllChainsServiceTools(server: McpServer) {
 /**
  * @function addBaseServiceTools
  * @description
- * Adds tools for BaseService, e.g. getAllChains
+ * Adds tools for BaseService, including:
+ *  - getAllChains
+ *  - getAllChainStatus
+ *  - getGasPrices
+ *  - getBlock
+ *  - getResolvedAddress
+ *  - getBlockHeights (iterates pages)
+ *  - getBlockHeightsByPage (single page)
+ *  - getLogs
+ *  - getLogEventsByAddress, getLogEventsByAddressByPage
+ *  - getLogEventsByTopicHash, getLogEventsByTopicHashByPage
+ *
+ * Each tool calls the relevant BaseService method from goldRushClient. The
+ * async-iterable endpoints are handled with for-await-of to gather all pages.
  */
 function addBaseServiceTools(server: McpServer) {
+  /**
+   * getAllChains
+   * (existing implementation)
+   */
   server.tool(
     "getAllChains",
     {},
@@ -268,11 +295,458 @@ function addBaseServiceTools(server: McpServer) {
       try {
         const response = await goldRushClient.BaseService.getAllChains();
         return {
-          content: [{ type: "text", text: JSON.stringify(response.data, null, 2) }]
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, null, 2)
+          }]
         };
       } catch (error) {
         return {
           content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getAllChainStatus
+   */
+  server.tool(
+    "getAllChainStatus",
+    {},
+    async () => {
+      try {
+        const response = await goldRushClient.BaseService.getAllChainStatus();
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getGasPrices
+   */
+  server.tool(
+    "getGasPrices",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      eventType: z.enum(["erc20", "nativetokens", "uniswapv3"]),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BaseService.getGasPrices(
+          params.chainName as Chain,
+          params.eventType,
+          {
+            quoteCurrency: params.quoteCurrency as Quote
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getBlock
+   */
+  server.tool(
+    "getBlock",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      blockHeight: z.string()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BaseService.getBlock(
+          params.chainName as Chain,
+          params.blockHeight
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getResolvedAddress
+   */
+  server.tool(
+    "getResolvedAddress",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BaseService.getResolvedAddress(
+          params.chainName as Chain,
+          params.walletAddress
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getBlockHeights (async iterable, gather all pages)
+   */
+  server.tool(
+    "getBlockHeights",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      startDate: z.string(),
+      endDate: z.union([z.string(), z.literal("latest")]),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const allBlocks: any[] = [];
+        const iterator = goldRushClient.BaseService.getBlockHeights(
+          params.chainName as Chain,
+          params.startDate,
+          params.endDate,
+          {
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber
+          }
+        );
+        for await (const page of iterator) {
+          if (page.data?.items) {
+            allBlocks.push(...page.data.items);
+          }
+        }
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ items: allBlocks }, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getBlockHeightsByPage (single page)
+   */
+  server.tool(
+    "getBlockHeightsByPage",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      startDate: z.string(),
+      endDate: z.union([z.string(), z.literal("latest")]),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BaseService.getBlockHeightsByPage(
+          params.chainName as Chain,
+          params.startDate,
+          params.endDate,
+          {
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getLogs (single page)
+   */
+  server.tool(
+    "getLogs",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      startingBlock: z.number().optional(),
+      endingBlock: z.string().optional(), // TODO: bug in the SDK GetLogsQueryParamOpts, change to number once fixed
+      address: z.string().optional(),
+      topics: z.string().optional(),
+      blockHash: z.string().optional(),
+      skipDecode: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BaseService.getLogs(
+          params.chainName as Chain,
+          {
+            startingBlock: params.startingBlock,
+            endingBlock: params.endingBlock,
+            address: params.address,
+            topics: params.topics,
+            blockHash: params.blockHash,
+            skipDecode: params.skipDecode
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getLogEventsByAddress (async iterable)
+   */
+  server.tool(
+    "getLogEventsByAddress",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      contractAddress: z.string(),
+      startingBlock: z.union([z.string(), z.number()]).optional(),
+      endingBlock: z.union([z.string(), z.number()]).optional(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const allLogs: any[] = [];
+        const iterator = goldRushClient.BaseService.getLogEventsByAddress(
+          params.chainName as Chain,
+          params.contractAddress,
+          {
+            startingBlock: params.startingBlock,
+            endingBlock: params.endingBlock,
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber
+          }
+        );
+        for await (const page of iterator) {
+          if (page.data?.items) {
+            allLogs.push(...page.data.items);
+          }
+        }
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ items: allLogs }, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getLogEventsByAddressByPage (single page)
+   */
+  server.tool(
+    "getLogEventsByAddressByPage",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      contractAddress: z.string(),
+      startingBlock: z.union([z.string(), z.number()]).optional(),
+      endingBlock: z.union([z.string(), z.number()]).optional(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BaseService.getLogEventsByAddressByPage(
+          params.chainName as Chain,
+          params.contractAddress,
+          {
+            startingBlock: params.startingBlock,
+            endingBlock: params.endingBlock,
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getLogEventsByTopicHash (async iterable)
+   */
+  server.tool(
+    "getLogEventsByTopicHash",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      topicHash: z.string(),
+      startingBlock: z.union([z.string(), z.number()]).optional(),
+      endingBlock: z.union([z.string(), z.number()]).optional(),
+      secondaryTopics: z.string().optional(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const allLogs: any[] = [];
+        const iterator = goldRushClient.BaseService.getLogEventsByTopicHash(
+          params.chainName as Chain,
+          params.topicHash,
+          {
+            startingBlock: params.startingBlock,
+            endingBlock: params.endingBlock,
+            secondaryTopics: params.secondaryTopics,
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber
+          }
+        );
+        for await (const page of iterator) {
+          if (page.data?.items) {
+            allLogs.push(...page.data.items);
+          }
+        }
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ items: allLogs }, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  /**
+   * getLogEventsByTopicHashByPage (single page)
+   */
+  server.tool(
+    "getLogEventsByTopicHashByPage",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      topicHash: z.string(),
+      startingBlock: z.union([z.string(), z.number()]).optional(),
+      endingBlock: z.union([z.string(), z.number()]).optional(),
+      secondaryTopics: z.string().optional(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.BaseService.getLogEventsByTopicHashByPage(
+          params.chainName as Chain,
+          params.topicHash,
+          {
+            startingBlock: params.startingBlock,
+            endingBlock: params.endingBlock,
+            secondaryTopics: params.secondaryTopics,
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
           isError: true
         };
       }
@@ -286,20 +760,19 @@ function addBaseServiceTools(server: McpServer) {
 /**
  * @function addBalanceServiceTools
  * @description
- * Tools for the BalanceService. Previously we had:
+ * Tools for the BalanceService. This includes:
  *  - getTokenBalancesForWalletAddress
  *  - getHistoricalTokenBalancesForWalletAddress
- * Now we add more for Step #2:
  *  - getHistoricalPortfolioForWalletAddress
- *  - getErc20TransfersForWalletAddress (async iterable)
+ *  - getErc20TransfersForWalletAddress (async)
  *  - getErc20TransfersForWalletAddressByPage
- *  - getTokenHoldersV2ForTokenAddress (async iterable)
+ *  - getTokenHoldersV2ForTokenAddress (async)
  *  - getTokenHoldersV2ForTokenAddressByPage
  *  - getNativeTokenBalance
  */
 function addBalanceServiceTools(server: McpServer) {
 
-  // Already existing from Step #1
+  // getTokenBalancesForWalletAddress
   server.tool(
     "getTokenBalancesForWalletAddress",
     {
@@ -309,7 +782,7 @@ function addBalanceServiceTools(server: McpServer) {
       nft: z.boolean().optional(),
       noNftFetch: z.boolean().optional(),
       noSpam: z.boolean().optional(),
-      noNftAssetMetadata: z.boolean().optional(),
+      noNftAssetMetadata: z.boolean().optional()
     },
     async (params) => {
       try {
@@ -321,15 +794,17 @@ function addBalanceServiceTools(server: McpServer) {
             nft: params.nft,
             noNftFetch: params.noNftFetch,
             noSpam: params.noSpam,
-            noNftAssetMetadata: params.noNftAssetMetadata,
+            noNftAssetMetadata: params.noNftAssetMetadata
           }
         );
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(response.data, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -341,7 +816,7 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  // Already existing from Step #1
+  // getHistoricalTokenBalancesForWalletAddress
   server.tool(
     "getHistoricalTokenBalancesForWalletAddress",
     {
@@ -373,9 +848,11 @@ function addBalanceServiceTools(server: McpServer) {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(response.data, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -387,9 +864,7 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getHistoricalPortfolioForWalletAddress
-   */
+  // getHistoricalPortfolioForWalletAddress
   server.tool(
     "getHistoricalPortfolioForWalletAddress",
     {
@@ -411,9 +886,11 @@ function addBalanceServiceTools(server: McpServer) {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(response.data, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -425,9 +902,7 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getErc20TransfersForWalletAddress (iterates all pages)
-   */
+  // getErc20TransfersForWalletAddress (iterates all pages)
   server.tool(
     "getErc20TransfersForWalletAddress",
     {
@@ -466,8 +941,9 @@ function addBalanceServiceTools(server: McpServer) {
           content: [{
             type: "text",
             text: JSON.stringify({ items: allTransfers }, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -479,9 +955,7 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getErc20TransfersForWalletAddressByPage (single page)
-   */
+  // getErc20TransfersForWalletAddressByPage (single page)
   server.tool(
     "getErc20TransfersForWalletAddressByPage",
     {
@@ -511,9 +985,11 @@ function addBalanceServiceTools(server: McpServer) {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(response.data, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -525,9 +1001,7 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getTokenHoldersV2ForTokenAddress (iterates all pages)
-   */
+  // getTokenHoldersV2ForTokenAddress (iterates all pages)
   server.tool(
     "getTokenHoldersV2ForTokenAddress",
     {
@@ -562,8 +1036,9 @@ function addBalanceServiceTools(server: McpServer) {
           content: [{
             type: "text",
             text: JSON.stringify({ items: allHolders }, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -575,9 +1050,7 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getTokenHoldersV2ForTokenAddressByPage (single page)
-   */
+  // getTokenHoldersV2ForTokenAddressByPage (single page)
   server.tool(
     "getTokenHoldersV2ForTokenAddressByPage",
     {
@@ -604,9 +1077,11 @@ function addBalanceServiceTools(server: McpServer) {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(response.data, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -618,9 +1093,7 @@ function addBalanceServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getNativeTokenBalance
-   */
+  // getNativeTokenBalance
   server.tool(
     "getNativeTokenBalance",
     {
@@ -642,9 +1115,11 @@ function addBalanceServiceTools(server: McpServer) {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(response.data, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -706,8 +1181,9 @@ function addTransactionServiceTools(server: McpServer) {
         return {
           content: [{
             type: "text", text: JSON.stringify({ items: transactions }, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
@@ -724,7 +1200,7 @@ function addTransactionServiceTools(server: McpServer) {
     "getTransaction",
     {
       chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
-      txHash: z.string(),
+      txHash: z.string()
     },
     async (params) => {
       try {
@@ -735,9 +1211,11 @@ function addTransactionServiceTools(server: McpServer) {
         return {
           content: [{
             type: "text",
-            text: JSON.stringify(response.data, (_, value) =>
-              typeof value === 'bigint' ? value.toString() : value
-              , 2)
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
           }]
         };
       } catch (error) {
