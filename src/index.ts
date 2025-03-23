@@ -149,7 +149,7 @@ addNftServiceTools(server);
 addPricingServiceTools(server);
 
 /**
- * Add SecurityService Tools (Step #7)
+ * Add SecurityService Tools
  */
 addSecurityServiceTools(server);
 
@@ -1091,6 +1091,13 @@ function addBalanceServiceTools(server: McpServer) {
  * @function addTransactionServiceTools
  * @description
  * Tools for the TransactionService.
+ *  - getTransaction
+ *  - getAllTransactionsForAddress
+ *  - getAllTransactionsForAddressByPage
+ *  - getTransactionsForBlock
+ *  - getTransactionSummary
+ *  - getTransactionsForAddressV3
+ *  - getTimeBucketTransactionsForAddress
  */
 function addTransactionServiceTools(server: McpServer) {
   server.tool(
@@ -1168,6 +1175,206 @@ function addTransactionServiceTools(server: McpServer) {
       } catch (error) {
         return {
           content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getAllTransactionsForAddressByPage
+  server.tool(
+    "getAllTransactionsForAddressByPage",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      address: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      noLogs: z.boolean().optional(),
+      blockSignedAtAsc: z.boolean().optional(),
+      withInternal: z.boolean().optional(),
+      withState: z.boolean().optional(),
+      withInputData: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.TransactionService.getAllTransactionsForAddressByPage(
+          params.chainName as Chain,
+          params.address,
+          {
+            quoteCurrency: params.quoteCurrency as Quote,
+            noLogs: params.noLogs,
+            blockSignedAtAsc: params.blockSignedAtAsc,
+            withInternal: params.withInternal,
+            withState: params.withState,
+            withInputData: params.withInputData
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getTransactionsForBlock
+  server.tool(
+    "getTransactionsForBlock",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      blockHeight: z.union([z.string(), z.number(), z.literal("latest")]),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      noLogs: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.TransactionService.getTransactionsForBlock(
+          params.chainName as Chain,
+          params.blockHeight,
+          {
+            quoteCurrency: params.quoteCurrency as Quote,
+            noLogs: params.noLogs
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getTransactionSummary
+  server.tool(
+    "getTransactionSummary",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      withGas: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.TransactionService.getTransactionSummary(
+          params.chainName as Chain,
+          params.walletAddress,
+          {
+            quoteCurrency: params.quoteCurrency as Quote,
+            withGas: params.withGas
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getTransactionsForAddressV3
+  server.tool(
+    "getTransactionsForAddressV3",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string(),
+      page: z.number(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      noLogs: z.boolean().optional(),
+      blockSignedAtAsc: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.TransactionService.getTransactionsForAddressV3(
+          params.chainName as Chain,
+          params.walletAddress,
+          params.page,
+          {
+            quoteCurrency: params.quoteCurrency as Quote,
+            noLogs: params.noLogs,
+            blockSignedAtAsc: params.blockSignedAtAsc
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getTimeBucketTransactionsForAddress
+  server.tool(
+    "getTimeBucketTransactionsForAddress",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string(),
+      timeBucket: z.number(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      noLogs: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.TransactionService.getTimeBucketTransactionsForAddress(
+          params.chainName as Chain,
+          params.walletAddress,
+          params.timeBucket,
+          {
+            quoteCurrency: params.quoteCurrency as Quote,
+            noLogs: params.noLogs
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
           isError: true
         };
       }
