@@ -2,9 +2,17 @@
  * @file index.ts
  * @description
  * The main entry point for the GoldRush MCP Server. This file sets up an MCP server
- * providing tools (AllChainsService, BaseService, BalanceService, TransactionService,
- * BitcoinService, and now NftService),
- * plus some static resources. It connects with Covalent's GoldRush API using the @covalenthq/client-sdk.
+ * providing tools for Covalent GoldRush services:
+ *  - AllChainsService
+ *  - BaseService
+ *  - BalanceService
+ *  - TransactionService
+ *  - BitcoinService
+ *  - NftService
+ *  - PricingService
+ *
+ * as well as static resources. It connects with Covalent's GoldRush API using
+ * the @covalenthq/client-sdk.
  *
  * Key Features:
  *  - Tools coverage for:
@@ -13,7 +21,8 @@
  *    * BalanceService
  *    * TransactionService
  *    * BitcoinService
- *    * NftService (STEP #5)
+ *    * NftService
+ *    * PricingService
  *  - Static resources listing supported chains and quote currencies
  *  - Environment-driven GOLDRUSH_API_KEY
  *
@@ -128,9 +137,14 @@ addTransactionServiceTools(server);
 addBitcoinServiceTools(server);
 
 /**
- * Add NftService Tools (STEP #5)
+ * Add NftService Tools
  */
 addNftServiceTools(server);
+
+/**
+ * Add PricingService Tools (Step #6)
+ */
+addPricingServiceTools(server);
 
 /**
  * @function addAllChainsServiceTools
@@ -1069,7 +1083,7 @@ function addBalanceServiceTools(server: McpServer) {
 /**
  * @function addTransactionServiceTools
  * @description
- * Tools for the TransactionService (some are implemented now, more in future steps).
+ * Tools for the TransactionService.
  */
 function addTransactionServiceTools(server: McpServer) {
   server.tool(
@@ -1275,7 +1289,7 @@ function addBitcoinServiceTools(server: McpServer) {
 /**
  * @function addNftServiceTools
  * @description
- * Tools for the NftService (STEP #5). They handle:
+ * Tools for the NftService. They handle:
  *  - getChainCollections / getChainCollectionsByPage
  *  - getNftsForAddress
  *  - getTokenIdsForContractWithMetadata / getTokenIdsForContractWithMetadataByPage
@@ -1691,7 +1705,7 @@ function addNftServiceTools(server: McpServer) {
           params.chainName as Chain,
           params.collectionAddress,
           {
-            quote_currency: params.quoteCurrency as Quote, // NOTE: Quote parameter name in GetCollectionMarketDataQueryParamOpts type definition is quote_currency
+            quote_currency: params.quoteCurrency as Quote,
             days: params.days
           }
         );
@@ -1729,7 +1743,7 @@ function addNftServiceTools(server: McpServer) {
           params.chainName as Chain,
           params.collectionAddress,
           {
-            quote_currency: params.quoteCurrency as Quote, // NOTE: Quote parameter name in GetCollectionMarketDataQueryParamOpts type definition is quote_currency
+            quote_currency: params.quoteCurrency as Quote,
             days: params.days
           }
         );
@@ -1767,7 +1781,7 @@ function addNftServiceTools(server: McpServer) {
           params.chainName as Chain,
           params.collectionAddress,
           {
-            quote_currency: params.quoteCurrency as Quote, // NOTE: Quote parameter name in GetCollectionMarketDataQueryParamOpts type definition is quote_currency
+            quote_currency: params.quoteCurrency as Quote,
             days: params.days
           }
         );
@@ -1860,6 +1874,57 @@ function addNftServiceTools(server: McpServer) {
       } catch (err) {
         return {
           content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+}
+
+//==================================================
+//             PRICING SERVICE
+//==================================================
+/**
+ * @function addPricingServiceTools
+ * @description
+ * Tools for the PricingService.
+ */
+function addPricingServiceTools(server: McpServer) {
+  server.tool(
+    "getTokenPrices",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]),
+      contractAddress: z.string(),
+      from: z.string().optional(),
+      to: z.string().optional(),
+      pricesAtAsc: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.PricingService.getTokenPrices(
+          params.chainName as Chain,
+          params.quoteCurrency as Quote,
+          params.contractAddress,
+          {
+            from: params.from,
+            to: params.to,
+            pricesAtAsc: params.pricesAtAsc
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
           isError: true
         };
       }
