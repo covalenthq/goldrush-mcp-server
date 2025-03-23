@@ -2,21 +2,25 @@
  * @file index.ts
  * @description
  * The main entry point for the GoldRush MCP Server. This file sets up an MCP server
- * providing tools (AllChainsService, BaseService, BalanceService, TransactionService, BitcoinService),
- * and static resources. It connects with Covalent's GoldRush API using the @covalenthq/client-sdk.
+ * providing tools (AllChainsService, BaseService, BalanceService, TransactionService,
+ * BitcoinService, and now NftService),
+ * plus some static resources. It connects with Covalent's GoldRush API using the @covalenthq/client-sdk.
  *
  * Key Features:
- *  - Tools for:
- *    * AllChainsService (cross-chain wallet queries: getMultiChainMultiAddressTransactions, getMultiChainBalances, getAddressActivity)
- *    * BaseService (general chain data: getBlock, getResolvedAddress, getBlockHeights, getLogs, etc.)
- *    * BalanceService (token balances, historical info, token holders, etc.)
- *    * TransactionService (transaction details, iteration)
- *    * BitcoinService (btc-based queries: getBitcoinHdWalletBalances, getTransactionsForBtcAddress, getBitcoinNonHdWalletBalances)
+ *  - Tools coverage for:
+ *    * AllChainsService
+ *    * BaseService
+ *    * BalanceService
+ *    * TransactionService
+ *    * BitcoinService
+ *    * NftService (STEP #5)
  *  - Static resources listing supported chains and quote currencies
+ *  - Environment-driven GOLDRUSH_API_KEY
  *
  * @notes
  *  - The GOLDRUSH_API_KEY environment variable must be set
  *  - Tools are implemented using zod for argument validation
+ *  - Each tool returns the Covalent response as JSON text.
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -63,7 +67,7 @@ if (!apiKey) {
 const goldRushClient = new GoldRushClient(apiKey);
 
 /**
- * Create an MCP server instance, specifying meta info
+ * Create an MCP server instance, specifying meta info.
  */
 const server = new McpServer({
   name: "GoldRush MCP Server",
@@ -71,7 +75,7 @@ const server = new McpServer({
 });
 
 /**
- * Provide a static resource listing the supported Covalent chain names
+ * Provide a static resource listing the supported Covalent chain names.
  */
 server.resource(
   "supported-chains",
@@ -85,7 +89,7 @@ server.resource(
 );
 
 /**
- * Provide a static resource listing the supported Covalent quote currencies
+ * Provide a static resource listing the supported Covalent quote currencies.
  */
 server.resource(
   "quote-currencies",
@@ -119,20 +123,19 @@ addBalanceServiceTools(server);
 addTransactionServiceTools(server);
 
 /**
- * Add BitcoinService Tools (New for Step #4)
+ * Add BitcoinService Tools
  */
 addBitcoinServiceTools(server);
 
-//==================================================
-//                ALL CHAINS SERVICE
-//==================================================
+/**
+ * Add NftService Tools (STEP #5)
+ */
+addNftServiceTools(server);
+
 /**
  * @function addAllChainsServiceTools
  * @description
- * Adds tools to handle Cross-Chain calls from AllChainsService:
- *  - getMultiChainMultiAddressTransactions
- *  - getMultiChainBalances
- *  - getAddressActivity
+ * Adds tools for Cross-Chain calls (AllChainsService).
  */
 function addAllChainsServiceTools(server: McpServer) {
   server.tool(
@@ -263,17 +266,7 @@ function addAllChainsServiceTools(server: McpServer) {
 /**
  * @function addBaseServiceTools
  * @description
- * Adds tools for BaseService, including:
- *  - getAllChains
- *  - getAllChainStatus
- *  - getGasPrices
- *  - getBlock
- *  - getResolvedAddress
- *  - getBlockHeights (iterates pages)
- *  - getBlockHeightsByPage (single page)
- *  - getLogs
- *  - getLogEventsByAddress, getLogEventsByAddressByPage
- *  - getLogEventsByTopicHash, getLogEventsByTopicHashByPage
+ * Adds tools for BaseService, including chain info, logs, etc.
  */
 function addBaseServiceTools(server: McpServer) {
   server.tool(
@@ -715,15 +708,7 @@ function addBaseServiceTools(server: McpServer) {
 /**
  * @function addBalanceServiceTools
  * @description
- * Tools for the BalanceService:
- *  - getTokenBalancesForWalletAddress
- *  - getHistoricalTokenBalancesForWalletAddress
- *  - getHistoricalPortfolioForWalletAddress
- *  - getErc20TransfersForWalletAddress (async)
- *  - getErc20TransfersForWalletAddressByPage
- *  - getTokenHoldersV2ForTokenAddress (async)
- *  - getTokenHoldersV2ForTokenAddressByPage
- *  - getNativeTokenBalance
+ * Tools for the BalanceService.
  */
 function addBalanceServiceTools(server: McpServer) {
   server.tool(
@@ -1084,10 +1069,7 @@ function addBalanceServiceTools(server: McpServer) {
 /**
  * @function addTransactionServiceTools
  * @description
- * Tools for the TransactionService, e.g.:
- *  - getAllTransactionsForAddress (iterates pages)
- *  - getTransaction
- *  (Others to be implemented in subsequent steps)
+ * Tools for the TransactionService (some are implemented now, more in future steps).
  */
 function addTransactionServiceTools(server: McpServer) {
   server.tool(
@@ -1178,21 +1160,9 @@ function addTransactionServiceTools(server: McpServer) {
 /**
  * @function addBitcoinServiceTools
  * @description
- * Adds tools for the BitcoinService:
- *   1) getBitcoinHdWalletBalances
- *   2) getTransactionsForBtcAddress
- *   3) getBitcoinNonHdWalletBalances
- *
- * The Covalent client internally knows the chain is BTC mainnet by default for these methods.
- * The user only passes the relevant addresses, page info, etc. The chainName isn't needed.
+ * Adds tools for the BitcoinService.
  */
 function addBitcoinServiceTools(server: McpServer) {
-  /**
-   * getBitcoinHdWalletBalances
-   * 
-   * Covalent docs mention passing HD wallet address (xpub or ypub).
-   * In minimal usage, user can pass a typical "xpub..." or "demo".
-   */
   server.tool(
     "getBitcoinHdWalletBalances",
     {
@@ -1228,12 +1198,6 @@ function addBitcoinServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getTransactionsForBtcAddress
-   * 
-   * Covalent doc usage: we pass { address, pageSize, pageNumber }.
-   * We'll do the same. We'll gather a single page only.
-   */
   server.tool(
     "getTransactionsForBtcAddress",
     {
@@ -1269,12 +1233,6 @@ function addBitcoinServiceTools(server: McpServer) {
     }
   );
 
-  /**
-   * getBitcoinNonHdWalletBalances
-   * 
-   * For non-HD addresses. Similar usage as HD, except use getBitcoinNonHdWalletBalances.
-   * We'll pass walletAddress, optional quoteCurrency, etc.
-   */
   server.tool(
     "getBitcoinNonHdWalletBalances",
     {
@@ -1304,6 +1262,604 @@ function addBitcoinServiceTools(server: McpServer) {
           content: [
             { type: "text", text: `Error: ${error}` }
           ],
+          isError: true
+        };
+      }
+    }
+  );
+}
+
+//==================================================
+//             NFT SERVICE
+//==================================================
+/**
+ * @function addNftServiceTools
+ * @description
+ * Tools for the NftService (STEP #5). They handle:
+ *  - getChainCollections / getChainCollectionsByPage
+ *  - getNftsForAddress
+ *  - getTokenIdsForContractWithMetadata / getTokenIdsForContractWithMetadataByPage
+ *  - getNftMetadataForGivenTokenIdForContract
+ *  - getNftTransactionsForContractTokenId
+ *  - getTraitsForCollection
+ *  - getAttributesForTraitInCollection
+ *  - getCollectionTraitsSummary
+ *  - getHistoricalFloorPricesForCollection
+ *  - getHistoricalVolumeForCollection
+ *  - getHistoricalSalesCountForCollection
+ *  - checkOwnershipInNft, checkOwnershipInNftForSpecificTokenId
+ */
+function addNftServiceTools(server: McpServer) {
+  // getChainCollections - gather all pages
+  server.tool(
+    "getChainCollections",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional(),
+      noSpam: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const allItems = [];
+        const iterator = goldRushClient.NftService.getChainCollections(
+          params.chainName as Chain,
+          {
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber,
+            noSpam: params.noSpam
+          }
+        );
+        for await (const page of iterator) {
+          if (page.data?.items) {
+            allItems.push(...page.data.items);
+          }
+        }
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ items: allItems }, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getChainCollectionsByPage - single page
+  server.tool(
+    "getChainCollectionsByPage",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional(),
+      noSpam: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getChainCollectionsByPage(
+          params.chainName as Chain,
+          {
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber,
+            noSpam: params.noSpam
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getNftsForAddress
+  server.tool(
+    "getNftsForAddress",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string(),
+      noSpam: z.boolean().optional(),
+      noNftAssetMetadata: z.boolean().optional(),
+      withUncached: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getNftsForAddress(
+          params.chainName as Chain,
+          params.walletAddress,
+          {
+            noSpam: params.noSpam,
+            noNftAssetMetadata: params.noNftAssetMetadata,
+            withUncached: params.withUncached
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getTokenIdsForContractWithMetadata - gather all pages
+  server.tool(
+    "getTokenIdsForContractWithMetadata",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      contractAddress: z.string(),
+      noMetadata: z.boolean().optional(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional(),
+      traitsFilter: z.string().optional(),
+      valuesFilter: z.string().optional(),
+      withUncached: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const allItems = [];
+        const iterator = goldRushClient.NftService.getTokenIdsForContractWithMetadata(
+          params.chainName as Chain,
+          params.contractAddress,
+          {
+            noMetadata: params.noMetadata,
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber,
+            traitsFilter: params.traitsFilter,
+            valuesFilter: params.valuesFilter,
+            withUncached: params.withUncached
+          }
+        );
+        for await (const page of iterator) {
+          if (page.data?.items) {
+            allItems.push(...page.data.items);
+          }
+        }
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify({ items: allItems }, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getTokenIdsForContractWithMetadataByPage
+  server.tool(
+    "getTokenIdsForContractWithMetadataByPage",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      contractAddress: z.string(),
+      noMetadata: z.boolean().optional(),
+      pageSize: z.number().optional(),
+      pageNumber: z.number().optional(),
+      traitsFilter: z.string().optional(),
+      valuesFilter: z.string().optional(),
+      withUncached: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getTokenIdsForContractWithMetadataByPage(
+          params.chainName as Chain,
+          params.contractAddress,
+          {
+            noMetadata: params.noMetadata,
+            pageSize: params.pageSize,
+            pageNumber: params.pageNumber,
+            traitsFilter: params.traitsFilter,
+            valuesFilter: params.valuesFilter,
+            withUncached: params.withUncached
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(response.data, (_, value) =>
+              typeof value === 'bigint' ? value.toString() : value, 2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getNftMetadataForGivenTokenIdForContract
+  server.tool(
+    "getNftMetadataForGivenTokenIdForContract",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      contractAddress: z.string(),
+      tokenId: z.string(),
+      noMetadata: z.boolean().optional(),
+      withUncached: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getNftMetadataForGivenTokenIdForContract(
+          params.chainName as Chain,
+          params.contractAddress,
+          params.tokenId,
+          {
+            noMetadata: params.noMetadata,
+            withUncached: params.withUncached
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getNftTransactionsForContractTokenId
+  server.tool(
+    "getNftTransactionsForContractTokenId",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      contractAddress: z.string(),
+      tokenId: z.string(),
+      noSpam: z.boolean().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getNftTransactionsForContractTokenId(
+          params.chainName as Chain,
+          params.contractAddress,
+          params.tokenId,
+          { noSpam: params.noSpam }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getTraitsForCollection
+  server.tool(
+    "getTraitsForCollection",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      collectionContract: z.string()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getTraitsForCollection(
+          params.chainName as Chain,
+          params.collectionContract
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getAttributesForTraitInCollection
+  server.tool(
+    "getAttributesForTraitInCollection",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      collectionContract: z.string(),
+      trait: z.string()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getAttributesForTraitInCollection(
+          params.chainName as Chain,
+          params.collectionContract,
+          params.trait
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getCollectionTraitsSummary
+  server.tool(
+    "getCollectionTraitsSummary",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      collectionContract: z.string()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getCollectionTraitsSummary(
+          params.chainName as Chain,
+          params.collectionContract
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getHistoricalFloorPricesForCollection
+  server.tool(
+    "getHistoricalFloorPricesForCollection",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      collectionAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      days: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getHistoricalFloorPricesForCollection(
+          params.chainName as Chain,
+          params.collectionAddress,
+          {
+            quote_currency: params.quoteCurrency as Quote, // NOTE: Quote parameter name in GetCollectionMarketDataQueryParamOpts type definition is quote_currency
+            days: params.days
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getHistoricalVolumeForCollection
+  server.tool(
+    "getHistoricalVolumeForCollection",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      collectionAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      days: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getHistoricalVolumeForCollection(
+          params.chainName as Chain,
+          params.collectionAddress,
+          {
+            quote_currency: params.quoteCurrency as Quote, // NOTE: Quote parameter name in GetCollectionMarketDataQueryParamOpts type definition is quote_currency
+            days: params.days
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // getHistoricalSalesCountForCollection
+  server.tool(
+    "getHistoricalSalesCountForCollection",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      collectionAddress: z.string(),
+      quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional(),
+      days: z.number().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.getHistoricalSalesCountForCollection(
+          params.chainName as Chain,
+          params.collectionAddress,
+          {
+            quote_currency: params.quoteCurrency as Quote, // NOTE: Quote parameter name in GetCollectionMarketDataQueryParamOpts type definition is quote_currency
+            days: params.days
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // checkOwnershipInNft
+  server.tool(
+    "checkOwnershipInNft",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string(),
+      collectionContract: z.string(),
+      traitsFilter: z.string().optional(),
+      valuesFilter: z.string().optional()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.checkOwnershipInNft(
+          params.chainName as Chain,
+          params.walletAddress,
+          params.collectionContract,
+          {
+            traitsFilter: params.traitsFilter,
+            valuesFilter: params.valuesFilter
+          }
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  // checkOwnershipInNftForSpecificTokenId
+  server.tool(
+    "checkOwnershipInNftForSpecificTokenId",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string(),
+      collectionContract: z.string(),
+      tokenId: z.string()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.NftService.checkOwnershipInNftForSpecificTokenId(
+          params.chainName as Chain,
+          params.walletAddress,
+          params.collectionContract,
+          params.tokenId
+        );
+        return {
+          content: [{
+            type: "text",
+            text: JSON.stringify(
+              response.data,
+              (_, value) => typeof value === 'bigint' ? value.toString() : value,
+              2
+            )
+          }]
+        };
+      } catch (err) {
+        return {
+          content: [{ type: "text", text: `Error: ${err}` }],
           isError: true
         };
       }
