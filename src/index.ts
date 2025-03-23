@@ -10,6 +10,7 @@
  *  - BitcoinService
  *  - NftService
  *  - PricingService
+ *  - SecurityService
  *
  * as well as static resources. It connects with Covalent's GoldRush API using
  * the @covalenthq/client-sdk.
@@ -23,13 +24,14 @@
  *    * BitcoinService
  *    * NftService
  *    * PricingService
+ *    * SecurityService
  *  - Static resources listing supported chains and quote currencies
  *  - Environment-driven GOLDRUSH_API_KEY
  *
  * @notes
  *  - The GOLDRUSH_API_KEY environment variable must be set
  *  - Tools are implemented using zod for argument validation
- *  - Each tool returns the Covalent response as JSON text.
+ *  - Each tool returns the Covalent response as JSON text
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -142,9 +144,14 @@ addBitcoinServiceTools(server);
 addNftServiceTools(server);
 
 /**
- * Add PricingService Tools (Step #6)
+ * Add PricingService Tools
  */
 addPricingServiceTools(server);
+
+/**
+ * Add SecurityService Tools (Step #7)
+ */
+addSecurityServiceTools(server);
 
 /**
  * @function addAllChainsServiceTools
@@ -1921,6 +1928,86 @@ function addPricingServiceTools(server: McpServer) {
               2
             )
           }]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+}
+
+//==================================================
+//             SECURITY SERVICE
+//==================================================
+/**
+ * @function addSecurityServiceTools
+ * @description
+ * Adds tools for the SecurityService. This includes:
+ *  - getApprovals
+ *  - getNftApprovals
+ *
+ * These calls fetch approvals for tokens and NFTs, respectively.
+ */
+function addSecurityServiceTools(server: McpServer) {
+  server.tool(
+    "getApprovals",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.SecurityService.getApprovals(
+          params.chainName as Chain,
+          params.walletAddress
+        );
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                response.data,
+                (_, value) => typeof value === 'bigint' ? value.toString() : value,
+                2
+              )
+            }
+          ]
+        };
+      } catch (error) {
+        return {
+          content: [{ type: "text", text: `Error: ${error}` }],
+          isError: true
+        };
+      }
+    }
+  );
+
+  server.tool(
+    "getNftApprovals",
+    {
+      chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+      walletAddress: z.string()
+    },
+    async (params) => {
+      try {
+        const response = await goldRushClient.SecurityService.getNftApprovals(
+          params.chainName as Chain,
+          params.walletAddress
+        );
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                response.data,
+                (_, value) => typeof value === 'bigint' ? value.toString() : value,
+                2
+              )
+            }
+          ]
         };
       } catch (error) {
         return {
