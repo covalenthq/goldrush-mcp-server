@@ -1,19 +1,22 @@
 /**
- * @file BitcoinService.test.ts
- * @description
- * Test suite for the BitcoinService tools implemented in src/index.ts for Step #4.
+ * Test suite for the BitcoinService tools implemented in src/index.ts.
+ * 
+ * @remarks
  * These tests rely on having the GOLDRUSH_API_KEY environment variable set,
- * and also rely on the server being started. They test:
- *   - getBitcoinHdWalletBalances
- *   - getTransactionsForBtcAddress
- *   - getBitcoinNonHdWalletBalances
+ * and also rely on the server being started.
+ * 
+ * @description
+ * Tests the following BitcoinService methods:
+ * - getBitcoinHdWalletBalances
+ * - getTransactionsForBtcAddress
+ * - getBitcoinNonHdWalletBalances
  *
- * Key points:
- *  - We use the Vitest framework
- *  - We must ensure the server is started
- *  - The addresses used are placeholders ("demo" or "dummy"), so we only do
- *    minimal checks to ensure no error is returned. In real usage, the user
- *    would pass real xpub/ypub or real BTC address.
+ * Notes:
+ * - We use the Vitest framework
+ * - We must ensure the server is started
+ * - The addresses used are placeholders ("demo" or "dummy"), so we only do
+ *   minimal checks to ensure no error is returned. In real usage, the user
+ *   would pass real xpub/ypub or real BTC address.
  */
 
 import { describe, it, expect, beforeAll } from "vitest";

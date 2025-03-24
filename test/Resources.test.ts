@@ -1,19 +1,22 @@
 /**
- * @file Resources.test.ts
+ * Test suite for the real-time resource functionality.
+ * 
+ * @remarks
+ * These tests rely on having the GOLDRUSH_API_KEY environment variable set,
+ * and also rely on the server being started.
+ * 
  * @description
- * Test suite for the newly added real-time resource functionality from Step #9.
- * Specifically checks:
- *   - "status://all-chains" resource
- *   - "status://chain/{chainName}" resource
- *   - "config://supported-chains" resource
- *   - "config://quote-currencies" resource
- * We rely on GOLDRUSH_API_KEY in the environment, the server must be started, 
- * and we do minimal checks verifying isError is false and content is present.
+ * Tests the following resources:
+ * - "status://all-chains" resource
+ * - "status://chain/{chainName}" resource
+ * - "config://supported-chains" resource
+ * - "config://quote-currencies" resource
  *
- * Implementation details:
- *  - Start the server as a subprocess using StdioClientTransport
- *  - Use the readResource method from MCP client
- *  - Confirm the resource returns non-empty content
+ * Notes:
+ * - Start the server as a subprocess using StdioClientTransport
+ * - Use the readResource method from MCP client
+ * - Confirm the resource returns non-empty content
+ * - We do minimal checks verifying isError is false and content is present
  */
 
 import { describe, it, beforeAll, expect } from "vitest";

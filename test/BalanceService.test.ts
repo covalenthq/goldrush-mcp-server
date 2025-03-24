@@ -1,22 +1,24 @@
 /**
- * @file BalanceService.test.ts
- * @description
  * Test suite for the BalanceService tools implemented in src/index.ts.
+ * 
+ * @remarks
  * These tests rely on having GOLDRUSH_API_KEY environment variable set,
- * and also rely on the server being started. They test the newly added
- * BalanceService methods:
- *  - getHistoricalPortfolioForWalletAddress
- *  - getErc20TransfersForWalletAddress
- *  - getErc20TransfersForWalletAddressByPage
- *  - getTokenHoldersV2ForTokenAddress
- *  - getTokenHoldersV2ForTokenAddressByPage
- *  - getNativeTokenBalance
+ * and also rely on the server being started.
+ * 
+ * @description
+ * Tests the following BalanceService methods:
+ * - getHistoricalPortfolioForWalletAddress
+ * - getErc20TransfersForWalletAddress
+ * - getErc20TransfersForWalletAddressByPage
+ * - getTokenHoldersV2ForTokenAddress
+ * - getTokenHoldersV2ForTokenAddressByPage
+ * - getNativeTokenBalance
  *
- * Key points:
- *  - We use the Vitest framework
- *  - We must ensure the server is started
- *  - For real tests, we need real addresses or block heights. We do minimal checks
- *    and do not do extensive validation of the returned data.
+ * Notes:
+ * - We use the Vitest framework
+ * - We must ensure the server is started
+ * - For real tests, we need real addresses or block heights. We do minimal checks
+ *   and do not do extensive validation of the returned data.
  */
 
 import { describe, it, expect, beforeAll } from "vitest";

@@ -1,16 +1,17 @@
 /**
- * @file SecurityService.test.ts
+ * Test suite for the SecurityService tools implemented in src/index.ts.
+ * 
+ * @remarks
+ * These tests rely on having the GOLDRUSH_API_KEY environment variable set,
+ * and also rely on the server being started.
+ * 
  * @description
- * Test suite for the SecurityService tools implemented in src/index.ts for Step #7.
- * We test:
- *   - getApprovals
- *   - getNftApprovals
+ * Tests the following SecurityService methods:
+ * - getApprovals
+ * - getNftApprovals
  *
- * Usage:
- *  - Requires GOLDRUSH_API_KEY environment variable set
- *  - The server must be started
- *
- * We do minimal checks, ensuring no error and verifying response is defined.
+ * Notes:
+ * - We do minimal checks, ensuring no error and verifying response is defined
  */
 
 import { describe, it, expect, beforeAll } from "vitest";

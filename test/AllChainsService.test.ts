@@ -1,16 +1,16 @@
 /**
- * @file AllChainsService.test.ts
- * @description
  * Test suite for the AllChainsService tools implemented in src/index.ts.
+ * 
+ * @remarks
  * These tests rely on having GOLDRUSH_API_KEY environment variable set,
  * and also rely on the server being started. They test the
  * getMultiChainMultiAddressTransactions, getMultiChainBalances,
  * and getAddressActivity tools.
  * 
- * Key points:
- *  - We use the Vitest framework
- *  - We must ensure the server is started
- *  - For real tests, we need real addresses. Here we do minimal checks
+ * @description
+ * - We use the Vitest framework
+ * - We must ensure the server is started
+ * - For real tests, we need real addresses. Here we do minimal checks
  */
 
 import { describe, it, expect, beforeAll } from "vitest";

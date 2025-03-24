@@ -1,18 +1,20 @@
 /**
- * @file PricingService.test.ts
+ * Test suite for the PricingService tools implemented in src/index.ts.
+ * 
+ * @remarks
+ * These tests rely on having the GOLDRUSH_API_KEY environment variable set,
+ * and also rely on the server being started.
+ * 
  * @description
- * Test suite for the PricingService tools implemented in src/index.ts for Step #6.
- * Specifically tests the tool:
- *  - getTokenPrices
+ * Tests the following PricingService method:
+ * - getTokenPrices
  *
- * We do minimal checks just to ensure that the call does not error out, as we do
- * not have a real contract address nor a real chain to test thoroughly.
- * We rely on GOLDRUSH_API_KEY in the environment. The server must be started.
- *
- * Key Steps:
- *  - Start server as a subprocess using StdioClientTransport
- *  - For getTokenPrices, pass minimal valid arguments.
- *  - Confirm we get a non-error response.
+ * Notes:
+ * - We do minimal checks just to ensure that the call does not error out, as we do
+ *   not have a real contract address nor a real chain to test thoroughly.
+ * - Start server as a subprocess using StdioClientTransport
+ * - For getTokenPrices, pass minimal valid arguments
+ * - Confirm we get a non-error response
  */
 
 import { describe, it, expect, beforeAll } from "vitest";

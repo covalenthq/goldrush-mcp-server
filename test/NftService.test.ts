@@ -1,25 +1,26 @@
 /**
- * @file NftService.test.ts
+ * Test suite for the NftService tools implemented in src/index.ts.
+ * 
+ * @remarks
+ * These tests rely on having the GOLDRUSH_API_KEY environment variable set,
+ * and also rely on the server being started.
+ * 
  * @description
- * Test suite for the NftService tools implemented in src/index.ts for Step #5.
- * This includes:
- *  - getChainCollections / getChainCollectionsByPage
- *  - getNftsForAddress
- *  - getTokenIdsForContractWithMetadata / getTokenIdsForContractWithMetadataByPage
- *  - getNftMetadataForGivenTokenIdForContract
- *  - getNftTransactionsForContractTokenId
- *  - getTraitsForCollection
- *  - getAttributesForTraitInCollection
- *  - getCollectionTraitsSummary
- *  - getHistoricalFloorPricesForCollection
- *  - getHistoricalVolumeForCollection
- *  - getHistoricalSalesCountForCollection
- *  - checkOwnershipInNft, checkOwnershipInNftForSpecificTokenId
+ * Tests the following NftService methods:
+ * - getChainCollections / getChainCollectionsByPage
+ * - getNftsForAddress
+ * - getTokenIdsForContractWithMetadata / getTokenIdsForContractWithMetadataByPage
+ * - getNftMetadataForGivenTokenIdForContract
+ * - getNftTransactionsForContractTokenId
+ * - getTraitsForCollection
+ * - getAttributesForTraitInCollection
+ * - getCollectionTraitsSummary
+ * - getHistoricalFloorPricesForCollection
+ * - getHistoricalVolumeForCollection
+ * - getHistoricalSalesCountForCollection
+ * - checkOwnershipInNft, checkOwnershipInNftForSpecificTokenId
  *
- * We do minimal checks to verify the calls succeed or at least don't error out.
- * We rely on GOLDRUSH_API_KEY in the environment. The server must be started.
- *
- * Key Steps:
+ * Notes:
  * - Start server as a subprocess using StdioClientTransport
  * - For each tool, do a minimal test calling it with placeholder or minimal arguments
  * - We do not do extensive validation, we just confirm isError is false

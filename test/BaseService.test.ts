@@ -1,23 +1,25 @@
 /**
- * @file BaseService.test.ts
- * @description
- * Test suite for the BaseService tools implemented in src/index.ts as part of Step #3.
+ * Test suite for the BaseService tools implemented in src/index.ts.
+ * 
+ * @remarks
  * These tests rely on having the GOLDRUSH_API_KEY environment variable set,
- * and also rely on the server being started. They test the newly added
- * BaseService methods:
- *  - getBlock
- *  - getResolvedAddress
- *  - getBlockHeights, getBlockHeightsByPage
- *  - getLogs
- *  - getLogEventsByAddress, getLogEventsByAddressByPage
- *  - getLogEventsByTopicHash, getLogEventsByTopicHashByPage
- *  - getAllChainStatus
- *  - getGasPrices
+ * and also rely on the server being started.
+ * 
+ * @description
+ * Tests the following BaseService methods:
+ * - getBlock
+ * - getResolvedAddress
+ * - getBlockHeights, getBlockHeightsByPage
+ * - getLogs
+ * - getLogEventsByAddress, getLogEventsByAddressByPage
+ * - getLogEventsByTopicHash, getLogEventsByTopicHashByPage
+ * - getAllChainStatus
+ * - getGasPrices
  *
- * Key points:
- *  - We use the Vitest framework
- *  - Must ensure the server is started
- *  - We do minimal checks for the returned data. We rely on the calls not erroring.
+ * Notes:
+ * - We use the Vitest framework
+ * - Must ensure the server is started
+ * - We do minimal checks for the returned data. We rely on the calls not erroring.
  */
 
 import { describe, it, expect, beforeAll } from "vitest";

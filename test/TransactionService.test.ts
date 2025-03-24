@@ -1,20 +1,23 @@
 /**
- * @file TransactionService.test.ts
+ * Test suite for the TransactionService tools implemented in src/index.ts.
+ * 
+ * @remarks
+ * These tests rely on having the GOLDRUSH_API_KEY environment variable set,
+ * and also rely on the server being started.
+ * 
  * @description
- * Test suite for the newly added TransactionService tools implemented in src/index.ts for Step #8:
- *   - getAllTransactionsForAddressByPage
- *   - getTransactionsForBlock
- *   - getTransactionSummary
- *   - getTransactionsForAddressV3
- *   - getTimeBucketTransactionsForAddress
+ * Tests the following TransactionService methods:
+ * - getAllTransactionsForAddressByPage
+ * - getTransactionsForBlock
+ * - getTransactionSummary
+ * - getTransactionsForAddressV3
+ * - getTimeBucketTransactionsForAddress
  *
- * We do minimal checks, ensuring the calls do not error out. We rely on the environment variable
- * GOLDRUSH_API_KEY. The server must be started. Some addresses/blocks might be placeholders.
- *
- * Key steps:
- *  - Start the server as a subprocess using StdioClientTransport
- *  - For each tool, do a minimal test calling it with placeholder arguments
- *  - Just confirm isError is false
+ * Notes:
+ * - Start the server as a subprocess using StdioClientTransport
+ * - For each tool, do a minimal test calling it with placeholder arguments
+ * - We do minimal checks, ensuring the calls do not error out
+ * - Some addresses/blocks might be placeholders
  */
 
 import { describe, it, expect, beforeAll } from "vitest";
