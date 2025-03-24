@@ -4,7 +4,7 @@ This project provides an [MCP (Model Context Protocol)](https://modelcontextprot
 
 ## Overview
 
-- **Server**: `src/index.ts` implements an MCP server that provides comprehensive coverage of Covalent's GoldRush API services:
+- **Server**: The MCP server provides comprehensive coverage of Covalent's GoldRush API services through a modular architecture:
   - **AllChainsService**  
   - **BaseService**  
   - **BalanceService**  
@@ -15,8 +15,8 @@ This project provides an [MCP (Model Context Protocol)](https://modelcontextprot
   - **SecurityService**  
 
 - **MCP**: Model Context Protocol is a message protocol for connecting context or tool-providing servers with LLM clients. This server allows an LLM client to:
-  - Call Covalent GoldRush API endpoints as “tools”
-  - Read from “resources” that give chain info, quote currencies, chain statuses, etc.
+  - Call Covalent GoldRush API endpoints as "tools"
+  - Read from "resources" that give chain info, quote currencies, chain statuses, etc.
 
 ## Features
 
@@ -28,6 +28,7 @@ This project provides an [MCP (Model Context Protocol)](https://modelcontextprot
    - `status://chain/{chainName}` – Status for a single chain
 3. **Fully Testable** – Uses [Vitest](https://vitest.dev/) to test each group of tools. 
 4. **Configuration** – Must specify `GOLDRUSH_API_KEY` environment variable for Covalent API calls.
+5. **Modular Architecture** – Each service is implemented as a separate module, making the codebase easier to maintain and extend.
 
 ## Prerequisites
 
@@ -155,8 +156,23 @@ set GOLDRUSH_API_KEY=YOUR_KEY_HERE
 ```
 goldrush-mcp-server
 ├── src
-│   ├── index.ts            # Main MCP server entry point
-│   ├── example-client.ts   # Example LLM client using STDIO transport
+│   ├── index.ts                 # Main MCP server entry point
+│   ├── services/                # Modular service implementations
+│   │   ├── AllChainsService.ts  # Cross-chain service tools
+│   │   ├── BalanceService.ts    # Balance-related tools
+│   │   ├── BaseService.ts       # Basic blockchain tools
+│   │   ├── BitcoinService.ts    # Bitcoin-specific tools
+│   │   ├── NftService.ts        # NFT-related tools
+│   │   ├── PricingService.ts    # Pricing-related tools
+│   │   ├── SecurityService.ts   # Security-related tools
+│   │   └── TransactionService.ts# Transaction-related tools
+│   ├── resources/               # Resource implementations
+│   │   ├── staticResources.ts   # Static configuration resources
+│   │   └── dynamicResources.ts  # Dynamic chain status resources
+│   ├── utils/                   # Utility functions and constants
+│   │   ├── constants.ts         # Shared constants
+│   │   └── helpers.ts           # Helper functions
+│   └── example-client.ts        # Example LLM client using STDIO transport
 ├── test
 │   ├── AllChainsService.test.ts
 │   ├── BalanceService.test.ts
@@ -168,7 +184,7 @@ goldrush-mcp-server
 │   ├── TransactionService.test.ts
 │   └── Resources.test.ts
 ├── docs
-│   └── USAGE.md            # Additional usage documentation
+│   └── USAGE.md                 # Additional usage documentation
 ├── package.json
 ├── tsconfig.json
 └── README.md (this file)

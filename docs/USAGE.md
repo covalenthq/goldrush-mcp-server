@@ -15,33 +15,62 @@ If you want a network-based approach, you can provide an HTTP or SSE-based trans
 
 ### Tools
 
-All Covalent GoldRush endpoints are exposed as MCP “tools.” For instance:
+All Covalent GoldRush endpoints are exposed as MCP "tools." Each service is organized into its own module under the `src/services/` directory:
 
-- `getMultiChainBalances`
-- `getNftMetadataForGivenTokenIdForContract`
-- `getApprovals`
-- etc.
+- `AllChainsService.ts` - Cross-chain operations such as `getMultiChainBalances`
+- `BalanceService.ts` - Balance-related operations
+- `BaseService.ts` - Basic blockchain operations
+- `BitcoinService.ts` - Bitcoin-specific operations
+- `NftService.ts` - NFT-related operations
+- `PricingService.ts` - Pricing-related operations
+- `SecurityService.ts` - Security-related operations
+- `TransactionService.ts` - Transaction-related operations
 
-Each tool's name and input schema are defined in src/index.ts. The input schema is declared via [Zod](https://github.com/colinhacks/zod). On invocation, the server calls the corresponding Covalent GoldRush client method and returns the JSON result as a string.
+Each tool's name and input schema are defined in its respective service file using Zod. The main `index.ts` imports and registers all these service modules.
 
 ### Resources
 
-We also provide “resources,” read via `resources/read` calls:
+Resources are split into static and dynamic types:
 
-- `config://supported-chains`
-- `config://quote-currencies`
-- `status://all-chains`
-- `status://chain/eth-mainnet`
-- `status://chain/{chainName}`
+- Static resources (`src/resources/staticResources.ts`):
+  - `config://supported-chains`
+  - `config://quote-currencies`
 
-Requests to these URIs yield JSON describing chain status or configuration, dynamically fetched from the Covalent API where appropriate.
+- Dynamic resources (`src/resources/dynamicResources.ts`):
+  - `status://all-chains`
+  - `status://chain/{chainName}`
+
+Dynamic resources fetch real-time data from the Covalent API on each request, ensuring current information.
 
 ## Development
 
-1. **Code** – Modify or add tools in `src/index.ts`. This file sets up each Covalent endpoint as a new tool.
-2. **Testing** – We use [Vitest](https://vitest.dev/) with test files in `test/`.
-	- `npm run test` runs all tests
-3. **Integration** – If you want to integrate with a different or custom LLM client, see the `@modelcontextprotocol/sdk` documentation.
+1. **Code Organization**:
+   - `src/index.ts` - Server setup and initialization
+   - `src/services/` - Individual service modules 
+   - `src/resources/` - Resource implementations
+   - `src/utils/` - Utility functions and constants
+
+2. **Adding New Services or Tools**:
+   - Create a new service file in `src/services/` or add to an existing one
+   - Follow the pattern of other services:
+     ```typescript
+     export function addYourServiceTools(server: McpServer, goldRushClient: GoldRushClient) {
+         server.tool(
+             "yourNewTool",
+             { /* zod schema */ },
+             async (params) => {
+                 // Implementation
+             }
+         );
+     }
+     ```
+   - Register your service in `src/index.ts`
+
+3. **Testing** – We use [Vitest](https://vitest.dev/) with test files in `test/`:
+   - `npm run test` runs all tests
+   - Add corresponding test files for new services
+
+4. **Integration** – If you want to integrate with a different or custom LLM client, see the `@modelcontextprotocol/sdk` documentation.
 
 ## Deploying
 
@@ -53,7 +82,12 @@ You can run this server as a stand-alone process or as part of a bigger system. 
 
 ## Updating
 
-If Covalent changes its API or adds new methods, simply update `@covalenthq/client-sdk` or add new tools in `src/index.ts`. For advanced usage like customizing pagination, examine the Covalent docs and adapt.
+If Covalent changes its API or adds new methods:
+
+1. Update `@covalenthq/client-sdk` to the latest version
+2. Add new tools in the appropriate service file under `src/services/`
+3. If needed, create a new service file following the modular pattern
+4. Register new services in `src/index.ts`
 
 ## Example Flow
 
