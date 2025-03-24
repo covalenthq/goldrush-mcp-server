@@ -1,33 +1,33 @@
 /**
- * @file index.ts
- * @description
- * The main entry point for the GoldRush MCP Server. This file sets up an MCP server
- * providing tools for Covalent GoldRush services:
- *  - AllChainsService
- *  - BaseService
- *  - BalanceService
- *  - TransactionService
- *  - BitcoinService
- *  - NftService
- *  - PricingService
- *  - SecurityService
+ * The main entry point for the GoldRush MCP Server.
+ * 
+ * This file sets up an MCP server providing tools for Covalent GoldRush services:
+ * - AllChainsService
+ * - BaseService
+ * - BalanceService
+ * - TransactionService
+ * - BitcoinService
+ * - NftService
+ * - PricingService
+ * - SecurityService
  *
  * It also provides static and dynamic resources:
- *  - "config://supported-chains"
- *  - "config://quote-currencies"
- *  - "status://all-chains" (dynamic, calls getAllChainStatus from BaseService)
- *  - "status://chain/{chainName}" (dynamic, calls getAllChainStatus and filters for a single chain)
+ * - "config://supported-chains"
+ * - "config://quote-currencies"
+ * - "status://all-chains" (dynamic, calls getAllChainStatus from BaseService)
+ * - "status://chain/{chainName}" (dynamic, calls getAllChainStatus and filters for a single chain)
  *
+ * @remarks
  * Key Features:
- *  - Tools coverage for the listed Covalent services
- *  - Resources for real-time data (no caching) about chain statuses
- *  - Environment-driven GOLDRUSH_API_KEY
+ * - Tools coverage for the listed Covalent services
+ * - Resources for real-time data (no caching) about chain statuses
+ * - Environment-driven GOLDRUSH_API_KEY
  *
  * @notes
- *  - The GOLDRUSH_API_KEY environment variable must be set
- *  - Tools are implemented using zod for argument validation
- *  - Each tool returns Covalent response as JSON text
- *  - For resources, we do not cache any data; each call to the resource triggers a fresh Covalent API call
+ * - The GOLDRUSH_API_KEY environment variable must be set
+ * - Tools are implemented using zod for argument validation
+ * - Each tool returns Covalent response as JSON text
+ * - For resources, we do not cache any data; each call to the resource triggers a fresh Covalent API call
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -49,6 +49,7 @@ dotenv.config();
 /**
  * A type-safe Zod enum referencing valid quote currencies for Covalent/GoldRush.
  * If Covalent adds new ones, we can add them here as needed.
+ * @type {z.ZodEnum<["USD", "CAD", "EUR", "SGD", "INR", "JPY", "VND", "CNY", "KRW", "RUB", "TRY", "NGN", "ARS", "AUD", "CHF", "GBP"]>}
  */
 const QUOTE_VALUES = z.enum([
   "USD", "CAD", "EUR", "SGD", "INR", "JPY", "VND", "CNY",
@@ -56,7 +57,8 @@ const QUOTE_VALUES = z.enum([
 ]);
 
 /**
- * Convert QUOTE_VALUES to a TypeScript array of valid quote currency strings.
+ * Array of valid quote currency strings derived from QUOTE_VALUES.
+ * @type {readonly Quote[]}
  */
 const validQuoteValues: readonly Quote[] = QUOTE_VALUES.options as Quote[];
 
@@ -83,11 +85,13 @@ const server = new McpServer({
 });
 
 /**
- * @function addStaticResources
- * @description
- * Adds static resources for configuration data:
- *  - "config://supported-chains" - List of supported chain names
- *  - "config://quote-currencies" - List of supported quote currencies
+ * Adds static resources for configuration data.
+ * 
+ * @param {McpServer} server - The MCP server instance
+ * @remarks
+ * This function creates static resources:
+ * - "config://supported-chains" - List of supported chain names
+ * - "config://quote-currencies" - List of supported quote currencies
  */
 function addStaticResources(server: McpServer) {
   /**
@@ -120,9 +124,14 @@ function addStaticResources(server: McpServer) {
 }
 
 /**
- * @function addAllChainsServiceTools
- * @description
  * Adds tools for Cross-Chain calls (AllChainsService).
+ * 
+ * @param {McpServer} server - The MCP server instance
+ * @remarks
+ * This function creates tools:
+ * - getMultiChainMultiAddressTransactions
+ * - getMultiChainBalances
+ * - getAddressActivity
  */
 function addAllChainsServiceTools(server: McpServer) {
   server.tool(
@@ -248,9 +257,23 @@ function addAllChainsServiceTools(server: McpServer) {
 }
 
 /**
- * @function addBaseServiceTools
- * @description
  * Adds tools for BaseService, including chain info, logs, etc.
+ * 
+ * @param {McpServer} server - The MCP server instance
+ * @remarks
+ * This function creates tools:
+ * - getAllChains
+ * - getAllChainStatus
+ * - getGasPrices
+ * - getBlock
+ * - getResolvedAddress
+ * - getBlockHeights
+ * - getBlockHeightsByPage
+ * - getLogs
+ * - getLogEventsByAddress
+ * - getLogEventsByAddressByPage
+ * - getLogEventsByTopicHash
+ * - getLogEventsByTopicHashByPage
  */
 function addBaseServiceTools(server: McpServer) {
   server.tool(
@@ -687,9 +710,19 @@ function addBaseServiceTools(server: McpServer) {
 }
 
 /**
- * @function addBalanceServiceTools
- * @description
- * Tools for the BalanceService.
+ * Adds tools for the BalanceService.
+ * 
+ * @param {McpServer} server - The MCP server instance
+ * @remarks
+ * This function creates tools:
+ * - getTokenBalancesForWalletAddress
+ * - getHistoricalTokenBalancesForWalletAddress
+ * - getHistoricalPortfolioForWalletAddress
+ * - getErc20TransfersForWalletAddress
+ * - getErc20TransfersForWalletAddressByPage
+ * - getTokenHoldersV2ForTokenAddress
+ * - getTokenHoldersV2ForTokenAddressByPage
+ * - getNativeTokenBalance
  */
 function addBalanceServiceTools(server: McpServer) {
   server.tool(
@@ -1045,16 +1078,18 @@ function addBalanceServiceTools(server: McpServer) {
 }
 
 /**
- * @function addTransactionServiceTools
- * @description
- * Tools for the TransactionService.
- *  - getTransaction
- *  - getAllTransactionsForAddress
- *  - getAllTransactionsForAddressByPage
- *  - getTransactionsForBlock
- *  - getTransactionSummary
- *  - getTransactionsForAddressV3
- *  - getTimeBucketTransactionsForAddress
+ * Adds tools for the TransactionService.
+ * 
+ * @param {McpServer} server - The MCP server instance
+ * @remarks
+ * This function creates tools:
+ * - getTransaction
+ * - getAllTransactionsForAddress
+ * - getAllTransactionsForAddressByPage
+ * - getTransactionsForBlock
+ * - getTransactionSummary
+ * - getTransactionsForAddressV3
+ * - getTimeBucketTransactionsForAddress
  */
 function addTransactionServiceTools(server: McpServer) {
   server.tool(
@@ -1338,6 +1373,13 @@ function addTransactionServiceTools(server: McpServer) {
  * @function addBitcoinServiceTools
  * @description
  * Adds tools for the BitcoinService.
+ * 
+ * @param {McpServer} server - The MCP server instance
+ * @remarks
+ * This function creates tools:
+ * - getBitcoinHdWalletBalances
+ * - getTransactionsForBtcAddress
+ * - getBitcoinNonHdWalletBalances
  */
 function addBitcoinServiceTools(server: McpServer) {
   server.tool(
@@ -1447,21 +1489,23 @@ function addBitcoinServiceTools(server: McpServer) {
 }
 
 /**
- * @function addNftServiceTools
- * @description
- * Tools for the NftService. They handle:
- *  - getChainCollections / getChainCollectionsByPage
- *  - getNftsForAddress
- *  - getTokenIdsForContractWithMetadata / getTokenIdsForContractWithMetadataByPage
- *  - getNftMetadataForGivenTokenIdForContract
- *  - getNftTransactionsForContractTokenId
- *  - getTraitsForCollection
- *  - getAttributesForTraitInCollection
- *  - getCollectionTraitsSummary
- *  - getHistoricalFloorPricesForCollection
- *  - getHistoricalVolumeForCollection
- *  - getHistoricalSalesCountForCollection
- *  - checkOwnershipInNft, checkOwnershipInNftForSpecificTokenId
+ * Adds tools for the NftService.
+ * 
+ * @param {McpServer} server - The MCP server instance
+ * @remarks
+ * This function creates tools:
+ * - getChainCollections / getChainCollectionsByPage
+ * - getNftsForAddress
+ * - getTokenIdsForContractWithMetadata / getTokenIdsForContractWithMetadataByPage
+ * - getNftMetadataForGivenTokenIdForContract
+ * - getNftTransactionsForContractTokenId
+ * - getTraitsForCollection
+ * - getAttributesForTraitInCollection
+ * - getCollectionTraitsSummary
+ * - getHistoricalFloorPricesForCollection
+ * - getHistoricalVolumeForCollection
+ * - getHistoricalSalesCountForCollection
+ * - checkOwnershipInNft, checkOwnershipInNftForSpecificTokenId
  */
 function addNftServiceTools(server: McpServer) {
   // getChainCollections - gather all pages
@@ -2044,7 +2088,12 @@ function addNftServiceTools(server: McpServer) {
 /**
  * @function addPricingServiceTools
  * @description
- * Tools for the PricingService.
+ * Adds tools for the PricingService.
+ * 
+ * @param {McpServer} server - The MCP server instance
+ * @remarks
+ * This function creates tools:
+ * - getTokenPrices
  */
 function addPricingServiceTools(server: McpServer) {
   server.tool(
@@ -2169,13 +2218,15 @@ function addSecurityServiceTools(server: McpServer) {
 /**
  * @function addRealTimeChainStatusResources
  * @description
- * Adds new dynamic resources that provide real-time chain status data with no caching:
- *  - "status://all-chains"
- *  - "status://chain/{chainName}"
- *
- * For "status://all-chains", we fetch from BaseService.getAllChainStatus()
- * For "status://chain/{chainName}", we also call getAllChainStatus() and then filter for that chain.
- * This approach is a bit naive but ensures no caching is done. 
+ * Adds dynamic resources that provide real-time chain status data with no caching.
+ * 
+ * @param {McpServer} server - The MCP server instance
+ * @remarks
+ * This function creates resources:
+ * - "status://all-chains" - Fetches from BaseService.getAllChainStatus()
+ * - "status://chain/{chainName}" - Calls getAllChainStatus() and filters for the specified chain
+ * 
+ * This approach ensures no caching is done, as a fresh API call is made for each resource request.
  */
 function addRealTimeChainStatusResources(server: McpServer) {
   // status://all-chains
@@ -2265,10 +2316,13 @@ addSecurityServiceTools(server);
 addRealTimeChainStatusResources(server);
 
 /**
+ * Initializes the server using STDIO transport for communication.
+ * 
  * @async
- * @function startServer
- * @description
- * Initializes the server using STDIO transport for communication, logs success or failure.
+ * @returns {Promise<void>}
+ * @throws {Error} If server fails to start
+ * @remarks
+ * Logs success or failure to the console.
  */
 async function startServer() {
   console.log("Starting GoldRush MCP server...");
