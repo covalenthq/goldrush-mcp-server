@@ -12,26 +12,22 @@
  *  - PricingService
  *  - SecurityService
  *
- * as well as static resources. It connects with Covalent's GoldRush API using
- * the @covalenthq/client-sdk.
+ * It also provides static and dynamic resources:
+ *  - "config://supported-chains"
+ *  - "config://quote-currencies"
+ *  - "status://all-chains" (dynamic, calls getAllChainStatus from BaseService)
+ *  - "status://chain/{chainName}" (dynamic, calls getAllChainStatus and filters for a single chain)
  *
  * Key Features:
- *  - Tools coverage for:
- *    * AllChainsService
- *    * BaseService
- *    * BalanceService
- *    * TransactionService
- *    * BitcoinService
- *    * NftService
- *    * PricingService
- *    * SecurityService
- *  - Static resources listing supported chains and quote currencies
+ *  - Tools coverage for the listed Covalent services
+ *  - Resources for real-time data (no caching) about chain statuses
  *  - Environment-driven GOLDRUSH_API_KEY
  *
  * @notes
  *  - The GOLDRUSH_API_KEY environment variable must be set
  *  - Tools are implemented using zod for argument validation
- *  - Each tool returns the Covalent response as JSON text
+ *  - Each tool returns Covalent response as JSON text
+ *  - For resources, we do not cache any data; each call to the resource triggers a fresh Covalent API call
  */
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -45,6 +41,7 @@ import {
 } from "@covalenthq/client-sdk";
 import { z } from "zod";
 import dotenv from "dotenv";
+import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js"; // For dynamic resource URIs
 
 // Load environment variables
 dotenv.config();
@@ -112,46 +109,6 @@ server.resource(
     }]
   })
 );
-
-/**
- * Add AllChainsService Tools
- */
-addAllChainsServiceTools(server);
-
-/**
- * Add BaseService Tools
- */
-addBaseServiceTools(server);
-
-/**
- * Add BalanceService Tools
- */
-addBalanceServiceTools(server);
-
-/**
- * Add TransactionService Tools
- */
-addTransactionServiceTools(server);
-
-/**
- * Add BitcoinService Tools
- */
-addBitcoinServiceTools(server);
-
-/**
- * Add NftService Tools
- */
-addNftServiceTools(server);
-
-/**
- * Add PricingService Tools
- */
-addPricingServiceTools(server);
-
-/**
- * Add SecurityService Tools
- */
-addSecurityServiceTools(server);
 
 /**
  * @function addAllChainsServiceTools
@@ -281,9 +238,6 @@ function addAllChainsServiceTools(server: McpServer) {
   );
 }
 
-//==================================================
-//                BASE SERVICE
-//==================================================
 /**
  * @function addBaseServiceTools
  * @description
@@ -723,9 +677,6 @@ function addBaseServiceTools(server: McpServer) {
   );
 }
 
-//==================================================
-//             BALANCE SERVICE
-//==================================================
 /**
  * @function addBalanceServiceTools
  * @description
@@ -1084,9 +1035,6 @@ function addBalanceServiceTools(server: McpServer) {
   );
 }
 
-//==================================================
-//             TRANSACTION SERVICE
-//==================================================
 /**
  * @function addTransactionServiceTools
  * @description
@@ -1181,7 +1129,6 @@ function addTransactionServiceTools(server: McpServer) {
     }
   );
 
-  // getAllTransactionsForAddressByPage
   server.tool(
     "getAllTransactionsForAddressByPage",
     {
@@ -1227,7 +1174,6 @@ function addTransactionServiceTools(server: McpServer) {
     }
   );
 
-  // getTransactionsForBlock
   server.tool(
     "getTransactionsForBlock",
     {
@@ -1264,7 +1210,6 @@ function addTransactionServiceTools(server: McpServer) {
     }
   );
 
-  // getTransactionSummary
   server.tool(
     "getTransactionSummary",
     {
@@ -1301,7 +1246,6 @@ function addTransactionServiceTools(server: McpServer) {
     }
   );
 
-  // getTransactionsForAddressV3
   server.tool(
     "getTransactionsForAddressV3",
     {
@@ -1342,7 +1286,6 @@ function addTransactionServiceTools(server: McpServer) {
     }
   );
 
-  // getTimeBucketTransactionsForAddress
   server.tool(
     "getTimeBucketTransactionsForAddress",
     {
@@ -1382,9 +1325,6 @@ function addTransactionServiceTools(server: McpServer) {
   );
 }
 
-//==================================================
-//                BITCOIN SERVICE
-//==================================================
 /**
  * @function addBitcoinServiceTools
  * @description
@@ -1497,9 +1437,6 @@ function addBitcoinServiceTools(server: McpServer) {
   );
 }
 
-//==================================================
-//             NFT SERVICE
-//==================================================
 /**
  * @function addNftServiceTools
  * @description
@@ -2095,9 +2032,6 @@ function addNftServiceTools(server: McpServer) {
   );
 }
 
-//==================================================
-//             PRICING SERVICE
-//==================================================
 /**
  * @function addPricingServiceTools
  * @description
@@ -2146,9 +2080,6 @@ function addPricingServiceTools(server: McpServer) {
   );
 }
 
-//==================================================
-//             SECURITY SERVICE
-//==================================================
 /**
  * @function addSecurityServiceTools
  * @description
@@ -2225,6 +2156,103 @@ function addSecurityServiceTools(server: McpServer) {
     }
   );
 }
+
+/**
+ * @function addRealTimeChainStatusResources
+ * @description
+ * Adds new dynamic resources that provide real-time chain status data with no caching:
+ *  - "status://all-chains"
+ *  - "status://chain/{chainName}"
+ *
+ * For "status://all-chains", we fetch from BaseService.getAllChainStatus()
+ * For "status://chain/{chainName}", we also call getAllChainStatus() and then filter for that chain.
+ * This approach is a bit naive but ensures no caching is done. 
+ */
+function addRealTimeChainStatusResources() {
+  // status://all-chains
+  server.resource(
+    "all-chains-status",
+    "status://all-chains",
+    async (uri) => {
+      // Make a fresh call each time
+      const response = await goldRushClient.BaseService.getAllChainStatus();
+      return {
+        contents: [{
+          uri: uri.href,
+          text: JSON.stringify(
+            response.data,
+            (_, value) => typeof value === 'bigint' ? value.toString() : value,
+            2
+          )
+        }]
+      };
+    }
+  );
+
+  // status://chain/{chainName}
+  const chainStatusTemplate = new ResourceTemplate("status://chain/{chainName}", { list: undefined });
+  server.resource(
+    "chain-status",
+    chainStatusTemplate,
+    async (uri, { chainName }) => {
+      // For single chain, we again call getAllChainStatus
+      const response = await goldRushClient.BaseService.getAllChainStatus();
+      const data = response.data;
+      if (!data || !data.items) {
+        return {
+          contents: [{
+            uri: uri.href,
+            text: JSON.stringify({ error: "Failed to fetch chain status" }, null, 2)
+          }]
+        };
+      }
+      const items = data.items || [];
+      // Filter for the given chainName if found
+      const chainStatus = items.find((x: any) => {
+        // x.name is the chain name e.g. "eth-mainnet"
+        // x.chain_id is the chain ID e.g. 1
+        // We'll handle numeric or string match
+        if (x.name === chainName) {
+          return true;
+        }
+        // If chainName is numeric, maybe compare chain_id
+        if (!isNaN(Number(chainName))) {
+          return x.chain_id === Number(chainName);
+        }
+        return false;
+      });
+      if (!chainStatus) {
+        return {
+          contents: [{
+            uri: uri.href,
+            text: JSON.stringify({ error: `Chain not found for: ${chainName}` }, null, 2)
+          }]
+        };
+      }
+      return {
+        contents: [{
+          uri: uri.href,
+          text: JSON.stringify(chainStatus, (_, value) =>
+            typeof value === 'bigint' ? value.toString() : value, 2
+          )
+        }]
+      };
+    }
+  );
+}
+
+/**
+ * Initialize all relevant Covalent-based tools and resources.
+ */
+addAllChainsServiceTools(server);
+addBaseServiceTools(server);
+addBalanceServiceTools(server);
+addTransactionServiceTools(server);
+addBitcoinServiceTools(server);
+addNftServiceTools(server);
+addPricingServiceTools(server);
+addSecurityServiceTools(server);
+addRealTimeChainStatusResources();
 
 /**
  * @async
