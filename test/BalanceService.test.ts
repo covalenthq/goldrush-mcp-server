@@ -71,8 +71,9 @@ describe("BalanceService Tools (Step #2)", () => {
             name: "getErc20TransfersForWalletAddress",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
+                walletAddress: "test.eth",
                 pageSize: 1,
+                pageNumber: 0
             },
         });
         console.log(
@@ -88,8 +89,9 @@ describe("BalanceService Tools (Step #2)", () => {
             name: "getErc20TransfersForWalletAddressByPage",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
+                walletAddress: "test.eth",
                 pageSize: 1,
+                pageNumber: 0
             },
         });
         console.log(
@@ -105,8 +107,9 @@ describe("BalanceService Tools (Step #2)", () => {
             name: "getTokenHoldersV2ForTokenAddress",
             arguments: {
                 chainName: "eth-mainnet",
-                tokenAddress: "demo-token.eth",
+                tokenAddress: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB", // cryptopunks
                 pageSize: 1,
+                pageNumber: 0
             },
         });
         console.log("getTokenHoldersV2ForTokenAddress response:", response.content);
@@ -119,8 +122,9 @@ describe("BalanceService Tools (Step #2)", () => {
             name: "getTokenHoldersV2ForTokenAddressByPage",
             arguments: {
                 chainName: "eth-mainnet",
-                tokenAddress: "demo-token.eth",
+                tokenAddress: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB", // cryptopunks
                 pageSize: 1,
+                pageNumber: 0,
             },
         });
         console.log(

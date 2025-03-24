@@ -91,9 +91,7 @@ describe("NftService Tools (Step #5)", () => {
             name: "getNftsForAddress",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "0xb7F7F6C52F2e2fdb1963Eab30438024864c313F6",
-                pageSize: 1,
-                pageNumber: 0
+                walletAddress: "sovpunk.eth"
             }
         });
         console.log("getNftsForAddress result:", result.content);
