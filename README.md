@@ -1,55 +1,62 @@
 # GoldRush MCP Server
 
-A Model Context Protocol (MCP) server that exposes Covalent's GoldRush API functionality as MCP tools, allowing AI assistants to query blockchain data through the Covalent GoldRush API.
+This project provides an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server that exposes Covalent's [GoldRush](https://www.covalenthq.com/platform) APIs as MCP resources and tools. It is implemented in TypeScript using [@modelcontextprotocol/sdk](https://www.npmjs.com/package/@modelcontextprotocol/sdk) and [@covalenthq/client-sdk](https://www.npmjs.com/package/@covalenthq/client-sdk).
+
+## Overview
+
+- **Server**: `src/index.ts` implements an MCP server that provides comprehensive coverage of Covalent's GoldRush API services:
+  - **AllChainsService**  
+  - **BaseService**  
+  - **BalanceService**  
+  - **TransactionService**  
+  - **BitcoinService**  
+  - **NftService**  
+  - **PricingService**  
+  - **SecurityService**  
+
+- **MCP**: Model Context Protocol is a message protocol for connecting context or tool-providing servers with LLM clients. This server allows an LLM client to:
+  - Call Covalent GoldRush API endpoints as “tools”
+  - Read from “resources” that give chain info, quote currencies, chain statuses, etc.
 
 ## Features
 
-- Implements the Model Context Protocol (MCP) specification
-- Uses STDIO transport for communication
-- Exposes Covalent GoldRush API methods as MCP tools
-- Includes tools from BaseService, BalanceService, and TransactionService
+1. **Tools** – The server registers each Covalent endpoint as an MCP tool, e.g. `getMultiChainBalances`, `getNftMetadataForGivenTokenIdForContract`, etc.
+2. **Resources** – The server also provides read-only resources such as:
+   - `config://supported-chains` – A JSON list of supported chain names  
+   - `config://quote-currencies` – A JSON list of supported quote currencies  
+   - `status://all-chains` – Real-time chain status  
+   - `status://chain/{chainName}` – Status for a single chain
+3. **Fully Testable** – Uses [Vitest](https://vitest.dev/) to test each group of tools. 
+4. **Configuration** – Must specify `GOLDRUSH_API_KEY` environment variable for Covalent API calls.
 
 ## Prerequisites
 
-- Node.js (v18 or higher)
-- NPM or Yarn
-- A GoldRush API key from Covalent
+- **Node.js** v18 or higher
+- **npm** or **yarn**
+- **GOLDRUSH_API_KEY** environment variable containing a valid Covalent API key
 
 ## Installation
 
-1. Clone this repository:
-   ```
-   git clone https://github.com/yourusername/goldrush-mcp-server.git
-   cd goldrush-mcp-server
-   ```
-
-2. Install dependencies:
-   ```
-   npm install
-   ```
-
-3. Create a `.env` file in the root directory and add your GoldRush API key:
-   ```
-   GOLDRUSH_API_KEY=your_api_key_here
-   ```
-
-## Building
-
+```bash
+git clone https://github.com/covalenthq/goldrush-mcp-server.git
+cd goldrush-mcp-server
+npm install
 ```
+
+Then build:
+```bash
 npm run build
 ```
-
 ## Usage
-
-Start the server:
-
+### Running the MCP Server
+```bash
+# Start the server (runs dist/index.js)
+npm run start
 ```
-npm start
-```
+This spawns the MCP server on stdin/stdout. Typically, an MCP client will connect to the server.
 
-This will start the MCP server using the STDIO transport, ready to receive MCP protocol messages from an MCP client.
-
-### As JSON Config
+### Client Configuration
+#### npx
 
 ```json
 {
@@ -66,6 +73,12 @@ This will start the MCP server using the STDIO transport, ready to receive MCP p
     }
   }
 }   
+```
+
+#### Claude Code
+
+```
+$ claude mcp add goldrush -e GOLDRUSH_API_KEY=<YOUR_API_KEY> -- npx @covalenthq/goldrush-mcp-server
 ```
 
 ### As a subprocess
@@ -104,21 +117,66 @@ const result = await client.callTool({
 console.log(result);
 ```
 
-## Available Tools
+### Example Client
 
-### BaseService Tools
+You can run the example client that will spawn the server as a child process via STDIO:
 
-- **getAllChains**: Get a list of all chains, including those in development
+```
+npm run example
+```
 
-### BalanceService Tools
+This attempts a few Covalent calls and prints out the responses.
 
-- **getTokenBalancesForWalletAddress**: Get token balances for a specific wallet address
-- **getHistoricalTokenBalancesForWalletAddress**: Get historical token balances for a wallet address at a specific block height or date
+### Running the Tests
 
-### TransactionService Tools
+```
+npm run test
+```
 
-- **getAllTransactionsForAddress**: Get all transactions for a specific address
-- **getTransaction**: Get details of a specific transaction by hash
+This runs the entire test suite covering each service.
+
+### Setting GOLDRUSH\_API\_KEY
+
+You **must** set the `GOLDRUSH_API_KEY` environment variable to a valid key from the Covalent platform.  
+For example on Linux/macOS:
+
+```
+export GOLDRUSH_API_KEY=YOUR_KEY_HERE
+```
+
+Or on Windows:
+
+```
+set GOLDRUSH_API_KEY=YOUR_KEY_HERE
+```
+
+## File Layout
+
+```
+goldrush-mcp-server
+├── src
+│   ├── index.ts            # Main MCP server entry point
+│   ├── example-client.ts   # Example LLM client using STDIO transport
+├── test
+│   ├── AllChainsService.test.ts
+│   ├── BalanceService.test.ts
+│   ├── BaseService.test.ts
+│   ├── BitcoinService.test.ts
+│   ├── NftService.test.ts
+│   ├── PricingService.test.ts
+│   ├── SecurityService.test.ts
+│   ├── TransactionService.test.ts
+│   └── Resources.test.ts
+├── docs
+│   └── USAGE.md            # Additional usage documentation
+├── package.json
+├── tsconfig.json
+└── README.md (this file)
+```
+
+## Documentation
+
+See `docs/USAGE.md` for more details on how to integrate with or customize the server.
 
 ## Debugging
 
@@ -127,22 +185,14 @@ https://modelcontextprotocol.io/docs/tools/inspector
 ```
 npx @modelcontextprotocol/inspector node dist/index.js
 ```
+
 ### Using Claude Code
 
 ```
 $ claude mcp add goldrush-server -e GOLDRUSH_API_KEY=<YOUR_API_KEY> -- <NODE_EXECUTABLE_PATH>/node $PWD/dist/index.js
 ```
 
-## TODO
 
-- [ ] add validation for input params that need to match specific supported values in `Generic.types.d.ts`. Interation should be robust enough to flag to client if there's no supported match or ask for clarification in case of multiple match
-- [ ] address pagination for best user / agent experience. Maybe return only first page for paginated methods and inform total / provide options to retrieve all
-- [ ] expose relevant types and usage docs as mcp resources
-- [ ] expose usage examples as prompt templates
-- [ ] add all remaining public GoldRush API SDK methods as tools
-- [ ] add CI for publishing server npm package
-- [ ] Tests
+## License
 
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+TBD
