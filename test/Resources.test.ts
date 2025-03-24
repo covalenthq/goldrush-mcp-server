@@ -5,6 +5,8 @@
  * Specifically checks:
  *   - "status://all-chains" resource
  *   - "status://chain/{chainName}" resource
+ *   - "config://supported-chains" resource
+ *   - "config://quote-currencies" resource
  * We rely on GOLDRUSH_API_KEY in the environment, the server must be started, 
  * and we do minimal checks verifying isError is false and content is present.
  *
@@ -62,5 +64,43 @@ describe("Real-Time Resource Management (Step #9)", () => {
         expect(resp.contents?.length).toBeGreaterThan(0);
         // Potentially it returns an error JSON
         console.log("status://chain/not-a-chain resource contents:", resp.contents);
+    }, 30000);
+
+    it("Should read config://supported-chains resource successfully", async () => {
+        const resp = await client.readResource({ uri: "config://supported-chains" });
+        expect(resp.contents).toBeDefined();
+        expect(resp.contents?.length).toBeGreaterThan(0);
+        
+        // Parse the JSON to verify it's a valid array of chain names
+        const content = resp.contents?.[0]?.text;
+        expect(content).toBeDefined();
+        
+        const chainNames = JSON.parse(content as string);
+        expect(Array.isArray(chainNames)).toBe(true);
+        expect(chainNames.length).toBeGreaterThan(0);
+        
+        // Ethereum mainnet should be in the supported chains
+        expect(chainNames).toContain("eth-mainnet");
+        
+        console.log("config://supported-chains resource contents:", chainNames.slice(0, 5), "...");
+    }, 30000);
+
+    it("Should read config://quote-currencies resource successfully", async () => {
+        const resp = await client.readResource({ uri: "config://quote-currencies" });
+        expect(resp.contents).toBeDefined();
+        expect(resp.contents?.length).toBeGreaterThan(0);
+        
+        // Parse the JSON to verify it's a valid array of quote currencies
+        const content = resp.contents?.[0]?.text;
+        expect(content).toBeDefined();
+        
+        const quoteCurrencies = JSON.parse(content as string);
+        expect(Array.isArray(quoteCurrencies)).toBe(true);
+        expect(quoteCurrencies.length).toBeGreaterThan(0);
+        
+        // USD should be in the supported quote currencies
+        expect(quoteCurrencies).toContain("USD");
+        
+        console.log("config://quote-currencies resource contents:", quoteCurrencies);
     }, 30000);
 });

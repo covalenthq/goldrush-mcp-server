@@ -83,32 +83,41 @@ const server = new McpServer({
 });
 
 /**
- * Provide a static resource listing the supported Covalent chain names.
+ * @function addStaticResources
+ * @description
+ * Adds static resources for configuration data:
+ *  - "config://supported-chains" - List of supported chain names
+ *  - "config://quote-currencies" - List of supported quote currencies
  */
-server.resource(
-  "supported-chains",
-  "config://supported-chains",
-  async (uri) => ({
-    contents: [{
-      uri: uri.href,
-      text: JSON.stringify(Object.values(ChainName), null, 2)
-    }]
-  })
-);
+function addStaticResources(server: McpServer) {
+  /**
+   * Provide a static resource listing the supported Covalent chain names.
+   */
+  server.resource(
+    "supported-chains",
+    "config://supported-chains",
+    async (uri) => ({
+      contents: [{
+        uri: uri.href,
+        text: JSON.stringify(Object.values(ChainName), null, 2)
+      }]
+    })
+  );
 
-/**
- * Provide a static resource listing the supported Covalent quote currencies.
- */
-server.resource(
-  "quote-currencies",
-  "config://quote-currencies",
-  async (uri) => ({
-    contents: [{
-      uri: uri.href,
-      text: JSON.stringify(Object.values(validQuoteValues), null, 2)
-    }]
-  })
-);
+  /**
+   * Provide a static resource listing the supported Covalent quote currencies.
+   */
+  server.resource(
+    "quote-currencies",
+    "config://quote-currencies",
+    async (uri) => ({
+      contents: [{
+        uri: uri.href,
+        text: JSON.stringify(Object.values(validQuoteValues), null, 2)
+      }]
+    })
+  );
+}
 
 /**
  * @function addAllChainsServiceTools
@@ -2168,7 +2177,7 @@ function addSecurityServiceTools(server: McpServer) {
  * For "status://chain/{chainName}", we also call getAllChainStatus() and then filter for that chain.
  * This approach is a bit naive but ensures no caching is done. 
  */
-function addRealTimeChainStatusResources() {
+function addRealTimeChainStatusResources(server: McpServer) {
   // status://all-chains
   server.resource(
     "all-chains-status",
@@ -2244,6 +2253,7 @@ function addRealTimeChainStatusResources() {
 /**
  * Initialize all relevant Covalent-based tools and resources.
  */
+addStaticResources(server);
 addAllChainsServiceTools(server);
 addBaseServiceTools(server);
 addBalanceServiceTools(server);
@@ -2252,7 +2262,7 @@ addBitcoinServiceTools(server);
 addNftServiceTools(server);
 addPricingServiceTools(server);
 addSecurityServiceTools(server);
-addRealTimeChainStatusResources();
+addRealTimeChainStatusResources(server);
 
 /**
  * @async
