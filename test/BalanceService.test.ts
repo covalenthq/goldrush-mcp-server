@@ -26,7 +26,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
 
-describe("BalanceService Tools (Step #2)", () => {
+describe("BalanceService Tool", () => {
     let client: Client;
 
     beforeAll(async () => {

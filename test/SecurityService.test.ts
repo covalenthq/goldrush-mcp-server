@@ -19,7 +19,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
 
-describe("SecurityService Tools (Step #7)", () => {
+describe("SecurityService Tools", () => {
     let client: Client;
 
     beforeAll(async () => {

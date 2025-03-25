@@ -31,7 +31,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
 
-describe("NftService Tools (Step #5)", () => {
+describe("NftService Tools", () => {
     let client: Client;
 
     beforeAll(async () => {

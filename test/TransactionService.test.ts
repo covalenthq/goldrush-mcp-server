@@ -25,7 +25,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
 
-describe("TransactionService Tools (Step #8)", () => {
+describe("TransactionService Tools", () => {
     let client: Client;
 
     beforeAll(async () => {

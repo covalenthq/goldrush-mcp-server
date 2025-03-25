@@ -22,7 +22,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
 
-describe("PricingService Tools (Step #6)", () => {
+describe("PricingService Tools", () => {
     let client: Client;
 
     beforeAll(async () => {

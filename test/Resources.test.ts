@@ -24,7 +24,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
 
-describe("Real-Time Resource Management (Step #9)", () => {
+describe("Resources", () => {
     let client: Client;
 
     beforeAll(async () => {

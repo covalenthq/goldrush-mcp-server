@@ -24,7 +24,7 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
 
-describe("BitcoinService Tools (Step #4)", () => {
+describe("BitcoinService Tools", () => {
     let client: Client;
 
     beforeAll(async () => {
