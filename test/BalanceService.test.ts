@@ -1,10 +1,10 @@
 /**
  * Test suite for the BalanceService tools implemented in src/index.ts.
- * 
+ *
  * @remarks
  * These tests rely on having GOLDRUSH_API_KEY environment variable set,
  * and also rely on the server being started.
- * 
+ *
  * @description
  * Tests the following BalanceService methods:
  * - getHistoricalPortfolioForWalletAddress
@@ -20,11 +20,10 @@
  * - For real tests, we need real addresses or block heights. We do minimal checks
  *   and do not do extensive validation of the returned data.
  */
-
-import { describe, it, expect, beforeAll } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
+import { describe, it, expect, beforeAll } from "vitest";
 
 describe("BalanceService Tool", () => {
     let client: Client;
@@ -75,7 +74,7 @@ describe("BalanceService Tool", () => {
                 chainName: "eth-mainnet",
                 walletAddress: "test.eth",
                 pageSize: 1,
-                pageNumber: 0
+                pageNumber: 0,
             },
         });
         console.log(
@@ -93,7 +92,7 @@ describe("BalanceService Tool", () => {
                 chainName: "eth-mainnet",
                 walletAddress: "test.eth",
                 pageSize: 1,
-                pageNumber: 0
+                pageNumber: 0,
             },
         });
         console.log(
@@ -111,10 +110,13 @@ describe("BalanceService Tool", () => {
                 chainName: "eth-mainnet",
                 tokenAddress: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB", // cryptopunks
                 pageSize: 1,
-                pageNumber: 0
+                pageNumber: 0,
             },
         });
-        console.log("getTokenHoldersV2ForTokenAddress response:", response.content);
+        console.log(
+            "getTokenHoldersV2ForTokenAddress response:",
+            response.content
+        );
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);

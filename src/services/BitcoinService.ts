@@ -1,14 +1,14 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { GoldRushClient, Quote } from "@covalenthq/client-sdk";
-import { z } from "zod";
 import { validQuoteValues } from "../utils/constants.js";
 import { stringifyWithBigInt } from "../utils/helpers.js";
+import type { GoldRushClient, Quote } from "@covalenthq/client-sdk";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
 
 /**
  * @function addBitcoinServiceTools
  * @description
  * Adds tools for the BitcoinService.
- * 
+ *
  * @param {McpServer} server - The MCP server instance
  * @param {GoldRushClient} goldRushClient - The GoldRush client
  * @remarks
@@ -17,33 +17,39 @@ import { stringifyWithBigInt } from "../utils/helpers.js";
  * - getTransactionsForBtcAddress
  * - getBitcoinNonHdWalletBalances
  */
-export function addBitcoinServiceTools(server: McpServer, goldRushClient: GoldRushClient) {
+export function addBitcoinServiceTools(
+    server: McpServer,
+    goldRushClient: GoldRushClient
+) {
     server.tool(
         "getBitcoinHdWalletBalances",
         {
             walletAddress: z.string(),
-            quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional()
+            quoteCurrency: z
+                .enum(Object.values(validQuoteValues) as [string, ...string[]])
+                .optional(),
         },
         async (params) => {
             try {
-                const response = await goldRushClient.BitcoinService.getBitcoinHdWalletBalances(
-                    params.walletAddress,
-                    {
-                        quoteCurrency: params.quoteCurrency as Quote
-                    }
-                );
+                const response =
+                    await goldRushClient.BitcoinService.getBitcoinHdWalletBalances(
+                        params.walletAddress,
+                        {
+                            quoteCurrency: params.quoteCurrency as Quote,
+                        }
+                    );
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
                 };
             } catch (error) {
                 return {
-                    content: [
-                        { type: "text", text: `Error: ${error}` }
-                    ],
-                    isError: true
+                    content: [{ type: "text", text: `Error: ${error}` }],
+                    isError: true,
                 };
             }
         }
@@ -54,27 +60,30 @@ export function addBitcoinServiceTools(server: McpServer, goldRushClient: GoldRu
         {
             address: z.string(),
             pageSize: z.number().optional(),
-            pageNumber: z.number().optional()
+            pageNumber: z.number().optional(),
         },
         async (params) => {
             try {
-                const response = await goldRushClient.BitcoinService.getTransactionsForBtcAddress({
-                    address: params.address,
-                    pageSize: params.pageSize,
-                    pageNumber: params.pageNumber
-                });
+                const response =
+                    await goldRushClient.BitcoinService.getTransactionsForBtcAddress(
+                        {
+                            address: params.address,
+                            pageSize: params.pageSize,
+                            pageNumber: params.pageNumber,
+                        }
+                    );
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
                 };
             } catch (error) {
                 return {
-                    content: [
-                        { type: "text", text: `Error: ${error}` }
-                    ],
-                    isError: true
+                    content: [{ type: "text", text: `Error: ${error}` }],
+                    isError: true,
                 };
             }
         }
@@ -84,30 +93,33 @@ export function addBitcoinServiceTools(server: McpServer, goldRushClient: GoldRu
         "getBitcoinNonHdWalletBalances",
         {
             walletAddress: z.string(),
-            quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional()
+            quoteCurrency: z
+                .enum(Object.values(validQuoteValues) as [string, ...string[]])
+                .optional(),
         },
         async (params) => {
             try {
-                const response = await goldRushClient.BitcoinService.getBitcoinNonHdWalletBalances(
-                    params.walletAddress,
-                    {
-                        quoteCurrency: params.quoteCurrency as Quote
-                    }
-                );
+                const response =
+                    await goldRushClient.BitcoinService.getBitcoinNonHdWalletBalances(
+                        params.walletAddress,
+                        {
+                            quoteCurrency: params.quoteCurrency as Quote,
+                        }
+                    );
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
                 };
             } catch (error) {
                 return {
-                    content: [
-                        { type: "text", text: `Error: ${error}` }
-                    ],
-                    isError: true
+                    content: [{ type: "text", text: `Error: ${error}` }],
+                    isError: true,
                 };
             }
         }
     );
-} 
+}

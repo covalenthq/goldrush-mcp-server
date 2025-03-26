@@ -1,6 +1,6 @@
 /**
  * The main entry point for the GoldRush MCP Server.
- * 
+ *
  * This file sets up an MCP server providing tools for Covalent GoldRush services:
  * - AllChainsService
  * - BaseService
@@ -29,25 +29,22 @@
  * - Each tool returns Covalent response as JSON text
  * - For resources, we do not cache any data; each call to the resource triggers a fresh Covalent API call
  */
-
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { GoldRushClient } from "@covalenthq/client-sdk";
-import dotenv from "dotenv";
-
+import { addRealTimeChainStatusResources } from "./resources/dynamicResources.js";
+// Import resources
+import { addStaticResources } from "./resources/staticResources.js";
 // Import service tools
 import { addAllChainsServiceTools } from "./services/AllChainsService.js";
-import { addBaseServiceTools } from "./services/BaseService.js";
 import { addBalanceServiceTools } from "./services/BalanceService.js";
-import { addTransactionServiceTools } from "./services/TransactionService.js";
+import { addBaseServiceTools } from "./services/BaseService.js";
 import { addBitcoinServiceTools } from "./services/BitcoinService.js";
 import { addNftServiceTools } from "./services/NftService.js";
 import { addPricingServiceTools } from "./services/PricingService.js";
 import { addSecurityServiceTools } from "./services/SecurityService.js";
-
-// Import resources
-import { addStaticResources } from "./resources/staticResources.js";
-import { addRealTimeChainStatusResources } from "./resources/dynamicResources.js";
+import { addTransactionServiceTools } from "./services/TransactionService.js";
+import { GoldRushClient } from "@covalenthq/client-sdk";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import dotenv from "dotenv";
 
 // Load environment variables
 dotenv.config();
@@ -57,8 +54,8 @@ dotenv.config();
  */
 const apiKey = process.env.GOLDRUSH_API_KEY;
 if (!apiKey) {
-  console.error("GOLDRUSH_API_KEY environment variable is not set.");
-  process.exit(1);
+    console.error("GOLDRUSH_API_KEY environment variable is not set.");
+    process.exit(1);
 }
 
 /**
@@ -70,8 +67,8 @@ const goldRushClient = new GoldRushClient(apiKey);
  * Create an MCP server instance, specifying meta info.
  */
 const server = new McpServer({
-  name: "GoldRush MCP Server",
-  version: "1.0.0"
+    name: "GoldRush MCP Server",
+    version: "1.0.0",
 });
 
 /**
@@ -93,7 +90,7 @@ addSecurityServiceTools(server, goldRushClient);
 
 /**
  * Initializes the server using STDIO transport for communication.
- * 
+ *
  * @async
  * @returns {Promise<void>}
  * @throws {Error} If server fails to start
@@ -101,20 +98,20 @@ addSecurityServiceTools(server, goldRushClient);
  * Logs success or failure to the console.
  */
 async function startServer() {
-  console.log("Starting GoldRush MCP server...");
+    console.log("Starting GoldRush MCP server...");
 
-  try {
-    // Create the STDIO transport
-    const transport = new StdioServerTransport();
+    try {
+        // Create the STDIO transport
+        const transport = new StdioServerTransport();
 
-    // Connect the server to the transport
-    await server.connect(transport);
+        // Connect the server to the transport
+        await server.connect(transport);
 
-    console.log("GoldRush MCP server started successfully");
-  } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
-  }
+        console.log("GoldRush MCP server started successfully");
+    } catch (error) {
+        console.error("Failed to start server:", error);
+        process.exit(1);
+    }
 }
 
 // Start the server

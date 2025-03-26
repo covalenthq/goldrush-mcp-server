@@ -1,13 +1,9 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import {
-    Chain,
-    ChainName,
-    GoldRushClient,
-    Quote,
-} from "@covalenthq/client-sdk";
-import { z } from "zod";
 import { validQuoteValues } from "../utils/constants.js";
 import { stringifyWithBigInt } from "../utils/helpers.js";
+import type { Chain, GoldRushClient, Quote } from "@covalenthq/client-sdk";
+import { ChainName } from "@covalenthq/client-sdk";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
 
 /**
  * Adds tools for BaseService, including chain info, logs, etc.
@@ -52,33 +48,36 @@ export function addBaseServiceTools(
         }
     });
 
-    server.tool(
-        "getAllChainStatus",
-        {},
-        async () => {
-            try {
-                const response = await goldRushClient.BaseService.getAllChainStatus();
-                return {
-                    content: [{
+    server.tool("getAllChainStatus", {}, async () => {
+        try {
+            const response =
+                await goldRushClient.BaseService.getAllChainStatus();
+            return {
+                content: [
+                    {
                         type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
-                };
-            } catch (err) {
-                return {
-                    content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
-                };
-            }
+                        text: stringifyWithBigInt(response.data),
+                    },
+                ],
+            };
+        } catch (err) {
+            return {
+                content: [{ type: "text", text: `Error: ${err}` }],
+                isError: true,
+            };
         }
-    );
+    });
 
     server.tool(
         "getGasPrices",
         {
-            chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
             eventType: z.enum(["erc20", "nativetokens", "uniswapv3"]),
-            quoteCurrency: z.enum(Object.values(validQuoteValues) as [string, ...string[]]).optional()
+            quoteCurrency: z
+                .enum(Object.values(validQuoteValues) as [string, ...string[]])
+                .optional(),
         },
         async (params) => {
             try {
@@ -86,19 +85,21 @@ export function addBaseServiceTools(
                     params.chainName as Chain,
                     params.eventType,
                     {
-                        quoteCurrency: params.quoteCurrency as Quote
+                        quoteCurrency: params.quoteCurrency as Quote,
                     }
                 );
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
                 };
             } catch (err) {
                 return {
                     content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
+                    isError: true,
                 };
             }
         }
@@ -107,8 +108,10 @@ export function addBaseServiceTools(
     server.tool(
         "getBlock",
         {
-            chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
-            blockHeight: z.string()
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
+            blockHeight: z.string(),
         },
         async (params) => {
             try {
@@ -117,15 +120,17 @@ export function addBaseServiceTools(
                     params.blockHeight
                 );
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
                 };
             } catch (err) {
                 return {
                     content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
+                    isError: true,
                 };
             }
         }
@@ -134,25 +139,30 @@ export function addBaseServiceTools(
     server.tool(
         "getResolvedAddress",
         {
-            chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
-            walletAddress: z.string()
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
+            walletAddress: z.string(),
         },
         async (params) => {
             try {
-                const response = await goldRushClient.BaseService.getResolvedAddress(
-                    params.chainName as Chain,
-                    params.walletAddress
-                );
+                const response =
+                    await goldRushClient.BaseService.getResolvedAddress(
+                        params.chainName as Chain,
+                        params.walletAddress
+                    );
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
                 };
             } catch (err) {
                 return {
                     content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
+                    isError: true,
                 };
             }
         }
@@ -161,11 +171,13 @@ export function addBaseServiceTools(
     server.tool(
         "getBlockHeights",
         {
-            chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
             startDate: z.string(),
             endDate: z.union([z.string(), z.literal("latest")]),
             pageSize: z.number().optional(),
-            pageNumber: z.number().optional()
+            pageNumber: z.number().optional(),
         },
         async (params) => {
             try {
@@ -176,7 +188,7 @@ export function addBaseServiceTools(
                     params.endDate,
                     {
                         pageSize: params.pageSize,
-                        pageNumber: params.pageNumber
+                        pageNumber: params.pageNumber,
                     }
                 );
                 for await (const page of iterator) {
@@ -185,15 +197,17 @@ export function addBaseServiceTools(
                     }
                 }
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt({ items: allBlocks })
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt({ items: allBlocks }),
+                        },
+                    ],
                 };
             } catch (err) {
                 return {
                     content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
+                    isError: true,
                 };
             }
         }
@@ -202,33 +216,38 @@ export function addBaseServiceTools(
     server.tool(
         "getBlockHeightsByPage",
         {
-            chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
             startDate: z.string(),
             endDate: z.union([z.string(), z.literal("latest")]),
             pageSize: z.number().optional(),
-            pageNumber: z.number().optional()
+            pageNumber: z.number().optional(),
         },
         async (params) => {
             try {
-                const response = await goldRushClient.BaseService.getBlockHeightsByPage(
-                    params.chainName as Chain,
-                    params.startDate,
-                    params.endDate,
-                    {
-                        pageSize: params.pageSize,
-                        pageNumber: params.pageNumber
-                    }
-                );
+                const response =
+                    await goldRushClient.BaseService.getBlockHeightsByPage(
+                        params.chainName as Chain,
+                        params.startDate,
+                        params.endDate,
+                        {
+                            pageSize: params.pageSize,
+                            pageNumber: params.pageNumber,
+                        }
+                    );
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
                 };
             } catch (err) {
                 return {
                     content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
+                    isError: true,
                 };
             }
         }
@@ -237,13 +256,15 @@ export function addBaseServiceTools(
     server.tool(
         "getLogs",
         {
-            chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
             startingBlock: z.number().optional(),
             endingBlock: z.string().optional(),
             address: z.string().optional(),
             topics: z.string().optional(),
             blockHash: z.string().optional(),
-            skipDecode: z.boolean().optional()
+            skipDecode: z.boolean().optional(),
         },
         async (params) => {
             try {
@@ -255,19 +276,21 @@ export function addBaseServiceTools(
                         address: params.address,
                         topics: params.topics,
                         blockHash: params.blockHash,
-                        skipDecode: params.skipDecode
+                        skipDecode: params.skipDecode,
                     }
                 );
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
                 };
             } catch (err) {
                 return {
                     content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
+                    isError: true,
                 };
             }
         }
@@ -276,41 +299,46 @@ export function addBaseServiceTools(
     server.tool(
         "getLogEventsByAddress",
         {
-            chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
             contractAddress: z.string(),
             startingBlock: z.union([z.string(), z.number()]).optional(),
             endingBlock: z.union([z.string(), z.number()]).optional(),
             pageSize: z.number().optional(),
-            pageNumber: z.number().optional()
+            pageNumber: z.number().optional(),
         },
         async (params) => {
             try {
                 const allLogs: any[] = [];
-                const iterator = goldRushClient.BaseService.getLogEventsByAddress(
-                    params.chainName as Chain,
-                    params.contractAddress,
-                    {
-                        startingBlock: params.startingBlock,
-                        endingBlock: params.endingBlock,
-                        pageSize: params.pageSize,
-                        pageNumber: params.pageNumber
-                    }
-                );
+                const iterator =
+                    goldRushClient.BaseService.getLogEventsByAddress(
+                        params.chainName as Chain,
+                        params.contractAddress,
+                        {
+                            startingBlock: params.startingBlock,
+                            endingBlock: params.endingBlock,
+                            pageSize: params.pageSize,
+                            pageNumber: params.pageNumber,
+                        }
+                    );
                 for await (const page of iterator) {
                     if (page.data?.items) {
                         allLogs.push(...page.data.items);
                     }
                 }
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt({ items: allLogs })
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt({ items: allLogs }),
+                        },
+                    ],
                 };
             } catch (err) {
                 return {
                     content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
+                    isError: true,
                 };
             }
         }
@@ -319,35 +347,40 @@ export function addBaseServiceTools(
     server.tool(
         "getLogEventsByAddressByPage",
         {
-            chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
             contractAddress: z.string(),
             startingBlock: z.union([z.string(), z.number()]).optional(),
             endingBlock: z.union([z.string(), z.number()]).optional(),
             pageSize: z.number().optional(),
-            pageNumber: z.number().optional()
+            pageNumber: z.number().optional(),
         },
         async (params) => {
             try {
-                const response = await goldRushClient.BaseService.getLogEventsByAddressByPage(
-                    params.chainName as Chain,
-                    params.contractAddress,
-                    {
-                        startingBlock: params.startingBlock,
-                        endingBlock: params.endingBlock,
-                        pageSize: params.pageSize,
-                        pageNumber: params.pageNumber
-                    }
-                );
+                const response =
+                    await goldRushClient.BaseService.getLogEventsByAddressByPage(
+                        params.chainName as Chain,
+                        params.contractAddress,
+                        {
+                            startingBlock: params.startingBlock,
+                            endingBlock: params.endingBlock,
+                            pageSize: params.pageSize,
+                            pageNumber: params.pageNumber,
+                        }
+                    );
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
                 };
             } catch (err) {
                 return {
                     content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
+                    isError: true,
                 };
             }
         }
@@ -356,43 +389,48 @@ export function addBaseServiceTools(
     server.tool(
         "getLogEventsByTopicHash",
         {
-            chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
             topicHash: z.string(),
             startingBlock: z.union([z.string(), z.number()]).optional(),
             endingBlock: z.union([z.string(), z.number()]).optional(),
             secondaryTopics: z.string().optional(),
             pageSize: z.number().optional(),
-            pageNumber: z.number().optional()
+            pageNumber: z.number().optional(),
         },
         async (params) => {
             try {
                 const allLogs: any[] = [];
-                const iterator = goldRushClient.BaseService.getLogEventsByTopicHash(
-                    params.chainName as Chain,
-                    params.topicHash,
-                    {
-                        startingBlock: params.startingBlock,
-                        endingBlock: params.endingBlock,
-                        secondaryTopics: params.secondaryTopics,
-                        pageSize: params.pageSize,
-                        pageNumber: params.pageNumber
-                    }
-                );
+                const iterator =
+                    goldRushClient.BaseService.getLogEventsByTopicHash(
+                        params.chainName as Chain,
+                        params.topicHash,
+                        {
+                            startingBlock: params.startingBlock,
+                            endingBlock: params.endingBlock,
+                            secondaryTopics: params.secondaryTopics,
+                            pageSize: params.pageSize,
+                            pageNumber: params.pageNumber,
+                        }
+                    );
                 for await (const page of iterator) {
                     if (page.data?.items) {
                         allLogs.push(...page.data.items);
                     }
                 }
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt({ items: allLogs })
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt({ items: allLogs }),
+                        },
+                    ],
                 };
             } catch (err) {
                 return {
                     content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
+                    isError: true,
                 };
             }
         }
@@ -401,37 +439,42 @@ export function addBaseServiceTools(
     server.tool(
         "getLogEventsByTopicHashByPage",
         {
-            chainName: z.enum(Object.values(ChainName) as [string, ...string[]]),
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
             topicHash: z.string(),
             startingBlock: z.union([z.string(), z.number()]).optional(),
             endingBlock: z.union([z.string(), z.number()]).optional(),
             secondaryTopics: z.string().optional(),
             pageSize: z.number().optional(),
-            pageNumber: z.number().optional()
+            pageNumber: z.number().optional(),
         },
         async (params) => {
             try {
-                const response = await goldRushClient.BaseService.getLogEventsByTopicHashByPage(
-                    params.chainName as Chain,
-                    params.topicHash,
-                    {
-                        startingBlock: params.startingBlock,
-                        endingBlock: params.endingBlock,
-                        secondaryTopics: params.secondaryTopics,
-                        pageSize: params.pageSize,
-                        pageNumber: params.pageNumber
-                    }
-                );
+                const response =
+                    await goldRushClient.BaseService.getLogEventsByTopicHashByPage(
+                        params.chainName as Chain,
+                        params.topicHash,
+                        {
+                            startingBlock: params.startingBlock,
+                            endingBlock: params.endingBlock,
+                            secondaryTopics: params.secondaryTopics,
+                            pageSize: params.pageSize,
+                            pageNumber: params.pageNumber,
+                        }
+                    );
                 return {
-                    content: [{
-                        type: "text",
-                        text: stringifyWithBigInt(response.data)
-                    }]
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
                 };
             } catch (err) {
                 return {
                     content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true
+                    isError: true,
                 };
             }
         }

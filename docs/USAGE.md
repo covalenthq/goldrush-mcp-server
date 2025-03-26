@@ -33,42 +33,51 @@ Each tool's name and input schema are defined in its respective service file usi
 Resources are split into static and dynamic types:
 
 - Static resources (`src/resources/staticResources.ts`):
-  - `config://supported-chains`
-  - `config://quote-currencies`
+
+    - `config://supported-chains`
+    - `config://quote-currencies`
 
 - Dynamic resources (`src/resources/dynamicResources.ts`):
-  - `status://all-chains`
-  - `status://chain/{chainName}`
+    - `status://all-chains`
+    - `status://chain/{chainName}`
 
 Dynamic resources fetch real-time data from the Covalent API on each request, ensuring current information.
 
 ## Development
 
 1. **Code Organization**:
-   - `src/index.ts` - Server setup and initialization
-   - `src/services/` - Individual service modules 
-   - `src/resources/` - Resource implementations
-   - `src/utils/` - Utility functions and constants
+
+    - `src/index.ts` - Server setup and initialization
+    - `src/services/` - Individual service modules
+    - `src/resources/` - Resource implementations
+    - `src/utils/` - Utility functions and constants
 
 2. **Adding New Services or Tools**:
-   - Create a new service file in `src/services/` or add to an existing one
-   - Follow the pattern of other services:
-     ```typescript
-     export function addYourServiceTools(server: McpServer, goldRushClient: GoldRushClient) {
-         server.tool(
-             "yourNewTool",
-             { /* zod schema */ },
-             async (params) => {
-                 // Implementation
-             }
-         );
-     }
-     ```
-   - Register your service in `src/index.ts`
+
+    - Create a new service file in `src/services/` or add to an existing one
+    - Follow the pattern of other services:
+        ```typescript
+        export function addYourServiceTools(
+            server: McpServer,
+            goldRushClient: GoldRushClient
+        ) {
+            server.tool(
+                "yourNewTool",
+                {
+                    /* zod schema */
+                },
+                async (params) => {
+                    // Implementation
+                }
+            );
+        }
+        ```
+    - Register your service in `src/index.ts`
 
 3. **Testing** – We use [Vitest](https://vitest.dev/) with test files in `test/`:
-   - `npm run test` runs all tests
-   - Add corresponding test files for new services
+
+    - `npm run test` runs all tests
+    - Add corresponding test files for new services
 
 4. **Integration** – If you want to integrate with a different or custom LLM client, see the `@modelcontextprotocol/sdk` documentation.
 

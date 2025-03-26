@@ -1,10 +1,10 @@
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { ChainName } from "@covalenthq/client-sdk";
 import { validQuoteValues } from "../utils/constants.js";
+import { ChainName } from "@covalenthq/client-sdk";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 /**
  * Adds static resources for configuration data.
- * 
+ *
  * @param {McpServer} server - The MCP server instance
  * @remarks
  * This function creates static resources:
@@ -19,10 +19,12 @@ export function addStaticResources(server: McpServer) {
         "supported-chains",
         "config://supported-chains",
         async (uri) => ({
-            contents: [{
-                uri: uri.href,
-                text: JSON.stringify(Object.values(ChainName), null, 2)
-            }]
+            contents: [
+                {
+                    uri: uri.href,
+                    text: JSON.stringify(Object.values(ChainName), null, 2),
+                },
+            ],
         })
     );
 
@@ -33,10 +35,16 @@ export function addStaticResources(server: McpServer) {
         "quote-currencies",
         "config://quote-currencies",
         async (uri) => ({
-            contents: [{
-                uri: uri.href,
-                text: JSON.stringify(Object.values(validQuoteValues), null, 2)
-            }]
+            contents: [
+                {
+                    uri: uri.href,
+                    text: JSON.stringify(
+                        Object.values(validQuoteValues),
+                        null,
+                        2
+                    ),
+                },
+            ],
         })
     );
-} 
+}

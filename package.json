@@ -1,35 +1,46 @@
 {
-  "name": "goldrush-mcp-server",
-  "version": "1.0.0",
-  "description": "GoldRush MCP Server for interacting with Covalent GoldRush API",
-  "main": "dist/index.js",
-  "type": "module",
-  "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
-    "dev": "ts-node --esm src/index.ts",
-    "example": "ts-node --esm src/example-client.ts",
-    "test": "vitest",
-    "test:allchains": "vitest test/AllChainsService.test.ts",
-    "test:balances": "vitest test/BalanceService.test.ts",
-    "test:base": "vitest test/BaseService.test.ts",
-    "test:transactions": "vitest test/TransactionService.test.ts",
-    "test:bitcoin": "vitest test/BitcoinService.test.ts",
-    "test:nft": "vitest test/NftService.test.ts",
-    "test:pricing": "vitest test/PricingService.test.ts",
-    "test:security": "vitest test/SecurityService.test.ts",
-    "test:resources": "vitest test/Resources.test.ts"
-  },
-  "dependencies": {
-    "@covalenthq/client-sdk": "^2.2.4",
-    "@modelcontextprotocol/sdk": "^1.7.0",
-    "dotenv": "^16.4.7",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
-    "@types/node": "^20.17.24",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.2",
-    "vitest": "^3.0.9"
-  }
+    "name": "goldrush-mcp-server",
+    "version": "1.0.0",
+    "description": "GoldRush MCP Server for interacting with Covalent GoldRush API",
+    "main": "dist/index.js",
+    "type": "module",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/index.js",
+        "dev": "ts-node --esm src/index.ts",
+        "lint": "eslint .",
+        "pretty": "prettier . --write",
+        "example": "ts-node --esm src/example-client.ts",
+        "test": "vitest",
+        "test:allchains": "vitest test/AllChainsService.test.ts",
+        "test:balances": "vitest test/BalanceService.test.ts",
+        "test:base": "vitest test/BaseService.test.ts",
+        "test:transactions": "vitest test/TransactionService.test.ts",
+        "test:bitcoin": "vitest test/BitcoinService.test.ts",
+        "test:nft": "vitest test/NftService.test.ts",
+        "test:pricing": "vitest test/PricingService.test.ts",
+        "test:security": "vitest test/SecurityService.test.ts",
+        "test:resources": "vitest test/Resources.test.ts"
+    },
+    "dependencies": {
+        "@eslint/eslintrc": "^3.3.0",
+        "@eslint/js": "^9.21.0",
+        "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+        "@typescript-eslint/eslint-plugin": "^8.25.0",
+        "@typescript-eslint/parser": "^8.25.0",
+        "eslint": "^9.21.0",
+        "eslint-config-prettier": "^10.0.2",
+        "eslint-plugin-prettier": "^5.2.3",
+        "prettier": "^3.5.3",
+        "@covalenthq/client-sdk": "^2.2.4",
+        "@modelcontextprotocol/sdk": "^1.7.0",
+        "dotenv": "^16.4.7",
+        "zod": "^3.24.2"
+    },
+    "devDependencies": {
+        "@types/node": "^20.17.24",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.2",
+        "vitest": "^3.0.9"
+    }
 }

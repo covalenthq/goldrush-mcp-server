@@ -1,10 +1,10 @@
 /**
  * Test suite for the PricingService tools implemented in src/index.ts.
- * 
+ *
  * @remarks
  * These tests rely on having the GOLDRUSH_API_KEY environment variable set,
  * and also rely on the server being started.
- * 
+ *
  * @description
  * Tests the following PricingService method:
  * - getTokenPrices
@@ -16,11 +16,10 @@
  * - For getTokenPrices, pass minimal valid arguments
  * - Confirm we get a non-error response
  */
-
-import { describe, it, expect, beforeAll } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
+import { describe, it, expect, beforeAll } from "vitest";
 
 describe("PricingService Tools", () => {
     let client: Client;
@@ -29,18 +28,18 @@ describe("PricingService Tools", () => {
         // Start the server as a subprocess via stdio
         const transport = new StdioClientTransport({
             command: "node",
-            args: [path.resolve(process.cwd(), "dist/index.js")]
+            args: [path.resolve(process.cwd(), "dist/index.js")],
         });
 
         client = new Client(
             {
                 name: "PricingServiceTestClient",
-                version: "1.0.0"
+                version: "1.0.0",
             },
             {
                 capabilities: {
-                    tools: {}
-                }
+                    tools: {},
+                },
             }
         );
 
@@ -56,8 +55,8 @@ describe("PricingService Tools", () => {
                 contractAddress: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D", // CXT
                 from: "2025-01-01",
                 to: "2025-01-05",
-                pricesAtAsc: true
-            }
+                pricesAtAsc: true,
+            },
         });
 
         console.log("getTokenPrices response:", resp.content);

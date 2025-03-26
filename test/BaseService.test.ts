@@ -1,10 +1,10 @@
 /**
  * Test suite for the BaseService tools implemented in src/index.ts.
- * 
+ *
  * @remarks
  * These tests rely on having the GOLDRUSH_API_KEY environment variable set,
  * and also rely on the server being started.
- * 
+ *
  * @description
  * Tests the following BaseService methods:
  * - getBlock
@@ -21,11 +21,10 @@
  * - Must ensure the server is started
  * - We do minimal checks for the returned data. We rely on the calls not erroring.
  */
-
-import { describe, it, expect, beforeAll } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
+import { describe, it, expect, beforeAll } from "vitest";
 
 describe("BaseService Tools", () => {
     let client: Client;
@@ -34,18 +33,18 @@ describe("BaseService Tools", () => {
         // Start the server as a subprocess via stdio
         const transport = new StdioClientTransport({
             command: "node",
-            args: [path.resolve(process.cwd(), "dist/index.js")]
+            args: [path.resolve(process.cwd(), "dist/index.js")],
         });
 
         client = new Client(
             {
                 name: "BaseServiceTestClient",
-                version: "1.0.0"
+                version: "1.0.0",
             },
             {
                 capabilities: {
-                    tools: {}
-                }
+                    tools: {},
+                },
             }
         );
 
@@ -55,7 +54,7 @@ describe("BaseService Tools", () => {
     it("getAllChainStatus - minimal check", async () => {
         const resp = await client.callTool({
             name: "getAllChainStatus",
-            arguments: {}
+            arguments: {},
         });
         console.log("getAllChainStatus response:", resp.content);
         expect(resp.isError).toBeFalsy();
@@ -67,8 +66,8 @@ describe("BaseService Tools", () => {
             name: "getGasPrices",
             arguments: {
                 chainName: "eth-mainnet",
-                eventType: "erc20"
-            }
+                eventType: "erc20",
+            },
         });
         console.log("getGasPrices response:", resp.content);
         expect(resp.isError).toBeFalsy();
@@ -80,8 +79,8 @@ describe("BaseService Tools", () => {
             name: "getBlock",
             arguments: {
                 chainName: "eth-mainnet",
-                blockHeight: "latest"
-            }
+                blockHeight: "latest",
+            },
         });
         console.log("getBlock response:", resp.content);
         expect(resp.isError).toBeFalsy();
@@ -93,8 +92,8 @@ describe("BaseService Tools", () => {
             name: "getResolvedAddress",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "demo.eth"
-            }
+                walletAddress: "demo.eth",
+            },
         });
         console.log("getResolvedAddress response:", resp.content);
         expect(resp.isError).toBeFalsy();
@@ -107,8 +106,8 @@ describe("BaseService Tools", () => {
             arguments: {
                 chainName: "eth-mainnet",
                 startDate: "2025-01-01",
-                endDate: "2025-01-02"
-            }
+                endDate: "2025-01-02",
+            },
         });
         console.log("getBlockHeights (all pages) response:", resp.content);
         expect(resp.isError).toBeFalsy();
@@ -121,8 +120,8 @@ describe("BaseService Tools", () => {
                 chainName: "eth-mainnet",
                 startDate: "2025-01-01",
                 endDate: "2025-01-02",
-                pageSize: 1
-            }
+                pageSize: 1,
+            },
         });
         console.log("getBlockHeightsByPage response:", resp.content);
         expect(resp.isError).toBeFalsy();
@@ -137,8 +136,8 @@ describe("BaseService Tools", () => {
                 startingBlock: 22096686,
                 endingBlock: "22098876",
                 address: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D",
-                topics: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925"
-            }
+                topics: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+            },
         });
         console.log("getLogs response:", resp.content);
         expect(resp.isError).toBeFalsy();
@@ -154,7 +153,7 @@ describe("BaseService Tools", () => {
                 endingBlock: 22098876,
                 contractAddress: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D",
                 pageNumber: 0,
-            }
+            },
         });
         console.log("getLogEventsByAddress response:", resp.content);
         expect(resp.isError).toBeFalsy();
@@ -170,7 +169,7 @@ describe("BaseService Tools", () => {
                 endingBlock: 22098876,
                 contractAddress: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D",
                 pageNumber: 0,
-            }
+            },
         });
         console.log("getLogEventsByAddressByPage response:", resp.content);
         expect(resp.isError).toBeFalsy();
@@ -183,10 +182,11 @@ describe("BaseService Tools", () => {
             name: "getLogEventsByTopicHash",
             arguments: {
                 chainName: "eth-mainnet",
-                topicHash: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+                topicHash:
+                    "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
                 pageSize: 1,
-                pageNumber: 0
-            }
+                pageNumber: 0,
+            },
         });
         console.log("getLogEventsByTopicHash response:", resp.content);
         expect(resp.isError).toBeFalsy();
@@ -198,12 +198,13 @@ describe("BaseService Tools", () => {
             name: "getLogEventsByTopicHashByPage",
             arguments: {
                 chainName: "eth-mainnet",
-                topicHash: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+                topicHash:
+                    "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
                 startingBlock: 22096686,
                 endingBlock: 22098876,
                 pageSize: 5,
                 pageNumber: 0,
-            }
+            },
         });
         console.log("getLogEventsByTopicHashByPage response:", resp.content);
         expect(resp.isError).toBeFalsy();
