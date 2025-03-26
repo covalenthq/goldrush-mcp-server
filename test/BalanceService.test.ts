@@ -1,9 +1,11 @@
 /**
  * Test suite for the BalanceService tools implemented in src/index.ts.
  *
+ *
  * @remarks
  * These tests rely on having GOLDRUSH_API_KEY environment variable set,
  * and also rely on the server being started.
+ *
  *
  * @description
  * Tests the following BalanceService methods:
@@ -72,7 +74,10 @@ describe("BalanceService Tool", () => {
             name: "getErc20TransfersForWalletAddress",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "test.eth",
+                walletAddress: "demo.eth",
+                contractAddress: "0xf8C3527CC04340b208C854E985240c02F7B7793f",
+                startingBlock: 20681357,
+                endingBlock: 20681557,
                 pageSize: 1,
                 pageNumber: 0,
             },
@@ -90,7 +95,8 @@ describe("BalanceService Tool", () => {
             name: "getErc20TransfersForWalletAddressByPage",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "test.eth",
+                walletAddress: "demo.eth",
+                contractAddress: "0xf8C3527CC04340b208C854E985240c02F7B7793f",
                 pageSize: 1,
                 pageNumber: 0,
             },
@@ -108,8 +114,7 @@ describe("BalanceService Tool", () => {
             name: "getTokenHoldersV2ForTokenAddress",
             arguments: {
                 chainName: "eth-mainnet",
-                tokenAddress: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB", // cryptopunks
-                pageSize: 1,
+                tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC
                 pageNumber: 0,
             },
         });
@@ -126,8 +131,7 @@ describe("BalanceService Tool", () => {
             name: "getTokenHoldersV2ForTokenAddressByPage",
             arguments: {
                 chainName: "eth-mainnet",
-                tokenAddress: "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB", // cryptopunks
-                pageSize: 1,
+                tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC
                 pageNumber: 0,
             },
         });
