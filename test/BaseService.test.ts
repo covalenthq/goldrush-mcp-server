@@ -1,9 +1,11 @@
 /**
  * Test suite for the BaseService tools implemented in src/index.ts.
  *
+ *
  * @remarks
  * These tests rely on having the GOLDRUSH_API_KEY environment variable set,
  * and also rely on the server being started.
+ *
  *
  * @description
  * Tests the following BaseService methods:
@@ -176,7 +178,6 @@ describe("BaseService Tools", () => {
         expect(resp.content).toBeDefined();
     }, 30000);
 
-    // TODO: not returning any logs or timing out - investigate
     it("getLogEventsByTopicHash - minimal check", async () => {
         const resp = await client.callTool({
             name: "getLogEventsByTopicHash",
@@ -184,7 +185,8 @@ describe("BaseService Tools", () => {
                 chainName: "eth-mainnet",
                 topicHash:
                     "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
-                pageSize: 1,
+                startingBlock: 22096686,
+                endingBlock: 22096786,
                 pageNumber: 0,
             },
         });
@@ -201,9 +203,8 @@ describe("BaseService Tools", () => {
                 topicHash:
                     "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
                 startingBlock: 22096686,
-                endingBlock: 22098876,
-                pageSize: 5,
-                pageNumber: 0,
+                endingBlock: 22096786,
+                pageNumber: 1,
             },
         });
         console.log("getLogEventsByTopicHashByPage response:", resp.content);

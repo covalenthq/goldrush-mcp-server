@@ -1,12 +1,12 @@
 import { validQuoteValues } from "../utils/constants.js";
 import { stringifyWithBigInt } from "../utils/helpers.js";
-import type {
-    Chain,
-    ChainID,
-    GoldRushClient,
-    Quote,
+import {
+    type Chain,
+    type ChainID,
+    ChainName,
+    type GoldRushClient,
+    type Quote,
 } from "@covalenthq/client-sdk";
-import { ChainName } from "@covalenthq/client-sdk";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 
