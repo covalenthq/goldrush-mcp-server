@@ -56,21 +56,19 @@ describe("NftService Tools", () => {
         await client.connect(transport);
     }, 60000);
 
-    // TODO: This is timing out, uncomment when we have a way to test it
-    // it("getChainCollections - minimal check", async () => {
-    //     const result = await client.callTool({
-    //         name: "getChainCollections",
-    //         arguments: {
-    //             chainName: "eth-mainnet",
-    //             pageSize: 1,
-    //             pageNumber: 0,
-    //             noSpam: true
-    //         }
-    //     });
-    //     console.log("getChainCollections result:", result.content);
-    //     expect(result.isError).toBeFalsy();
-    //     expect(result.content).toBeDefined();
-    // }, 30000);
+    it("getChainCollections - minimal check", async () => {
+        const result = await client.callTool({
+            name: "getChainCollections",
+            arguments: {
+                chainName: "base-mainnet",
+                pageNumber: 0,
+                noSpam: true,
+            },
+        });
+        console.log("getChainCollections result:", result.content);
+        expect(result.isError).toBeFalsy();
+        expect(result.content).toBeDefined();
+    }, 30000);
 
     it("getChainCollectionsByPage - minimal check", async () => {
         const result = await client.callTool({
@@ -98,21 +96,22 @@ describe("NftService Tools", () => {
         expect(result.isError).toBeFalsy();
     }, 30000);
 
-    // TODO: This is timing out, uncomment when we have a way to test it
-    // it("getTokenIdsForContractWithMetadata - minimal check", async () => {
-    //     const result = await client.callTool({
-    //         name: "getTokenIdsForContractWithMetadata",
-    //         arguments: {
-    //             chainName: "eth-mainnet",
-    //             contractAddress: "0xBd3531dA5CF5857e7CfAA92426877b022e612cf8",
-    //             pageSize: 1,
-    //             pageNumber: 0
-    //         }
-    //     });
-    //     console.log("getTokenIdsForContractWithMetadata result:", result.content);
-    //     expect(result.isError).toBeFalsy();
-    //     expect(result.content).toBeDefined();
-    // }, 30000);
+    it("getTokenIdsForContractWithMetadata - minimal check", async () => {
+        const result = await client.callTool({
+            name: "getTokenIdsForContractWithMetadata",
+            arguments: {
+                chainName: "eth-mainnet",
+                contractAddress: "0xD97c7C5c30FEba950790D3A6F72d98509499112c",
+                pageNumber: 0,
+            },
+        });
+        console.log(
+            "getTokenIdsForContractWithMetadata result:",
+            result.content
+        );
+        expect(result.isError).toBeFalsy();
+        expect(result.content).toBeDefined();
+    }, 60000);
 
     it("getTokenIdsForContractWithMetadataByPage - minimal check", async () => {
         const result = await client.callTool({

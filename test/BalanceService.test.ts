@@ -114,7 +114,8 @@ describe("BalanceService Tool", () => {
             name: "getTokenHoldersV2ForTokenAddress",
             arguments: {
                 chainName: "eth-mainnet",
-                tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC
+                tokenAddress: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D", // CXT
+                pageSize: 1,
                 pageNumber: 0,
             },
         });
@@ -124,15 +125,15 @@ describe("BalanceService Tool", () => {
         );
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
-    }, 30000);
+    }, 60000);
 
     it("getTokenHoldersV2ForTokenAddressByPage - minimal check", async () => {
         const response = await client.callTool({
             name: "getTokenHoldersV2ForTokenAddressByPage",
             arguments: {
                 chainName: "eth-mainnet",
-                tokenAddress: "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48", // USDC
-                pageNumber: 0,
+                tokenAddress: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D", // CXT
+                pageNumber: 1,
             },
         });
         console.log(
