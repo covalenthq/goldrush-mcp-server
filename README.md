@@ -27,7 +27,7 @@ This project provides a [MCP (Model Context Protocol)](https://modelcontextproto
 
 - [Features](#features)
 - [Setup](#setup)
-  - [Getting a Goldrush API key](#getting-a-goldrush-api-key)
+  - [Getting a GoldRush API key](#getting-a-goldrush-api-key)
   - [Usage with Claude Desktop](#usage-with-claude-desktop)
   - [Usage with Claude Code CLI](#usage-with-claude-code-cli)
   - [Usage with Cursor](#usage-with-cursor)
@@ -58,7 +58,7 @@ Model Context Protocol (MCP) is a message protocol for connecting context or too
 
 ## Setup
 
-### Getting a Goldrush API key
+### Getting a GoldRush API key
 TODO
 
 ### Usage with Claude Desktop
@@ -105,7 +105,7 @@ For more details see [Set up Model Context Protocol (MCP)](https://docs.anthropi
         "@covalenthq/goldrush-mcp-server"
       ],
       "env": {
-        "COVALENT_API_KEY": "YOUR_API_KEY_HERE"
+        "GOLDRUSH_API_KEY": "YOUR_API_KEY_HERE"
       }
     }
   }
@@ -132,7 +132,7 @@ Add this to your `./codeium/windsurf/model_config.json`:
         "@covalenthq/goldrush-mcp-server"
       ],
       "env": {
-        "COVALENT_API_KEY": "YOUR_API_KEY_HERE"
+        "GOLDRUSH_API_KEY": "YOUR_API_KEY_HERE"
       }
     }
   }
