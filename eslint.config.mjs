@@ -17,15 +17,10 @@ const compat = new FlatCompat({
 
 export default [
     {
-        ignores: [
-            "**/*.config.js",
-            "**/dist",
-            "jest.config.js",
-            "**/template/**",
-        ],
+        ignores: ["**/*.config.js", "**/dist"],
     },
     {
-        files: ["**/*.ts", "**/*.tsx"],
+        files: ["**/*.ts"],
         languageOptions: {
             parser: typescriptParser,
             parserOptions: {

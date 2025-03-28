@@ -8,7 +8,6 @@ coverage/
 
 # Ignore configuration files
 *.config.js
-*.config.ts
 .env
 .env.local
 
@@ -20,7 +19,7 @@ pnpm-lock.yaml
 # Ignore documentation
 CHANGELOG.md
 LICENSE
-README.md
+README
 
 # Ignore specific patterns
 **/*.svg

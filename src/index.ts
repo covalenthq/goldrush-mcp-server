@@ -52,7 +52,7 @@ dotenv.config();
 /**
  * Retrieve API key from environment
  */
-const apiKey = process.env.GOLDRUSH_API_KEY;
+const apiKey = process.env["GOLDRUSH_API_KEY"];
 if (!apiKey) {
     console.error("GOLDRUSH_API_KEY environment variable is not set.");
     process.exit(1);
