@@ -7,10 +7,9 @@
     "scripts": {
         "build": "tsc",
         "start": "node dist/index.js",
-        "dev": "ts-node --esm src/index.ts",
         "lint": "eslint .",
         "pretty": "prettier . --write",
-        "example": "ts-node --esm src/example-client.ts",
+        "example": "node dist/example-client.js",
         "test": "vitest",
         "test:allchains": "vitest test/AllChainsService.test.ts",
         "test:balances": "vitest test/BalanceService.test.ts",
