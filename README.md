@@ -23,6 +23,30 @@ This project provides a [MCP (Model Context Protocol)](https://modelcontextproto
 
 ---
 
+## Table of Contents
+
+- [Features](#features)
+- [Setup](#setup)
+  - [Getting a Goldrush API key](#getting-a-goldrush-api-key)
+  - [Usage with Claude Desktop](#usage-with-claude-desktop)
+  - [Usage with Claude Code CLI](#usage-with-claude-code-cli)
+  - [Usage with Cursor](#usage-with-cursor)
+  - [Usage with Windsurf](#usage-with-windsurf)
+  - [Programmatic Usage](#programmatic-usage)
+  - [Example LLM Flow](#example-llm-flow)
+- [Tools](#tools)
+- [Resources](#resources)
+- [Development](#development)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the MCP Server](#running-the-mcp-server)
+  - [Example Client](#example-client)
+  - [Running the Tests](#running-the-tests)
+  - [Setting GOLDRUSH_API_KEY](#setting-goldrush_api_key)
+  - [File Layout](#file-layout)
+  - [Debugging](#debugging)
+- [License](#license)
+
 ## Features
 
 Model Context Protocol (MCP) is a message protocol for connecting context or tool-providing servers with LLM clients. This server allows an LLM client to:
@@ -165,7 +189,7 @@ console.log(result);
 3. The LLM decides to call a tool like `getTransactionSummary` to gather data about a wallet.
 4. The server calls the Covalent endpoint under the hood, returns JSON to the LLM, which then uses it in the conversation context.
 
-## Available Tools
+## Tools
 
 Tools are a powerful primitive in the Model Context Protocol (MCP) that enable servers to expose executable functionality to clients. Through tools, LLMs can interact with external systems, perform computations, and take actions in the real world.
 
@@ -665,7 +689,7 @@ Tools are designed to be model-controlled, meaning that tools are exposed from s
     *   Returns: Balance information for the specified standard Bitcoin wallet address.
 
 
-## Available Resources
+## Resources
 
 Resources are a core primitive in the Model Context Protocol (MCP) that allow servers to expose data and content that can be read by clients and used as context for LLM interactions.
 
