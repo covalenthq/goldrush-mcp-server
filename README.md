@@ -32,7 +32,7 @@ Model Context Protocol (MCP) is a message protocol for connecting context or too
 - Fully testable with [Vitest](https://vitest.dev/) for testing each group of tools.
 - Modular architecture where each service is implemented as a separate module, making the codebase easier to maintain and extend.
 
-## Quickstart
+## Setup
 
 ### Getting a Goldrush API key
 TODO
@@ -67,7 +67,7 @@ For more details see [Set up Model Context Protocol (MCP)](https://docs.anthropi
 ### Usage with Cursor
 
 1. Open Cursor Settings
-2. Go to Features > MCP Servers
+2. Go to Features > MCP
 3. Click + Add new global MCP server
 4. Add this to your `~/.cursor/mcp.json`:
 
