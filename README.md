@@ -126,7 +126,7 @@ See [Example LLM Flow](#example-llm-flow)
 
 ### Usage with Windsurf
 
-Add this to your `./codeium/windsurf/model_config.json`:
+Add this to your `~/.codeium/windsurf/mcp_config.json` file:
 
 ```json
 {
