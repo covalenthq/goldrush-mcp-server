@@ -2,10 +2,6 @@
 
 # GoldRush MCP Server
 
-[📖 Documentation](https://https://goldrush.dev/docs/goldrush-mcp/)
-
-<br />
-
 [![NPM Version](https://img.shields.io/npm/v/@covalenthq/goldrush-mcp-server)](https://www.npmjs.com/package/@covalenthq/goldrush-mcp-server)
 [![NPM Downloads](https://img.shields.io/npm/dt/@covalenthq/goldrush-mcp-server)](https://www.npmjs.com/package/@covalenthq/goldrush-mcp-server)
 [![GitHub license](https://img.shields.io/github/license/covalenthq/goldrush-mcp-server)](https://github.com/covalenthq/goldrush-mcp-server/blob/main/LICENSE)
@@ -17,7 +13,11 @@
 [![GitHub stars](https://img.shields.io/github/stars/covalenthq/goldrush-mcp-server)](https://github.com/covalenthq/goldrush-mcp-server/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/covalenthq/goldrush-mcp-server)](https://github.com/covalenthq/goldrush-mcp-server/network/members)
 
+[📖 Documentation](https://https://goldrush.dev/docs/goldrush-mcp/)
+
 </div>
+
+---
 
 This project provides a [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server that exposes Covalent's [GoldRush](https://www.covalenthq.com/platform) APIs as MCP resources and tools. It is implemented in TypeScript using [@modelcontextprotocol/sdk](https://www.npmjs.com/package/@modelcontextprotocol/sdk) and [@covalenthq/client-sdk](https://www.npmjs.com/package/@covalenthq/client-sdk).
 
@@ -25,9 +25,9 @@ This project provides a [MCP (Model Context Protocol)](https://modelcontextproto
 
 ## Table of Contents
 
-- [Features](#features)
-- [Setup](#setup)
-  - [Getting a GoldRush API key](#getting-a-goldrush-api-key)
+- [Key Features](#key-features)
+- [Getting Started](#getting-started)
+  - [GoldRush API key](#goldrush-api-key)
   - [Usage with Claude Desktop](#usage-with-claude-desktop)
   - [Usage with Claude Code CLI](#usage-with-claude-code-cli)
   - [Usage with Cursor](#usage-with-cursor)
@@ -47,7 +47,9 @@ This project provides a [MCP (Model Context Protocol)](https://modelcontextproto
   - [Debugging](#debugging)
 - [License](#license)
 
-## Features
+---
+
+## Key Features
 
 Model Context Protocol (MCP) is a message protocol for connecting context or tool-providing servers with LLM clients. This server allows an LLM client to:
 
@@ -56,9 +58,11 @@ Model Context Protocol (MCP) is a message protocol for connecting context or too
 - Fully testable with [Vitest](https://vitest.dev/) for testing each group of tools.
 - Modular architecture where each service is implemented as a separate module, making the codebase easier to maintain and extend.
 
-## Setup
+---
 
-### Getting a GoldRush API key
+## Getting Started
+
+### GoldRush API key
 
 Using any of the GoldRush developer tools requires an API key.
 Get yours at https://goldrush.dev/platform/auth/register/
@@ -186,10 +190,14 @@ console.log(result);
 
 ### Example LLM Flow
 
+<!-- TODO: add more and better examples -->
+
 1. An LLM-based application starts.
 2. It spawns or connects to this MCP server.
 3. The LLM decides to call a tool like `getTransactionSummary` to gather data about a wallet.
 4. The server calls the Covalent endpoint under the hood, returns JSON to the LLM, which then uses it in the conversation context.
+
+---
 
 ## Tools
 
@@ -690,6 +698,7 @@ Tools are designed to be model-controlled, meaning that tools are exposed from s
         *   `quoteCurrency` (string, optional): The currency to quote prices in.
     *   Returns: Balance information for the specified standard Bitcoin wallet address.
 
+---
 
 ## Resources
 
@@ -713,6 +722,8 @@ Resources exposed by the GoldRush MCP server are split into static and dynamic t
     - `status://chain/{chainName}`
 
 Dynamic resources fetch real-time data from the Covalent API on each request, ensuring current information.
+
+---
 
 ## Development
 
@@ -819,7 +830,16 @@ https://modelcontextprotocol.io/docs/tools/inspector
 ```
 npx @modelcontextprotocol/inspector node dist/index.js
 ```
+---
 
-## License
+## 🤝 Contributing
 
-MIT License - see LICENSE file for details
+We welcome contributions from the community! If you have suggestions, improvements, or new spam contract addresses to add, please open an issue or submit a pull request. Feel free to check <a href="https://github.com/covalenthq/goldrush-mcp-server/issues">issues</a> page.
+
+## Show your support
+
+Give a ⭐️ if this project helped you!
+
+## 📝 License
+
+This project is <a href="https://github.com/covalenthq/goldrush-mcp-server/blob/main/LICENSE">MIT</a> licensed.
