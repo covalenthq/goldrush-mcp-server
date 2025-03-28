@@ -59,7 +59,9 @@ Model Context Protocol (MCP) is a message protocol for connecting context or too
 ## Setup
 
 ### Getting a GoldRush API key
-TODO
+
+Using any of the GoldRush developer tools requires an API key.
+Get yours at https://goldrush.dev/platform/auth/register/
 
 ### Usage with Claude Desktop
 Add this to your `claude_desktop_config.json`:
