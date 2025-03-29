@@ -74,6 +74,7 @@ async function getSupportedChainsResourceExample(client: Client) {
     if (
         result.contents &&
         result.contents.length > 0 &&
+        result.contents[0] &&
         "text" in result.contents[0]
     ) {
         const chains = JSON.parse(result.contents[0].text as string);
@@ -92,6 +93,7 @@ async function getQuoteCurrenciesResourceExample(client: Client) {
     if (
         result.contents &&
         result.contents.length > 0 &&
+        result.contents[0] &&
         "text" in result.contents[0]
     ) {
         const currencies = JSON.parse(result.contents[0].text as string);

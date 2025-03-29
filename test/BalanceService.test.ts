@@ -9,6 +9,8 @@
  *
  * @description
  * Tests the following BalanceService methods:
+ * - getTokenBalancesForWalletAddress
+ * - getHistoricalTokenBalancesForWalletAddress
  * - getHistoricalPortfolioForWalletAddress
  * - getErc20TransfersForWalletAddress
  * - getErc20TransfersForWalletAddressByPage
@@ -52,6 +54,41 @@ describe("BalanceService Tool", () => {
         // Connect
         await client.connect(transport);
     }, 60000);
+
+    it("getTokenBalancesForWalletAddress - minimal check", async () => {
+        const response = await client.callTool({
+            name: "getTokenBalancesForWalletAddress",
+            arguments: {
+                chainName: "eth-mainnet",
+                address: "demo.eth",
+                noSpam: true,
+            },
+        });
+        console.log(
+            "getTokenBalancesForWalletAddress response:",
+            response.content
+        );
+        expect(response.isError).toBeFalsy();
+        expect(response.content).toBeDefined();
+    }, 30000);
+
+    it("getHistoricalTokenBalancesForWalletAddress - minimal check", async () => {
+        const response = await client.callTool({
+            name: "getHistoricalTokenBalancesForWalletAddress",
+            arguments: {
+                chainName: "eth-mainnet",
+                address: "demo.eth",
+                blockHeight: 20681357,
+                noSpam: true,
+            },
+        });
+        console.log(
+            "getHistoricalTokenBalancesForWalletAddress response:",
+            response.content
+        );
+        expect(response.isError).toBeFalsy();
+        expect(response.content).toBeDefined();
+    }, 30000);
 
     it("getHistoricalPortfolioForWalletAddress - minimal check", async () => {
         const response = await client.callTool({
