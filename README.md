@@ -13,7 +13,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/covalenthq/goldrush-mcp-server)](https://github.com/covalenthq/goldrush-mcp-server/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/covalenthq/goldrush-mcp-server)](https://github.com/covalenthq/goldrush-mcp-server/network/members)
 
-[📖 Documentation](https://https://goldrush.dev/docs/goldrush-mcp/)
+[📖 Documentation](https://goldrush.dev/docs/goldrush-mcp/)
 
 </div>
 
