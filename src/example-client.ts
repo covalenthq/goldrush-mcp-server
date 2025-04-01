@@ -104,8 +104,6 @@ async function getQuoteCurrenciesResourceExample(client: Client) {
 }
 
 async function main() {
-    console.log("Starting GoldRush MCP example client...");
-
     // Create a STDIO transport that starts the server as a subprocess
     const transport = new StdioClientTransport({
         command: "node",
@@ -129,7 +127,6 @@ async function main() {
     try {
         // Connect to the server
         await client.connect(transport);
-        console.log("Connected to GoldRush MCP server");
 
         // List available tools
         const tools = await client.listTools();

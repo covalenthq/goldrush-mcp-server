@@ -98,16 +98,12 @@ addSecurityServiceTools(server, goldRushClient);
  * Logs success or failure to the console.
  */
 async function startServer() {
-    console.log("Starting GoldRush MCP server...");
-
     try {
         // Create the STDIO transport
         const transport = new StdioServerTransport();
 
         // Connect the server to the transport
         await server.connect(transport);
-
-        console.log("GoldRush MCP server started successfully");
     } catch (error) {
         console.error("Failed to start server:", error);
         process.exit(1);
