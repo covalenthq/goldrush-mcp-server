@@ -27,6 +27,10 @@ export function addAllChainsServiceTools(
 ) {
     server.tool(
         "getMultiChainMultiAddressTransactions",
+        "Gets transactions for multiple wallet addresses across multiple blockchains.\n" +
+            "Required: addresses (array of wallet addresses).\n" +
+            "Optional: chains (array of blockchain networks), before/after (pagination), limit, quoteCurrency, withDecodedLogs, withLogs.\n" +
+            "Returns transactions for the specified addresses across selected chains.",
         {
             chains: z
                 .array(
@@ -82,6 +86,10 @@ export function addAllChainsServiceTools(
 
     server.tool(
         "getMultiChainBalances",
+        "Gets token balances for a wallet address across multiple blockchains.\n" +
+            "Required: walletAddress (wallet address).\n" +
+            "Optional: chains (array of blockchain networks), quoteCurrency, before, cutoffTimestamp, limit.\n" +
+            "Returns token balances across all specified chains.",
         {
             walletAddress: z.string(),
             quoteCurrency: z
@@ -133,6 +141,10 @@ export function addAllChainsServiceTools(
 
     server.tool(
         "getAddressActivity",
+        "Gets a summary of wallet activity across all supported blockchains.\n" +
+            "Required: walletAddress (wallet address).\n" +
+            "Optional: testnets (include testnet activity).\n" +
+            "Returns chain activity summary across all networks.",
         {
             walletAddress: z.string(),
             testnets: z.boolean().optional(),

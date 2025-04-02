@@ -26,6 +26,10 @@ export function addPricingServiceTools(
 ) {
     server.tool(
         "getTokenPrices",
+        "Gets historical price data for a specific token over a time period.\n" +
+            "Required: chainName (blockchain network), quoteCurrency (price currency), contractAddress (token contract).\n" +
+            "Optional: from (start date), to (end date), pricesAtAsc (chronological order).\n" +
+            "Returns historical token prices for the specified time range.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]

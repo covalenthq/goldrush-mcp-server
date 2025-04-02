@@ -32,6 +32,10 @@ export function addBalanceServiceTools(
 ) {
     server.tool(
         "getTokenBalancesForWalletAddress",
+        "Gets current token balances for a wallet address on a specified chain.\n" +
+            "Required: chainName (blockchain network), address (wallet address).\n" +
+            "Optional: quoteCurrency, nft, noNftFetch, noSpam, noNftAssetMetadata.\n" +
+            "Returns detailed token balance information including prices.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -78,6 +82,10 @@ export function addBalanceServiceTools(
 
     server.tool(
         "getHistoricalTokenBalancesForWalletAddress",
+        "Gets historical token balances for a wallet at a specific block height or date.\n" +
+            "Required: chainName (blockchain network), address (wallet address).\n" +
+            "Optional: quoteCurrency, nft, noNftFetch, noSpam, noNftAssetMetadata, blockHeight, date.\n" +
+            "Returns token balances as they were at the specified point in time.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -128,6 +136,10 @@ export function addBalanceServiceTools(
 
     server.tool(
         "getHistoricalPortfolioForWalletAddress",
+        "Gets historical portfolio value for a wallet over time.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
+            "Optional: quoteCurrency (USD, EUR, etc), days (number of days to look back).\n" +
+            "Returns portfolio value time series data for the specified period.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -168,6 +180,10 @@ export function addBalanceServiceTools(
 
     server.tool(
         "getErc20TransfersForWalletAddress",
+        "Gets all ERC20 token transfers for a wallet address across all pages.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
+            "Optional: quoteCurrency, contractAddress (specific token), startingBlock, endingBlock, pageSize, pageNumber.\n" +
+            "Returns all token transfer events across all pages.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -224,6 +240,10 @@ export function addBalanceServiceTools(
 
     server.tool(
         "getErc20TransfersForWalletAddressByPage",
+        "Gets ERC20 token transfers for a wallet address with pagination.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
+            "Optional: quoteCurrency, contractAddress (specific token), startingBlock, endingBlock, pageSize, pageNumber.\n" +
+            "Returns token transfer events for a single page of results.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -272,6 +292,10 @@ export function addBalanceServiceTools(
 
     server.tool(
         "getTokenHoldersV2ForTokenAddress",
+        "Gets all token holders for a specific token across all pages.\n" +
+            "Required: chainName (blockchain network), tokenAddress (token contract address).\n" +
+            "Optional: blockHeight, date (historical point), pageSize, pageNumber (pagination parameters).\n" +
+            "Returns all token holders across all pages.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -325,6 +349,10 @@ export function addBalanceServiceTools(
 
     server.tool(
         "getTokenHoldersV2ForTokenAddressByPage",
+        "Gets token holders for a specific token with pagination.\n" +
+            "Required: chainName (blockchain network), tokenAddress (token contract address).\n" +
+            "Optional: blockHeight, date (historical point), pageSize, pageNumber (pagination parameters).\n" +
+            "Returns token holders for a single page of results.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -368,6 +396,10 @@ export function addBalanceServiceTools(
 
     server.tool(
         "getNativeTokenBalance",
+        "Gets the native token balance (ETH, MATIC, etc.) for a wallet address.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
+            "Optional: quoteCurrency (USD, EUR, etc), blockHeight (for historical balance).\n" +
+            "Returns native token balance information.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]

@@ -23,6 +23,10 @@ export function addBitcoinServiceTools(
 ) {
     server.tool(
         "getBitcoinHdWalletBalances",
+        "Gets balances for a Bitcoin Hierarchical Deterministic (HD) wallet address (xpub).\n" +
+            "Required: walletAddress (Bitcoin xpub).\n" +
+            "Optional: quoteCurrency (USD, EUR, etc).\n" +
+            "Returns balance information for the specified Bitcoin HD wallet.",
         {
             walletAddress: z.string(),
             quoteCurrency: z
@@ -57,6 +61,10 @@ export function addBitcoinServiceTools(
 
     server.tool(
         "getTransactionsForBtcAddress",
+        "Gets transactions for a standard (non-HD) Bitcoin address.\n" +
+            "Required: address (Bitcoin address).\n" +
+            "Optional: pageNumber, pageSize (pagination parameters).\n" +
+            "Returns transactions for the specified Bitcoin address.",
         {
             address: z.string(),
             pageSize: z.number().optional(),
@@ -91,6 +99,10 @@ export function addBitcoinServiceTools(
 
     server.tool(
         "getBitcoinNonHdWalletBalances",
+        "Gets balances for a standard (non-HD) Bitcoin address.\n" +
+            "Required: walletAddress (Bitcoin address).\n" +
+            "Optional: quoteCurrency (USD, EUR, etc).\n" +
+            "Returns balance information for the specified Bitcoin address.",
         {
             walletAddress: z.string(),
             quoteCurrency: z

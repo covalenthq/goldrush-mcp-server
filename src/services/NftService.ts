@@ -36,6 +36,10 @@ export function addNftServiceTools(
     // getChainCollections - gather all pages
     server.tool(
         "getChainCollections",
+        "Gets all NFT collections on a specific blockchain network across all pages.\n" +
+            "Required: chainName (blockchain network).\n" +
+            "Optional: pageSize, pageNumber, noSpam (filter out spam collections).\n" +
+            "Returns all NFT collections on the specified blockchain.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -80,6 +84,10 @@ export function addNftServiceTools(
     // getChainCollectionsByPage - single page
     server.tool(
         "getChainCollectionsByPage",
+        "Gets NFT collections on a specific blockchain network with pagination.\n" +
+            "Required: chainName (blockchain network).\n" +
+            "Optional: pageSize, pageNumber, noSpam (filter out spam collections).\n" +
+            "Returns NFT collections for a single page of results.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -119,6 +127,10 @@ export function addNftServiceTools(
     // getNftsForAddress
     server.tool(
         "getNftsForAddress",
+        "Gets all NFTs owned by a specific wallet address.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
+            "Optional: noSpam (filter spam NFTs), noNftAssetMetadata (exclude metadata), withUncached (include uncached data).\n" +
+            "Returns all NFTs owned by the specified wallet.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -160,6 +172,10 @@ export function addNftServiceTools(
     // getTokenIdsForContractWithMetadata - gather all pages
     server.tool(
         "getTokenIdsForContractWithMetadata",
+        "Gets all token IDs with metadata for a specific NFT contract across all pages.\n" +
+            "Required: chainName (blockchain network), contractAddress (NFT contract address).\n" +
+            "Optional: noMetadata, pageSize, pageNumber, traitsFilter, valuesFilter, withUncached.\n" +
+            "Returns all token IDs with their metadata for the specified NFT contract.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -213,6 +229,10 @@ export function addNftServiceTools(
     // getTokenIdsForContractWithMetadataByPage
     server.tool(
         "getTokenIdsForContractWithMetadataByPage",
+        "Gets token IDs with metadata for a specific NFT contract with pagination.\n" +
+            "Required: chainName (blockchain network), contractAddress (NFT contract address).\n" +
+            "Optional: noMetadata, pageSize, pageNumber, traitsFilter, valuesFilter, withUncached.\n" +
+            "Returns token IDs with metadata for a single page of results.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -260,6 +280,10 @@ export function addNftServiceTools(
     // getNftMetadataForGivenTokenIdForContract
     server.tool(
         "getNftMetadataForGivenTokenIdForContract",
+        "Gets detailed metadata for a specific NFT token ID.\n" +
+            "Required: chainName (blockchain network), contractAddress (NFT contract), tokenId (specific NFT ID).\n" +
+            "Optional: noMetadata (exclude metadata), withUncached (include uncached data).\n" +
+            "Returns comprehensive metadata for the specified NFT token.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -301,6 +325,10 @@ export function addNftServiceTools(
     // getNftTransactionsForContractTokenId
     server.tool(
         "getNftTransactionsForContractTokenId",
+        "Gets transaction history for a specific NFT token.\n" +
+            "Required: chainName (blockchain network), contractAddress (NFT contract), tokenId (specific NFT ID).\n" +
+            "Optional: noSpam (filter spam transactions).\n" +
+            "Returns all transactions involving the specified NFT token.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -338,6 +366,9 @@ export function addNftServiceTools(
     // getTraitsForCollection
     server.tool(
         "getTraitsForCollection",
+        "Gets all trait types (e.g., 'Background', 'Eyes') available in an NFT collection.\n" +
+            "Required: chainName (blockchain network), collectionContract (NFT collection address).\n" +
+            "Returns all available trait types for the specified NFT collection.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -371,6 +402,9 @@ export function addNftServiceTools(
     // getAttributesForTraitInCollection
     server.tool(
         "getAttributesForTraitInCollection",
+        "Gets all possible attribute values for a specific trait in an NFT collection.\n" +
+            "Required: chainName (blockchain network), collectionContract (NFT collection), trait (trait name).\n" +
+            "Returns all attribute values for the specified trait (e.g., all 'Background' values).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -406,6 +440,9 @@ export function addNftServiceTools(
     // getCollectionTraitsSummary
     server.tool(
         "getCollectionTraitsSummary",
+        "Gets a summary of all traits and their distribution in an NFT collection.\n" +
+            "Required: chainName (blockchain network), collectionContract (NFT collection address).\n" +
+            "Returns statistics for all traits and values in the specified collection.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -439,6 +476,10 @@ export function addNftServiceTools(
     // getHistoricalFloorPricesForCollection
     server.tool(
         "getHistoricalFloorPricesForCollection",
+        "Gets historical floor prices over time for an NFT collection.\n" +
+            "Required: chainName (blockchain network), collectionAddress (NFT collection).\n" +
+            "Optional: quoteCurrency (currency for prices), days (time period to analyze).\n" +
+            "Returns floor price data points over the specified time period.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -480,6 +521,10 @@ export function addNftServiceTools(
     // getHistoricalVolumeForCollection
     server.tool(
         "getHistoricalVolumeForCollection",
+        "Gets historical trading volume over time for an NFT collection.\n" +
+            "Required: chainName (blockchain network), collectionAddress (NFT collection).\n" +
+            "Optional: quoteCurrency (currency for volume), days (time period to analyze).\n" +
+            "Returns trading volume data points over the specified time period.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -521,6 +566,10 @@ export function addNftServiceTools(
     // getHistoricalSalesCountForCollection
     server.tool(
         "getHistoricalSalesCountForCollection",
+        "Gets historical count of sales over time for an NFT collection.\n" +
+            "Required: chainName (blockchain network), collectionAddress (NFT collection).\n" +
+            "Optional: quoteCurrency (currency for sales), days (time period to analyze).\n" +
+            "Returns sales count data points over the specified time period.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -562,6 +611,10 @@ export function addNftServiceTools(
     // checkOwnershipInNft
     server.tool(
         "checkOwnershipInNft",
+        "Verifies if a wallet owns any NFTs from a specific collection, optionally filtered by traits.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address), collectionContract (NFT collection).\n" +
+            "Optional: traitsFilter (filter by trait types), valuesFilter (filter by trait values).\n" +
+            "Returns ownership status and matching NFTs if owned.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -603,6 +656,9 @@ export function addNftServiceTools(
     // checkOwnershipInNftForSpecificTokenId
     server.tool(
         "checkOwnershipInNftForSpecificTokenId",
+        "Verifies if a wallet owns a specific NFT token.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address), collectionContract (NFT collection), tokenId (NFT ID).\n" +
+            "Returns ownership status for the specified NFT token.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]

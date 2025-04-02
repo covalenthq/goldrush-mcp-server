@@ -25,6 +25,9 @@ export function addSecurityServiceTools(
 ) {
     server.tool(
         "getApprovals",
+        "Gets token approvals granted by a wallet that may pose security risks.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
+            "Returns a list of ERC20 token approvals and their associated security risk levels.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -57,6 +60,9 @@ export function addSecurityServiceTools(
 
     server.tool(
         "getNftApprovals",
+        "Gets NFT approvals (setApprovalForAll) granted by a wallet that may pose security risks.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
+            "Returns a list of NFT collection approvals and their associated security risk levels.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]

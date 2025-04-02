@@ -33,47 +33,66 @@ export function addBaseServiceTools(
     server: McpServer,
     goldRushClient: GoldRushClient
 ) {
-    server.tool("getAllChains", {}, async () => {
-        try {
-            const response = await goldRushClient.BaseService.getAllChains();
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: JSON.stringify(response.data, null, 2),
-                    },
-                ],
-            };
-        } catch (error) {
-            return {
-                content: [{ type: "text", text: `Error: ${error}` }],
-                isError: true,
-            };
+    server.tool(
+        "getAllChains",
+        "Gets a list of all supported blockchain networks.\n" +
+            "No parameters required.\n" +
+            "Returns a list of all chains supported by the GoldRush API.",
+        {},
+        async () => {
+            try {
+                const response =
+                    await goldRushClient.BaseService.getAllChains();
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: JSON.stringify(response.data, null, 2),
+                        },
+                    ],
+                };
+            } catch (error) {
+                return {
+                    content: [{ type: "text", text: `Error: ${error}` }],
+                    isError: true,
+                };
+            }
         }
-    });
+    );
 
-    server.tool("getAllChainStatus", {}, async () => {
-        try {
-            const response =
-                await goldRushClient.BaseService.getAllChainStatus();
-            return {
-                content: [
-                    {
-                        type: "text",
-                        text: stringifyWithBigInt(response.data),
-                    },
-                ],
-            };
-        } catch (err) {
-            return {
-                content: [{ type: "text", text: `Error: ${err}` }],
-                isError: true,
-            };
+    server.tool(
+        "getAllChainStatus",
+        "Gets the synchronization status for all supported blockchain networks.\n" +
+            "No parameters required.\n" +
+            "Returns the status information for all chains.",
+        {},
+        async () => {
+            try {
+                const response =
+                    await goldRushClient.BaseService.getAllChainStatus();
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
+                };
+            } catch (err) {
+                return {
+                    content: [{ type: "text", text: `Error: ${err}` }],
+                    isError: true,
+                };
+            }
         }
-    });
+    );
 
     server.tool(
         "getGasPrices",
+        "Gets gas price estimations for a specific event type on a given chain.\n" +
+            "Required: chainName (blockchain network), eventType (erc20, nativetokens, or uniswapv3).\n" +
+            "Optional: quoteCurrency (USD, EUR, etc).\n" +
+            "Returns gas price estimations for the specified event type.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -111,6 +130,9 @@ export function addBaseServiceTools(
 
     server.tool(
         "getBlock",
+        "Gets details for a specific block height on a given chain.\n" +
+            "Required: chainName (blockchain network), blockHeight (block number).\n" +
+            "Returns detailed information about the specified block.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -142,6 +164,9 @@ export function addBaseServiceTools(
 
     server.tool(
         "getResolvedAddress",
+        "Resolves an ENS or RNS domain name to its corresponding wallet address on a given chain.\n" +
+            "Required: chainName (blockchain network), walletAddress (domain name or address).\n" +
+            "Returns the resolved address information.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -174,6 +199,10 @@ export function addBaseServiceTools(
 
     server.tool(
         "getBlockHeights",
+        "Gets all block heights within a specified date range on a given chain.\n" +
+            "Required: chainName (blockchain network), startDate (YYYY-MM-DD), endDate (YYYY-MM-DD or latest).\n" +
+            "Optional: pageSize, pageNumber (pagination parameters).\n" +
+            "Returns a list containing all block details within the date range across all pages.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -219,6 +248,10 @@ export function addBaseServiceTools(
 
     server.tool(
         "getBlockHeightsByPage",
+        "Gets block heights within a specified date range on a given chain with pagination.\n" +
+            "Required: chainName (blockchain network), startDate (YYYY-MM-DD), endDate (YYYY-MM-DD or latest).\n" +
+            "Optional: pageSize, pageNumber (pagination parameters).\n" +
+            "Returns block details for a single page of results.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -259,6 +292,10 @@ export function addBaseServiceTools(
 
     server.tool(
         "getLogs",
+        "Gets blockchain event logs matching specified filters.\n" +
+            "Required: chainName (blockchain network).\n" +
+            "Optional: startingBlock, endingBlock, address (contract), topics (event signatures), blockHash, skipDecode.\n" +
+            "Returns filtered event logs from the blockchain.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -302,6 +339,10 @@ export function addBaseServiceTools(
 
     server.tool(
         "getLogEventsByAddress",
+        "Gets all event logs emitted by a specific contract address across all pages.\n" +
+            "Required: chainName (blockchain network), contractAddress (contract emitting events).\n" +
+            "Optional: startingBlock, endingBlock, pageSize, pageNumber (pagination parameters).\n" +
+            "Returns all matching event logs across all pages.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -350,6 +391,10 @@ export function addBaseServiceTools(
 
     server.tool(
         "getLogEventsByAddressByPage",
+        "Gets event logs emitted by a specific contract address with pagination.\n" +
+            "Required: chainName (blockchain network), contractAddress (contract emitting events).\n" +
+            "Optional: startingBlock, endingBlock, pageSize, pageNumber (pagination parameters).\n" +
+            "Returns event logs for a single page of results.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -392,6 +437,10 @@ export function addBaseServiceTools(
 
     server.tool(
         "getLogEventsByTopicHash",
+        "Gets all event logs matching a specific event signature (topic hash) across all pages.\n" +
+            "Required: chainName (blockchain network), topicHash (event signature hash).\n" +
+            "Optional: startingBlock, endingBlock, secondaryTopics, pageSize, pageNumber.\n" +
+            "Returns all matching event logs across all pages.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -442,6 +491,10 @@ export function addBaseServiceTools(
 
     server.tool(
         "getLogEventsByTopicHashByPage",
+        "Gets event logs matching a specific event signature (topic hash) with pagination.\n" +
+            "Required: chainName (blockchain network), topicHash (event signature hash).\n" +
+            "Optional: startingBlock, endingBlock, secondaryTopics, pageSize, pageNumber.\n" +
+            "Returns event logs for a single page of results.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]

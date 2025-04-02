@@ -30,6 +30,10 @@ export function addTransactionServiceTools(
 ) {
     server.tool(
         "getAllTransactionsForAddress",
+        "Gets all transactions for a wallet address across all pages.\n" +
+            "Required: chainName (blockchain network), address (wallet address).\n" +
+            "Optional: quoteCurrency, noLogs, blockSignedAtAsc, withInternal, withState, withInputData.\n" +
+            "Returns all transactions across all pages for the specified address.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -85,6 +89,9 @@ export function addTransactionServiceTools(
 
     server.tool(
         "getTransaction",
+        "Gets detailed information about a specific transaction.\n" +
+            "Required: chainName (blockchain network), txHash (transaction hash).\n" +
+            "Returns comprehensive details about the specified transaction.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -117,6 +124,10 @@ export function addTransactionServiceTools(
 
     server.tool(
         "getAllTransactionsForAddressByPage",
+        "Gets transactions for a wallet address with pagination.\n" +
+            "Required: chainName (blockchain network), address (wallet address).\n" +
+            "Optional: quoteCurrency, noLogs, blockSignedAtAsc, withInternal, withState, withInputData.\n" +
+            "Returns transactions for a single page of results.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -165,6 +176,10 @@ export function addTransactionServiceTools(
 
     server.tool(
         "getTransactionsForBlock",
+        "Gets all transactions included in a specific block.\n" +
+            "Required: chainName (blockchain network), blockHeight (block number or latest).\n" +
+            "Optional: quoteCurrency, noLogs (exclude event logs).\n" +
+            "Returns all transactions from the specified block.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -205,6 +220,10 @@ export function addTransactionServiceTools(
 
     server.tool(
         "getTransactionSummary",
+        "Gets a summary of transaction activity for a wallet address.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
+            "Optional: quoteCurrency, withGas (include gas usage statistics).\n" +
+            "Returns summary of transaction activity for the specified wallet.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -245,6 +264,10 @@ export function addTransactionServiceTools(
 
     server.tool(
         "getTransactionsForAddressV3",
+        "Gets transactions for a wallet address using V3 API endpoint with specific page number.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address), page (page number).\n" +
+            "Optional: quoteCurrency, noLogs, blockSignedAtAsc (chronological order).\n" +
+            "Returns transactions for the specified page of results.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -289,6 +312,10 @@ export function addTransactionServiceTools(
 
     server.tool(
         "getTimeBucketTransactionsForAddress",
+        "Gets transactions for a wallet address grouped into time buckets (e.g., by day).\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address), timeBucket (time grouping).\n" +
+            "Optional: quoteCurrency, noLogs (exclude event logs).\n" +
+            "Returns transactions grouped by the specified time bucket.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
