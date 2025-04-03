@@ -16,9 +16,9 @@ import { z } from "zod";
  * @param {GoldRushClient} goldRushClient - The GoldRush client
  * @remarks
  * This function creates tools:
- * - getChainCollections / getChainCollectionsByPage
+ * - getChainCollections
  * - getNftsForAddress
- * - getTokenIdsForContractWithMetadata / getTokenIdsForContractWithMetadataByPage
+ * - getTokenIdsForContractWithMetadata
  * - getNftMetadataForGivenTokenIdForContract
  * - getNftTransactionsForContractTokenId
  * - getTraitsForCollection
@@ -27,63 +27,15 @@ import { z } from "zod";
  * - getHistoricalFloorPricesForCollection
  * - getHistoricalVolumeForCollection
  * - getHistoricalSalesCountForCollection
- * - checkOwnershipInNft, checkOwnershipInNftForSpecificTokenId
+ * - checkOwnershipInNft
+ * - checkOwnershipInNftForSpecificTokenId
  */
 export function addNftServiceTools(
     server: McpServer,
     goldRushClient: GoldRushClient
 ) {
-    // getChainCollections - gather all pages
     server.tool(
         "getChainCollections",
-        "Gets all NFT collections on a specific blockchain network across all pages.\n" +
-            "Required: chainName (blockchain network).\n" +
-            "Optional: pageSize, pageNumber, noSpam (filter out spam collections).\n" +
-            "Returns all NFT collections on the specified blockchain.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            pageSize: z.number().optional(),
-            pageNumber: z.number().optional(),
-            noSpam: z.boolean().optional(),
-        },
-        async (params) => {
-            try {
-                const allItems = [];
-                const iterator = goldRushClient.NftService.getChainCollections(
-                    params.chainName as Chain,
-                    {
-                        pageSize: params.pageSize,
-                        pageNumber: params.pageNumber,
-                        noSpam: params.noSpam,
-                    }
-                );
-                for await (const page of iterator) {
-                    if (page.data?.items) {
-                        allItems.push(...page.data.items);
-                    }
-                }
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt({ items: allItems }),
-                        },
-                    ],
-                };
-            } catch (err) {
-                return {
-                    content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
-
-    // getChainCollectionsByPage - single page
-    server.tool(
-        "getChainCollectionsByPage",
         "Gets NFT collections on a specific blockchain network with pagination.\n" +
             "Required: chainName (blockchain network).\n" +
             "Optional: pageSize, pageNumber, noSpam (filter out spam collections).\n" +
@@ -92,9 +44,9 @@ export function addNftServiceTools(
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
             ),
-            pageSize: z.number().optional(),
-            pageNumber: z.number().optional(),
-            noSpam: z.boolean().optional(),
+            pageSize: z.number().optional().default(10),
+            pageNumber: z.number().optional().default(0),
+            noSpam: z.boolean().optional().default(true),
         },
         async (params) => {
             try {
@@ -136,9 +88,9 @@ export function addNftServiceTools(
                 Object.values(ChainName) as [string, ...string[]]
             ),
             walletAddress: z.string(),
-            noSpam: z.boolean().optional(),
-            noNftAssetMetadata: z.boolean().optional(),
-            withUncached: z.boolean().optional(),
+            noSpam: z.boolean().optional().default(true),
+            noNftAssetMetadata: z.boolean().optional().default(true),
+            withUncached: z.boolean().optional().default(false),
         },
         async (params) => {
             try {
@@ -169,66 +121,9 @@ export function addNftServiceTools(
         }
     );
 
-    // getTokenIdsForContractWithMetadata - gather all pages
+    // getTokenIdsForContractWithMetadata
     server.tool(
         "getTokenIdsForContractWithMetadata",
-        "Gets all token IDs with metadata for a specific NFT contract across all pages.\n" +
-            "Required: chainName (blockchain network), contractAddress (NFT contract address).\n" +
-            "Optional: noMetadata, pageSize, pageNumber, traitsFilter, valuesFilter, withUncached.\n" +
-            "Returns all token IDs with their metadata for the specified NFT contract.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            contractAddress: z.string(),
-            noMetadata: z.boolean().optional(),
-            pageSize: z.number().optional(),
-            pageNumber: z.number().optional(),
-            traitsFilter: z.string().optional(),
-            valuesFilter: z.string().optional(),
-            withUncached: z.boolean().optional(),
-        },
-        async (params) => {
-            try {
-                const allItems = [];
-                const iterator =
-                    goldRushClient.NftService.getTokenIdsForContractWithMetadata(
-                        params.chainName as Chain,
-                        params.contractAddress,
-                        {
-                            noMetadata: params.noMetadata,
-                            pageSize: params.pageSize,
-                            pageNumber: params.pageNumber,
-                            traitsFilter: params.traitsFilter,
-                            valuesFilter: params.valuesFilter,
-                            withUncached: params.withUncached,
-                        }
-                    );
-                for await (const page of iterator) {
-                    if (page.data?.items) {
-                        allItems.push(...page.data.items);
-                    }
-                }
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt({ items: allItems }),
-                        },
-                    ],
-                };
-            } catch (err) {
-                return {
-                    content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
-
-    // getTokenIdsForContractWithMetadataByPage
-    server.tool(
-        "getTokenIdsForContractWithMetadataByPage",
         "Gets token IDs with metadata for a specific NFT contract with pagination.\n" +
             "Required: chainName (blockchain network), contractAddress (NFT contract address).\n" +
             "Optional: noMetadata, pageSize, pageNumber, traitsFilter, valuesFilter, withUncached.\n" +
@@ -239,11 +134,11 @@ export function addNftServiceTools(
             ),
             contractAddress: z.string(),
             noMetadata: z.boolean().optional(),
-            pageSize: z.number().optional(),
-            pageNumber: z.number().optional(),
+            pageSize: z.number().optional().default(10),
+            pageNumber: z.number().optional().default(0),
             traitsFilter: z.string().optional(),
             valuesFilter: z.string().optional(),
-            withUncached: z.boolean().optional(),
+            withUncached: z.boolean().optional().default(false),
         },
         async (params) => {
             try {
@@ -335,7 +230,7 @@ export function addNftServiceTools(
             ),
             contractAddress: z.string(),
             tokenId: z.string(),
-            noSpam: z.boolean().optional(),
+            noSpam: z.boolean().optional().default(true),
         },
         async (params) => {
             try {
@@ -488,7 +383,7 @@ export function addNftServiceTools(
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
-            days: z.number().optional(),
+            days: z.number().optional().default(7),
         },
         async (params) => {
             try {
@@ -533,7 +428,7 @@ export function addNftServiceTools(
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
-            days: z.number().optional(),
+            days: z.number().optional().default(7),
         },
         async (params) => {
             try {
@@ -578,7 +473,7 @@ export function addNftServiceTools(
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
-            days: z.number().optional(),
+            days: z.number().optional().default(7),
         },
         async (params) => {
             try {

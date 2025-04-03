@@ -9,14 +9,13 @@
  *
  * @description
  * Tests the following BaseService methods:
+ * - getGasPrices
  * - getBlock
  * - getResolvedAddress
- * - getBlockHeights, getBlockHeightsByPage
+ * - getBlockHeights
  * - getLogs
- * - getLogEventsByAddress, getLogEventsByAddressByPage
- * - getLogEventsByTopicHash, getLogEventsByTopicHashByPage
- * - getAllChainStatus
- * - getGasPrices
+ * - getLogEventsByAddress
+ * - getLogEventsByTopicHash
  *
  * Notes:
  * - We use the Vitest framework
@@ -52,16 +51,6 @@ describe("BaseService Tools", () => {
 
         await client.connect(transport);
     }, 60000);
-
-    it("getAllChainStatus - minimal check", async () => {
-        const resp = await client.callTool({
-            name: "getAllChainStatus",
-            arguments: {},
-        });
-        console.log("getAllChainStatus response:", resp.content);
-        expect(resp.isError).toBeFalsy();
-        expect(resp.content).toBeDefined();
-    }, 30000);
 
     it("getGasPrices - minimal check", async () => {
         const resp = await client.callTool({
@@ -115,28 +104,13 @@ describe("BaseService Tools", () => {
         expect(resp.isError).toBeFalsy();
     }, 30000);
 
-    it("getBlockHeightsByPage - minimal check", async () => {
-        const resp = await client.callTool({
-            name: "getBlockHeightsByPage",
-            arguments: {
-                chainName: "eth-mainnet",
-                startDate: "2025-01-01",
-                endDate: "2025-01-02",
-                pageSize: 1,
-            },
-        });
-        console.log("getBlockHeightsByPage response:", resp.content);
-        expect(resp.isError).toBeFalsy();
-        expect(resp.content).toBeDefined();
-    }, 30000);
-
     it("getLogs - minimal check", async () => {
         const resp = await client.callTool({
             name: "getLogs",
             arguments: {
                 chainName: "eth-mainnet",
                 startingBlock: 22096686,
-                endingBlock: "22098876",
+                endingBlock: 22098876,
                 address: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D",
                 topics: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
             },
@@ -154,26 +128,9 @@ describe("BaseService Tools", () => {
                 startingBlock: 22096686,
                 endingBlock: 22098876,
                 contractAddress: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D",
-                pageNumber: 0,
             },
         });
         console.log("getLogEventsByAddress response:", resp.content);
-        expect(resp.isError).toBeFalsy();
-        expect(resp.content).toBeDefined();
-    }, 30000);
-
-    it("getLogEventsByAddressByPage - minimal check", async () => {
-        const resp = await client.callTool({
-            name: "getLogEventsByAddressByPage",
-            arguments: {
-                chainName: "eth-mainnet",
-                startingBlock: 22096686,
-                endingBlock: 22098876,
-                contractAddress: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D",
-                pageNumber: 0,
-            },
-        });
-        console.log("getLogEventsByAddressByPage response:", resp.content);
         expect(resp.isError).toBeFalsy();
         expect(resp.content).toBeDefined();
     }, 30000);
@@ -187,27 +144,9 @@ describe("BaseService Tools", () => {
                     "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
                 startingBlock: 22096686,
                 endingBlock: 22096786,
-                pageNumber: 0,
             },
         });
         console.log("getLogEventsByTopicHash response:", resp.content);
-        expect(resp.isError).toBeFalsy();
-        expect(resp.content).toBeDefined();
-    }, 30000);
-
-    it("getLogEventsByTopicHashByPage - minimal check", async () => {
-        const resp = await client.callTool({
-            name: "getLogEventsByTopicHashByPage",
-            arguments: {
-                chainName: "eth-mainnet",
-                topicHash:
-                    "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
-                startingBlock: 22096686,
-                endingBlock: 22096786,
-                pageNumber: 1,
-            },
-        });
-        console.log("getLogEventsByTopicHashByPage response:", resp.content);
         expect(resp.isError).toBeFalsy();
         expect(resp.content).toBeDefined();
     }, 30000);

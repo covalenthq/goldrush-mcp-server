@@ -7,9 +7,9 @@
  *
  * @description
  * Tests the following NftService methods:
- * - getChainCollections / getChainCollectionsByPage
+ * - getChainCollections
  * - getNftsForAddress
- * - getTokenIdsForContractWithMetadata / getTokenIdsForContractWithMetadataByPage
+ * - getTokenIdsForContractWithMetadata
  * - getNftMetadataForGivenTokenIdForContract
  * - getNftTransactionsForContractTokenId
  * - getTraitsForCollection
@@ -18,7 +18,8 @@
  * - getHistoricalFloorPricesForCollection
  * - getHistoricalVolumeForCollection
  * - getHistoricalSalesCountForCollection
- * - checkOwnershipInNft, checkOwnershipInNftForSpecificTokenId
+ * - checkOwnershipInNft
+ * - checkOwnershipInNftForSpecificTokenId
  *
  * Notes:
  * - Start server as a subprocess using StdioClientTransport
@@ -61,25 +62,9 @@ describe("NftService Tools", () => {
             name: "getChainCollections",
             arguments: {
                 chainName: "base-mainnet",
-                pageNumber: 0,
-                noSpam: true,
             },
         });
         console.log("getChainCollections result:", result.content);
-        expect(result.isError).toBeFalsy();
-        expect(result.content).toBeDefined();
-    }, 30000);
-
-    it("getChainCollectionsByPage - minimal check", async () => {
-        const result = await client.callTool({
-            name: "getChainCollectionsByPage",
-            arguments: {
-                chainName: "eth-mainnet",
-                pageSize: 1,
-                pageNumber: 0,
-            },
-        });
-        console.log("getChainCollectionsByPage result:", result.content);
         expect(result.isError).toBeFalsy();
         expect(result.content).toBeDefined();
     }, 30000);
@@ -102,7 +87,6 @@ describe("NftService Tools", () => {
             arguments: {
                 chainName: "eth-mainnet",
                 contractAddress: "0xD97c7C5c30FEba950790D3A6F72d98509499112c",
-                pageNumber: 0,
             },
         });
         console.log(
@@ -112,24 +96,6 @@ describe("NftService Tools", () => {
         expect(result.isError).toBeFalsy();
         expect(result.content).toBeDefined();
     }, 60000);
-
-    it("getTokenIdsForContractWithMetadataByPage - minimal check", async () => {
-        const result = await client.callTool({
-            name: "getTokenIdsForContractWithMetadataByPage",
-            arguments: {
-                chainName: "eth-mainnet",
-                contractAddress: "0xBd3531dA5CF5857e7CfAA92426877b022e612cf8",
-                pageSize: 1,
-                pageNumber: 0,
-            },
-        });
-        console.log(
-            "getTokenIdsForContractWithMetadataByPage result:",
-            result.content
-        );
-        expect(result.isError).toBeFalsy();
-        expect(result.content).toBeDefined();
-    }, 30000);
 
     it("getNftMetadataForGivenTokenIdForContract - minimal check", async () => {
         const result = await client.callTool({

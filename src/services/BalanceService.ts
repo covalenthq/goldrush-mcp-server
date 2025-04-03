@@ -21,9 +21,7 @@ import { z } from "zod";
  * - getHistoricalTokenBalancesForWalletAddress
  * - getHistoricalPortfolioForWalletAddress
  * - getErc20TransfersForWalletAddress
- * - getErc20TransfersForWalletAddressByPage
  * - getTokenHoldersV2ForTokenAddress
- * - getTokenHoldersV2ForTokenAddressByPage
  * - getNativeTokenBalance
  */
 export function addBalanceServiceTools(
@@ -44,10 +42,10 @@ export function addBalanceServiceTools(
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
-            nft: z.boolean().optional(),
-            noNftFetch: z.boolean().optional(),
-            noSpam: z.boolean().optional(),
-            noNftAssetMetadata: z.boolean().optional(),
+            nft: z.boolean().optional().default(false),
+            noNftFetch: z.boolean().optional().default(true),
+            noSpam: z.boolean().optional().default(true),
+            noNftAssetMetadata: z.boolean().optional().default(true),
         },
         async (params) => {
             try {
@@ -94,10 +92,10 @@ export function addBalanceServiceTools(
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
-            nft: z.boolean().optional(),
-            noNftFetch: z.boolean().optional(),
-            noSpam: z.boolean().optional(),
-            noNftAssetMetadata: z.boolean().optional(),
+            nft: z.boolean().optional().default(false),
+            noNftFetch: z.boolean().optional().default(true),
+            noSpam: z.boolean().optional().default(true),
+            noNftAssetMetadata: z.boolean().optional().default(true),
             blockHeight: z.number().optional(),
             date: z.string().optional(),
         },
@@ -148,7 +146,7 @@ export function addBalanceServiceTools(
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
-            days: z.number().optional(),
+            days: z.number().optional().default(7),
         },
         async (params) => {
             try {
@@ -180,66 +178,6 @@ export function addBalanceServiceTools(
 
     server.tool(
         "getErc20TransfersForWalletAddress",
-        "Gets all ERC20 token transfers for a wallet address across all pages.\n" +
-            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
-            "Optional: quoteCurrency, contractAddress (specific token), startingBlock, endingBlock, pageSize, pageNumber.\n" +
-            "Returns all token transfer events across all pages.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            walletAddress: z.string(),
-            quoteCurrency: z
-                .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
-            contractAddress: z.string().optional(),
-            startingBlock: z.number().optional(),
-            endingBlock: z.number().optional(),
-            pageSize: z.number().optional(),
-            pageNumber: z.number().optional(),
-        },
-        async (params) => {
-            try {
-                const allTransfers = [];
-                const iterator =
-                    goldRushClient.BalanceService.getErc20TransfersForWalletAddress(
-                        params.chainName as Chain,
-                        params.walletAddress,
-                        {
-                            quoteCurrency: params.quoteCurrency as Quote,
-                            contractAddress: params.contractAddress,
-                            startingBlock: params.startingBlock,
-                            endingBlock: params.endingBlock,
-                            pageSize: params.pageSize,
-                            pageNumber: params.pageNumber,
-                        }
-                    );
-
-                for await (const page of iterator) {
-                    if (page.data?.items) {
-                        allTransfers.push(...page.data.items);
-                    }
-                }
-
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt({ items: allTransfers }),
-                        },
-                    ],
-                };
-            } catch (error) {
-                return {
-                    content: [{ type: "text", text: `Error: ${error}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
-
-    server.tool(
-        "getErc20TransfersForWalletAddressByPage",
         "Gets ERC20 token transfers for a wallet address with pagination.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
             "Optional: quoteCurrency, contractAddress (specific token), startingBlock, endingBlock, pageSize, pageNumber.\n" +
@@ -255,8 +193,8 @@ export function addBalanceServiceTools(
             contractAddress: z.string().optional(),
             startingBlock: z.number().optional(),
             endingBlock: z.number().optional(),
-            pageSize: z.number().optional(),
-            pageNumber: z.number().optional(),
+            pageSize: z.number().optional().default(10),
+            pageNumber: z.number().optional().default(0),
         },
         async (params) => {
             try {
@@ -292,63 +230,6 @@ export function addBalanceServiceTools(
 
     server.tool(
         "getTokenHoldersV2ForTokenAddress",
-        "Gets all token holders for a specific token across all pages.\n" +
-            "Required: chainName (blockchain network), tokenAddress (token contract address).\n" +
-            "Optional: blockHeight, date (historical point), pageSize, pageNumber (pagination parameters).\n" +
-            "Returns all token holders across all pages.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            tokenAddress: z.string(),
-            blockHeight: z.union([z.string(), z.number()]).optional(),
-            date: z.string().optional(),
-            pageSize: z.number().optional(),
-            pageNumber: z.number().optional(),
-        },
-        async (params) => {
-            try {
-                const allHolders = [];
-                const iterator =
-                    goldRushClient.BalanceService.getTokenHoldersV2ForTokenAddress(
-                        params.chainName as Chain,
-                        params.tokenAddress,
-                        {
-                            blockHeight: params.blockHeight,
-                            date: params.date,
-                            pageSize: params.pageSize,
-                            pageNumber: params.pageNumber,
-                        }
-                    );
-
-                for await (const page of iterator) {
-                    if (page.data?.items) {
-                        allHolders.push(...page.data.items);
-                    }
-                }
-
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt({
-                                items: allHolders,
-                                data: iterator,
-                            }),
-                        },
-                    ],
-                };
-            } catch (error) {
-                return {
-                    content: [{ type: "text", text: `Error: ${error}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
-
-    server.tool(
-        "getTokenHoldersV2ForTokenAddressByPage",
         "Gets token holders for a specific token with pagination.\n" +
             "Required: chainName (blockchain network), tokenAddress (token contract address).\n" +
             "Optional: blockHeight, date (historical point), pageSize, pageNumber (pagination parameters).\n" +

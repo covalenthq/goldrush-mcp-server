@@ -13,9 +13,7 @@
  * - getHistoricalTokenBalancesForWalletAddress
  * - getHistoricalPortfolioForWalletAddress
  * - getErc20TransfersForWalletAddress
- * - getErc20TransfersForWalletAddressByPage
  * - getTokenHoldersV2ForTokenAddress
- * - getTokenHoldersV2ForTokenAddressByPage
  * - getNativeTokenBalance
  *
  * Notes:
@@ -115,31 +113,10 @@ describe("BalanceService Tool", () => {
                 contractAddress: "0xf8C3527CC04340b208C854E985240c02F7B7793f",
                 startingBlock: 20681357,
                 endingBlock: 20681557,
-                pageSize: 1,
-                pageNumber: 0,
             },
         });
         console.log(
             "getErc20TransfersForWalletAddress response:",
-            response.content
-        );
-        expect(response.isError).toBeFalsy();
-        expect(response.content).toBeDefined();
-    }, 30000);
-
-    it("getErc20TransfersForWalletAddressByPage - minimal check", async () => {
-        const response = await client.callTool({
-            name: "getErc20TransfersForWalletAddressByPage",
-            arguments: {
-                chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
-                contractAddress: "0xf8C3527CC04340b208C854E985240c02F7B7793f",
-                pageSize: 1,
-                pageNumber: 0,
-            },
-        });
-        console.log(
-            "getErc20TransfersForWalletAddressByPage response:",
             response.content
         );
         expect(response.isError).toBeFalsy();
@@ -158,23 +135,6 @@ describe("BalanceService Tool", () => {
         });
         console.log(
             "getTokenHoldersV2ForTokenAddress response:",
-            response.content
-        );
-        expect(response.isError).toBeFalsy();
-        expect(response.content).toBeDefined();
-    }, 60000);
-
-    it("getTokenHoldersV2ForTokenAddressByPage - minimal check", async () => {
-        const response = await client.callTool({
-            name: "getTokenHoldersV2ForTokenAddressByPage",
-            arguments: {
-                chainName: "eth-mainnet",
-                tokenAddress: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D", // CXT
-                pageNumber: 1,
-            },
-        });
-        console.log(
-            "getTokenHoldersV2ForTokenAddressByPage response:",
             response.content
         );
         expect(response.isError).toBeFalsy();

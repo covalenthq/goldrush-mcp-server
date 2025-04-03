@@ -49,31 +49,28 @@ describe("TransactionService Tools", () => {
         await client.connect(transport);
     }, 60000);
 
-    it("getAllTransactionsForAddressByPage - minimal check", async () => {
-        const resp = await client.callTool({
-            name: "getAllTransactionsForAddressByPage",
-            arguments: {
-                chainName: "eth-mainnet",
-                address: "test.eth",
-            },
-        });
-        console.log(
-            "getAllTransactionsForAddressByPage response:",
-            resp.content
-        );
-        expect(resp.isError).toBeFalsy();
-        expect(resp.content).toBeDefined();
-    }, 30000);
+    // it("getTransactionsForBlock - minimal check", async () => {
+    //     const resp = await client.callTool({
+    //         name: "getTransactionsForBlock",
+    //         arguments: {
+    //             chainName: "eth-mainnet",
+    //             blockHeight: "latest",
+    //         },
+    //     });
+    //     console.log("getTransactionsForBlock response:", resp.content);
+    //     expect(resp.isError).toBeFalsy();
+    //     expect(resp.content).toBeDefined();
+    // }, 30000);
 
-    it("getTransactionsForBlock - minimal check", async () => {
+    it("getTransaction - minimal check", async () => {
         const resp = await client.callTool({
-            name: "getTransactionsForBlock",
+            name: "getTransaction",
             arguments: {
                 chainName: "eth-mainnet",
-                blockHeight: "latest",
+                txHash: "0x0404ea4101e1256169b04cb2374e8eb179ddc690a55661cd40a9ec589b9548f8",
             },
         });
-        console.log("getTransactionsForBlock response:", resp.content);
+        console.log("getTransaction response:", resp.content);
         expect(resp.isError).toBeFalsy();
         expect(resp.content).toBeDefined();
     }, 30000);
@@ -91,9 +88,9 @@ describe("TransactionService Tools", () => {
         expect(resp.content).toBeDefined();
     }, 30000);
 
-    it("getTransactionsForAddressV3 - minimal check", async () => {
+    it("getTransactionsForAddress - minimal check", async () => {
         const resp = await client.callTool({
-            name: "getTransactionsForAddressV3",
+            name: "getTransactionsForAddress",
             arguments: {
                 chainName: "eth-mainnet",
                 walletAddress: "demo.eth",

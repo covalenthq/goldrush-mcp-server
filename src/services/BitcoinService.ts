@@ -67,8 +67,8 @@ export function addBitcoinServiceTools(
             "Returns transactions for the specified Bitcoin address.",
         {
             address: z.string(),
-            pageSize: z.number().optional(),
-            pageNumber: z.number().optional(),
+            pageSize: z.number().optional().default(10),
+            pageNumber: z.number().optional().default(0),
         },
         async (params) => {
             try {

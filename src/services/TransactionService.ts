@@ -17,11 +17,8 @@ import { z } from "zod";
  * @remarks
  * This function creates tools:
  * - getTransaction
- * - getAllTransactionsForAddress
- * - getAllTransactionsForAddressByPage
- * - getTransactionsForBlock
  * - getTransactionSummary
- * - getTransactionsForAddressV3
+ * - getTransactionsForAddress
  * - getTimeBucketTransactionsForAddress
  */
 export function addTransactionServiceTools(
@@ -29,81 +26,42 @@ export function addTransactionServiceTools(
     goldRushClient: GoldRushClient
 ) {
     server.tool(
-        "getAllTransactionsForAddress",
-        "Gets all transactions for a wallet address across all pages.\n" +
-            "Required: chainName (blockchain network), address (wallet address).\n" +
-            "Optional: quoteCurrency, noLogs, blockSignedAtAsc, withInternal, withState, withInputData.\n" +
-            "Returns all transactions across all pages for the specified address.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            address: z.string(),
-            quoteCurrency: z
-                .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
-            noLogs: z.boolean().optional(),
-            blockSignedAtAsc: z.boolean().optional(),
-            withInternal: z.boolean().optional(),
-            withState: z.boolean().optional(),
-            withInputData: z.boolean().optional(),
-        },
-        async (params) => {
-            try {
-                const transactions = [];
-                const iterator =
-                    goldRushClient.TransactionService.getAllTransactionsForAddress(
-                        params.chainName as Chain,
-                        params.address,
-                        {
-                            quoteCurrency: params.quoteCurrency as Quote,
-                            noLogs: params.noLogs,
-                            blockSignedAtAsc: params.blockSignedAtAsc,
-                            withInternal: params.withInternal,
-                            withState: params.withState,
-                            withInputData: params.withInputData,
-                        }
-                    );
-
-                // Gather all pages
-                for await (const response of iterator) {
-                    transactions.push(...(response.data?.items || []));
-                }
-
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt({ items: transactions }),
-                        },
-                    ],
-                };
-            } catch (error) {
-                return {
-                    content: [{ type: "text", text: `Error: ${error}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
-
-    server.tool(
         "getTransaction",
         "Gets detailed information about a specific transaction.\n" +
             "Required: chainName (blockchain network), txHash (transaction hash).\n" +
+            "Optional: quoteCurrency (currency to convert to, USD by default), " +
+            "noLogs (exclude event logs, true by default), " +
+            "withInternal (include internal transactions, false by default), " +
+            "withState (include state changes, false by default), " +
+            "withInputData (include input data, false by default).\n" +
+            "Tracing features (withInternal, withState, withInputData) supported on the following chains: eth-mainnet\n" +
             "Returns comprehensive details about the specified transaction.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
             ),
             txHash: z.string(),
+            quoteCurrency: z
+                .enum(Object.values(validQuoteValues) as [string, ...string[]])
+                .optional(),
+            noLogs: z.boolean().optional().default(true),
+            withInternal: z.boolean().optional(),
+            withState: z.boolean().optional(),
+            withInputData: z.boolean().optional(),
         },
         async (params) => {
             try {
                 const response =
                     await goldRushClient.TransactionService.getTransaction(
                         params.chainName as Chain,
-                        params.txHash
+                        params.txHash,
+                        {
+                            quoteCurrency: params.quoteCurrency as Quote,
+                            noLogs: params.noLogs,
+                            withInternal: params.withInternal,
+                            withState: params.withState,
+                            withInputData: params.withInputData,
+                        }
                     );
                 return {
                     content: [
@@ -122,101 +80,101 @@ export function addTransactionServiceTools(
         }
     );
 
-    server.tool(
-        "getAllTransactionsForAddressByPage",
-        "Gets transactions for a wallet address with pagination.\n" +
-            "Required: chainName (blockchain network), address (wallet address).\n" +
-            "Optional: quoteCurrency, noLogs, blockSignedAtAsc, withInternal, withState, withInputData.\n" +
-            "Returns transactions for a single page of results.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            address: z.string(),
-            quoteCurrency: z
-                .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
-            noLogs: z.boolean().optional(),
-            blockSignedAtAsc: z.boolean().optional(),
-            withInternal: z.boolean().optional(),
-            withState: z.boolean().optional(),
-            withInputData: z.boolean().optional(),
-        },
-        async (params) => {
-            try {
-                const response =
-                    await goldRushClient.TransactionService.getAllTransactionsForAddressByPage(
-                        params.chainName as Chain,
-                        params.address,
-                        {
-                            quoteCurrency: params.quoteCurrency as Quote,
-                            noLogs: params.noLogs,
-                            blockSignedAtAsc: params.blockSignedAtAsc,
-                            withInternal: params.withInternal,
-                            withState: params.withState,
-                            withInputData: params.withInputData,
-                        }
-                    );
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt(response.data),
-                        },
-                    ],
-                };
-            } catch (err) {
-                return {
-                    content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
+    // server.tool(
+    //     "getAllTransactionsForAddressByPage",
+    //     "Gets transactions for a wallet address with pagination.\n" +
+    //         "Required: chainName (blockchain network), address (wallet address).\n" +
+    //         "Optional: quoteCurrency, noLogs, blockSignedAtAsc, withInternal, withState, withInputData.\n" +
+    //         "Returns transactions for a single page of results.",
+    //     {
+    //         chainName: z.enum(
+    //             Object.values(ChainName) as [string, ...string[]]
+    //         ),
+    //         address: z.string(),
+    //         quoteCurrency: z
+    //             .enum(Object.values(validQuoteValues) as [string, ...string[]])
+    //             .optional(),
+    //         noLogs: z.boolean().optional(),
+    //         blockSignedAtAsc: z.boolean().optional(),
+    //         withInternal: z.boolean().optional(),
+    //         withState: z.boolean().optional(),
+    //         withInputData: z.boolean().optional(),
+    //     },
+    //     async (params) => {
+    //         try {
+    //             const response =
+    //                 await goldRushClient.TransactionService.getAllTransactionsForAddressByPage(
+    //                     params.chainName as Chain,
+    //                     params.address,
+    //                     {
+    //                         quoteCurrency: params.quoteCurrency as Quote,
+    //                         noLogs: params.noLogs,
+    //                         blockSignedAtAsc: params.blockSignedAtAsc,
+    //                         withInternal: params.withInternal,
+    //                         withState: params.withState,
+    //                         withInputData: params.withInputData,
+    //                     }
+    //                 );
+    //             return {
+    //                 content: [
+    //                     {
+    //                         type: "text",
+    //                         text: stringifyWithBigInt(response.data),
+    //                     },
+    //                 ],
+    //             };
+    //         } catch (err) {
+    //             return {
+    //                 content: [{ type: "text", text: `Error: ${err}` }],
+    //                 isError: true,
+    //             };
+    //         }
+    //     }
+    // );
 
-    server.tool(
-        "getTransactionsForBlock",
-        "Gets all transactions included in a specific block.\n" +
-            "Required: chainName (blockchain network), blockHeight (block number or latest).\n" +
-            "Optional: quoteCurrency, noLogs (exclude event logs).\n" +
-            "Returns all transactions from the specified block.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            blockHeight: z.union([z.string(), z.number(), z.literal("latest")]),
-            quoteCurrency: z
-                .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
-            noLogs: z.boolean().optional(),
-        },
-        async (params) => {
-            try {
-                const response =
-                    await goldRushClient.TransactionService.getTransactionsForBlock(
-                        params.chainName as Chain,
-                        params.blockHeight,
-                        {
-                            quoteCurrency: params.quoteCurrency as Quote,
-                            noLogs: params.noLogs,
-                        }
-                    );
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt(response.data),
-                        },
-                    ],
-                };
-            } catch (err) {
-                return {
-                    content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
+    // server.tool(
+    //     "getTransactionsForBlock",
+    //     "Gets all transactions included in a specific block.\n" +
+    //         "Required: chainName (blockchain network), blockHeight (block number or latest).\n" +
+    //         "Optional: quoteCurrency, noLogs (exclude event logs).\n" +
+    //         "Returns all transactions from the specified block.",
+    //     {
+    //         chainName: z.enum(
+    //             Object.values(ChainName) as [string, ...string[]]
+    //         ),
+    //         blockHeight: z.union([z.string(), z.number(), z.literal("latest")]),
+    //         quoteCurrency: z
+    //             .enum(Object.values(validQuoteValues) as [string, ...string[]])
+    //             .optional(),
+    //         noLogs: z.boolean().optional(),
+    //     },
+    //     async (params) => {
+    //         try {
+    //             const response =
+    //                 await goldRushClient.TransactionService.getTransactionsForBlock(
+    //                     params.chainName as Chain,
+    //                     params.blockHeight,
+    //                     {
+    //                         quoteCurrency: params.quoteCurrency as Quote,
+    //                         noLogs: params.noLogs,
+    //                     }
+    //                 );
+    //             return {
+    //                 content: [
+    //                     {
+    //                         type: "text",
+    //                         text: stringifyWithBigInt(response.data),
+    //                     },
+    //                 ],
+    //             };
+    //         } catch (err) {
+    //             return {
+    //                 content: [{ type: "text", text: `Error: ${err}` }],
+    //                 isError: true,
+    //             };
+    //         }
+    //     }
+    // );
 
     server.tool(
         "getTransactionSummary",
@@ -263,7 +221,7 @@ export function addTransactionServiceTools(
     );
 
     server.tool(
-        "getTransactionsForAddressV3",
+        "getTransactionsForAddress",
         "Gets transactions for a wallet address using V3 API endpoint with specific page number.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address), page (page number).\n" +
             "Optional: quoteCurrency, noLogs, blockSignedAtAsc (chronological order).\n" +
@@ -277,7 +235,7 @@ export function addTransactionServiceTools(
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
-            noLogs: z.boolean().optional(),
+            noLogs: z.boolean().optional().default(true),
             blockSignedAtAsc: z.boolean().optional(),
         },
         async (params) => {
@@ -312,9 +270,11 @@ export function addTransactionServiceTools(
 
     server.tool(
         "getTimeBucketTransactionsForAddress",
-        "Gets transactions for a wallet address grouped into time buckets (e.g., by day).\n" +
+        "Gets transactions for a wallet address grouped into time buckets.\n" +
+            "The parameter timeBucket is the 0-indexed 15-minute time bucket.\n" +
+            "E.g. 27 Feb 2023 05:23 GMT = 1677475383 (Unix time). 1677475383/900=1863861 timeBucket.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address), timeBucket (time grouping).\n" +
-            "Optional: quoteCurrency, noLogs (exclude event logs).\n" +
+            "Optional: quoteCurrency, noLogs (exclude event logs, true by default).\n" +
             "Returns transactions grouped by the specified time bucket.",
         {
             chainName: z.enum(
@@ -325,7 +285,7 @@ export function addTransactionServiceTools(
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
-            noLogs: z.boolean().optional(),
+            noLogs: z.boolean().optional().default(true),
         },
         async (params) => {
             try {

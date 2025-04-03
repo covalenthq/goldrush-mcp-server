@@ -43,11 +43,11 @@ export function addAllChainsServiceTools(
                 )
                 .optional(),
             addresses: z.array(z.string()).optional(),
-            limit: z.number().optional(),
+            limit: z.number().optional().default(10),
             before: z.string().optional(),
             after: z.string().optional(),
-            withLogs: z.boolean().optional(),
-            withDecodedLogs: z.boolean().optional(),
+            withLogs: z.boolean().optional().default(false),
+            withDecodedLogs: z.boolean().optional().default(false),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
@@ -96,7 +96,7 @@ export function addAllChainsServiceTools(
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
             before: z.string().optional(),
-            limit: z.number().optional(),
+            limit: z.number().optional().default(10),
             chains: z
                 .array(
                     z.union([
@@ -147,7 +147,7 @@ export function addAllChainsServiceTools(
             "Returns chain activity summary across all networks.",
         {
             walletAddress: z.string(),
-            testnets: z.boolean().optional(),
+            testnets: z.boolean().optional().default(false),
         },
         async (params) => {
             try {

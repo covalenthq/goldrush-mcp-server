@@ -38,8 +38,8 @@ export function addPricingServiceTools(
                 Object.values(validQuoteValues) as [string, ...string[]]
             ),
             contractAddress: z.string(),
-            from: z.string().optional(),
-            to: z.string().optional(),
+            from: z.string(), // Making this required for MCP usage
+            to: z.string(), // Making this required for MCP usage
             pricesAtAsc: z.boolean().optional(),
         },
         async (params) => {
