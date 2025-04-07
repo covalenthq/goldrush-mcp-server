@@ -200,548 +200,145 @@ Tools are a powerful primitive in the Model Context Protocol (MCP) that enable s
 
 Tools are designed to be model-controlled, meaning that tools are exposed from servers to clients with the intention of the AI model being able to automatically invoke them (with a human in the loop to grant approval).
 
-1.  `getTokenBalancesForWalletAddress`
-
-    - Gets the token balances for a specific wallet address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `address` (string): The wallet address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `nft` (boolean, optional): Include NFTs in the response.
-        - `noNftFetch` (boolean, optional): Do not fetch NFT metadata.
-        - `noSpam` (boolean, optional): Exclude spam tokens.
-        - `noNftAssetMetadata` (boolean, optional): Do not include NFT asset metadata.
-    - Returns: A list of token balances for the specified wallet address.
-
-2.  `getHistoricalTokenBalancesForWalletAddress`
-
-    - Gets the historical token balances for a specific wallet address on a given chain at a specific date or block height.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `address` (string): The wallet address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `nft` (boolean, optional): Include NFTs in the response.
-        - `noNftFetch` (boolean, optional): Do not fetch NFT metadata.
-        - `noSpam` (boolean, optional): Exclude spam tokens.
-        - `noNftAssetMetadata` (boolean, optional): Do not include NFT asset metadata.
-        - `blockHeight` (number, optional): The block height to query historical balances.
-        - `date` (string, optional): The date (YYYY-MM-DD) to query historical balances.
-    - Returns: A list of historical token balances for the specified wallet address.
-
-3.  `getHistoricalPortfolioForWalletAddress`
-
-    - Gets the historical portfolio value over a period for a specific wallet address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `days` (number, optional): The number of days of historical data to retrieve.
-    - Returns: Historical portfolio value data for the specified wallet address.
-
-4.  `getErc20TransfersForWalletAddress`
-
-    - Gets all ERC20 token transfers for a specific wallet address on a given chain, handling pagination automatically.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `contractAddress` (string, optional): Filter transfers by a specific token contract address.
-        - `startingBlock` (number, optional): The starting block number to query transfers from.
-        - `endingBlock` (number, optional): The ending block number to query transfers to.
-        - `pageSize` (number, optional): Number of results per page (used internally for pagination).
-        - `pageNumber` (number, optional): Page number (used internally for pagination).
-    - Returns: A list containing all ERC20 transfers for the specified wallet address across all pages.
-
-5.  `getErc20TransfersForWalletAddressByPage`
-
-    - Gets a single page of ERC20 token transfers for a specific wallet address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `contractAddress` (string, optional): Filter transfers by a specific token contract address.
-        - `startingBlock` (number, optional): The starting block number to query transfers from.
-        - `endingBlock` (number, optional): The ending block number to query transfers to.
-        - `pageSize` (number, optional): Number of results per page.
-        - `pageNumber` (number, optional): Page number to retrieve.
-    - Returns: A single page of ERC20 transfers for the specified wallet address.
-
-6.  `getTokenHoldersV2ForTokenAddress`
-
-    - Gets all token holders for a specific token contract address on a given chain at a specific block height or date, handling pagination automatically.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `tokenAddress` (string): The token contract address.
-        - `blockHeight` (string, optional): The block height to query token holders at.
-        - `date` (string, optional): The date (YYYY-MM-DD) to query token holders at.
-        - `pageSize` (number, optional): Number of results per page (used internally for pagination).
-        - `pageNumber` (number, optional): Page number (used internally for pagination).
-    - Returns: A list containing all token holders for the specified token address across all pages.
-
-7.  `getTokenHoldersV2ForTokenAddressByPage`
-
-    - Gets a single page of token holders for a specific token contract address on a given chain at a specific block height or date.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `tokenAddress` (string): The token contract address.
-        - `blockHeight` (string, optional): The block height to query token holders at.
-        - `date` (string, optional): The date (YYYY-MM-DD) to query token holders at.
-        - `pageSize` (number, optional): Number of results per page.
-        - `pageNumber` (number, optional): Page number to retrieve.
-    - Returns: A single page of token holders for the specified token address.
-
-8.  `getNativeTokenBalance`
-
-    - Gets the native token balance for a specific wallet address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `blockHeight` (string, optional): The block height to query the balance at.
-    - Returns: The native token balance for the specified wallet address.
-
-9.  `getApprovals`
-
-    - Gets the token approvals for a specific wallet address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet address.
-    - Returns: A list of token approvals for the specified wallet address.
-
-10. `getNftApprovals`
-
-    - Gets the NFT approvals for a specific wallet address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet address.
-    - Returns: A list of NFT approvals for the specified wallet address.
-
-11. `getAllTransactionsForAddress`
-
-    - Gets all transactions for a specific address on a given chain, handling pagination automatically.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `address` (string): The wallet or contract address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `noLogs` (boolean, optional): Exclude logs from the response.
-        - `blockSignedAtAsc` (boolean, optional): Sort transactions by block timestamp in ascending order.
-        - `withInternal` (boolean, optional): Include internal transactions.
-        - `withState` (boolean, optional): Include transaction state information.
-        - `withInputData` (boolean, optional): Include transaction input data.
-    - Returns: A list containing all transactions for the specified address across all pages.
-
-12. `getTransaction`
-
-    - Gets details for a specific transaction hash on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `txHash` (string): The transaction hash.
-    - Returns: Detailed information about the specified transaction.
-
-13. `getAllTransactionsForAddressByPage`
-
-    - Gets a single page of transactions for a specific address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `address` (string): The wallet or contract address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `noLogs` (boolean, optional): Exclude logs from the response.
-        - `blockSignedAtAsc` (boolean, optional): Sort transactions by block timestamp in ascending order.
-        - `withInternal` (boolean, optional): Include internal transactions.
-        - `withState` (boolean, optional): Include transaction state information.
-        - `withInputData` (boolean, optional): Include transaction input data.
-    - Returns: A single page of transactions for the specified address.
-
-14. `getTransactionsForBlock`
-
-    - Gets transactions for a specific block height on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `blockHeight` (string): The block height or "latest".
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `noLogs` (boolean, optional): Exclude logs from the response.
-    - Returns: A list of transactions included in the specified block.
-
-15. `getTransactionSummary`
-
-    - Gets a summary of transactions for a specific wallet address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `withGas` (boolean, optional): Include gas usage details in the summary.
-    - Returns: A summary of transaction activity for the specified wallet address.
-
-16. `getTransactionsForAddressV3`
-
-    - Gets transactions for a specific address on a given chain using the V3 endpoint (page-based).
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet or contract address.
-        - `page` (number): The page number to retrieve.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `noLogs` (boolean, optional): Exclude logs from the response.
-        - `blockSignedAtAsc` (boolean, optional): Sort transactions by block timestamp in ascending order.
-    - Returns: A page of transactions for the specified address from the V3 endpoint.
-
-17. `getTimeBucketTransactionsForAddress`
-
-    - Gets transactions for a specific address within a given time bucket on a specific chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet or contract address.
-        - `timeBucket` (number): The time bucket identifier.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `noLogs` (boolean, optional): Exclude logs from the response.
-    - Returns: Transactions within the specified time bucket for the given address.
-
-18. `getAllChains`
-
-    - Gets a list of all supported blockchain networks.
-    - Inputs: None
-    - Returns: A list of all chains supported by the GoldRush API.
-
-19. `getAllChainStatus`
-
-    - Gets the synchronization status for all supported blockchain networks.
-    - Inputs: None
-    - Returns: The status information for all chains.
-
-20. `getGasPrices`
-
-    - Gets gas price estimations for a specific event type on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `eventType` (string ["erc20", "nativetokens", "uniswapv3"]): The type of event to estimate gas for.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-    - Returns: Gas price estimations for the specified event type.
-
-21. `getBlock`
-
-    - Gets details for a specific block height on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `blockHeight` (string): The block height.
-    - Returns: Detailed information about the specified block.
-
-22. `getResolvedAddress`
-
-    - Resolves an ENS or RNS domain name to its corresponding wallet address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The domain name (e.g., ENS, RNS) or wallet address.
-    - Returns: The resolved address information.
-
-23. `getBlockHeights`
-
-    - Gets all block heights within a specified date range on a given chain, handling pagination automatically.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `startDate` (string): The start date (YYYY-MM-DD).
-        - `endDate` (string): The end date (YYYY-MM-DD) or "latest".
-        - `pageSize` (number, optional): Number of results per page (used internally for pagination).
-        - `pageNumber` (number, optional): Page number (used internally for pagination).
-    - Returns: A list containing all block details within the date range across all pages.
-
-24. `getBlockHeightsByPage`
-
-    - Gets a single page of block heights within a specified date range on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `startDate` (string): The start date (YYYY-MM-DD).
-        - `endDate` (string): The end date (YYYY-MM-DD) or "latest".
-        - `pageSize` (number, optional): Number of results per page.
-        - `pageNumber` (number, optional): Page number to retrieve.
-    - Returns: A single page of block details within the date range.
-
-25. `getLogs`
-
-    - Gets blockchain log events based on various filter criteria on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `startingBlock` (number, optional): The starting block number.
-        - `endingBlock` (string, optional): The ending block number or "latest".
-        - `address` (string, optional): Filter logs by contract address.
-        - `topics` (string, optional): Filter logs by topic hashes (comma-separated).
-        - `blockHash` (string, optional): Filter logs by a specific block hash.
-        - `skipDecode` (boolean, optional): Skip decoding log event data.
-    - Returns: A list of log events matching the filter criteria.
-
-26. `getLogEventsByAddress`
-
-    - Gets all log events emitted by a specific contract address on a given chain, handling pagination automatically.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `contractAddress` (string): The contract address.
-        - `startingBlock` (string, optional): The starting block number or "latest".
-        - `endingBlock` (string, optional): The ending block number or "latest".
-        - `pageSize` (number, optional): Number of results per page (used internally for pagination).
-        - `pageNumber` (number, optional): Page number (used internally for pagination).
-    - Returns: A list containing all log events for the specified address across all pages.
-
-27. `getLogEventsByAddressByPage`
-
-    - Gets a single page of log events emitted by a specific contract address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `contractAddress` (string): The contract address.
-        - `startingBlock` (string, optional): The starting block number or "latest".
-        - `endingBlock` (string, optional): The ending block number or "latest".
-        - `pageSize` (number, optional): Number of results per page.
-        - `pageNumber` (number, optional): Page number to retrieve.
-    - Returns: A single page of log events for the specified address.
-
-28. `getLogEventsByTopicHash`
-
-    - Gets all log events matching a specific topic hash on a given chain, handling pagination automatically.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `topicHash` (string): The primary topic hash to filter by.
-        - `startingBlock` (string, optional): The starting block number or "latest".
-        - `endingBlock` (string, optional): The ending block number or "latest".
-        - `secondaryTopics` (string, optional): Additional topic hashes to filter by (comma-separated).
-        - `pageSize` (number, optional): Number of results per page (used internally for pagination).
-        - `pageNumber` (number, optional): Page number (used internally for pagination).
-    - Returns: A list containing all log events matching the topic hash(es) across all pages.
-
-29. `getLogEventsByTopicHashByPage`
-
-    - Gets a single page of log events matching a specific topic hash on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `topicHash` (string): The primary topic hash to filter by.
-        - `startingBlock` (string, optional): The starting block number or "latest".
-        - `endingBlock` (string, optional): The ending block number or "latest".
-        - `secondaryTopics` (string, optional): Additional topic hashes to filter by (comma-separated).
-        - `pageSize` (number, optional): Number of results per page.
-        - `pageNumber` (number, optional): Page number to retrieve.
-    - Returns: A single page of log events matching the topic hash(es).
-
-30. `getChainCollections`
-
-    - Gets all NFT collections on a given chain, handling pagination automatically.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `pageSize` (number, optional): Number of results per page (used internally for pagination).
-        - `pageNumber` (number, optional): Page number (used internally for pagination).
-        - `noSpam` (boolean, optional): Exclude spam collections.
-    - Returns: A list containing all NFT collections on the specified chain across all pages.
-
-31. `getChainCollectionsByPage`
-
-    - Gets a single page of NFT collections on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `pageSize` (number, optional): Number of results per page.
-        - `pageNumber` (number, optional): Page number to retrieve.
-        - `noSpam` (boolean, optional): Exclude spam collections.
-    - Returns: A single page of NFT collections on the specified chain.
-
-32. `getNftsForAddress`
-
-    - Gets all NFTs owned by a specific wallet address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet address.
-        - `noSpam` (boolean, optional): Exclude spam NFTs.
-        - `noNftAssetMetadata` (boolean, optional): Do not include NFT asset metadata.
-        - `withUncached` (boolean, optional): Include uncached NFTs.
-    - Returns: A list of NFTs owned by the specified wallet address.
-
-33. `getTokenIdsForContractWithMetadata`
-
-    - Gets all token IDs and their metadata for a specific NFT contract address on a given chain, handling pagination automatically.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `contractAddress` (string): The NFT contract address.
-        - `noMetadata` (boolean, optional): Exclude metadata from the response.
-        - `pageSize` (number, optional): Number of results per page (used internally for pagination).
-        - `pageNumber` (number, optional): Page number (used internally for pagination).
-        - `traitsFilter` (string, optional): Filter by traits (e.g., 'trait1:value1,trait2:value2').
-        - `valuesFilter` (string, optional): Filter by trait values (e.g., 'value1,value2').
-        - `withUncached` (boolean, optional): Include uncached NFTs.
-    - Returns: A list containing all token IDs and metadata for the specified contract across all pages.
-
-34. `getTokenIdsForContractWithMetadataByPage`
-
-    - Gets a single page of token IDs and their metadata for a specific NFT contract address on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `contractAddress` (string): The NFT contract address.
-        - `noMetadata` (boolean, optional): Exclude metadata from the response.
-        - `pageSize` (number, optional): Number of results per page.
-        - `pageNumber` (number, optional): Page number to retrieve.
-        - `traitsFilter` (string, optional): Filter by traits (e.g., 'trait1:value1,trait2:value2').
-        - `valuesFilter` (string, optional): Filter by trait values (e.g., 'value1,value2').
-        - `withUncached` (boolean, optional): Include uncached NFTs.
-    - Returns: A single page of token IDs and metadata for the specified contract.
-
-35. `getNftMetadataForGivenTokenIdForContract`
-
-    - Gets the metadata for a specific token ID within an NFT contract on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `contractAddress` (string): The NFT contract address.
-        - `tokenId` (string): The specific token ID.
-        - `noMetadata` (boolean, optional): Exclude metadata from the response.
-        - `withUncached` (boolean, optional): Include uncached NFTs.
-    - Returns: The metadata for the specified NFT token ID.
-
-36. `getNftTransactionsForContractTokenId`
-
-    - Gets the transaction history for a specific token ID within an NFT contract on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `contractAddress` (string): The NFT contract address.
-        - `tokenId` (string): The specific token ID.
-        - `noSpam` (boolean, optional): Exclude spam transactions.
-    - Returns: The transaction history for the specified NFT token ID.
-
-37. `getTraitsForCollection`
-
-    - Gets the available traits for a specific NFT collection contract on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `collectionContract` (string): The NFT collection contract address.
-    - Returns: A list of traits available within the specified collection.
-
-38. `getAttributesForTraitInCollection`
-
-    - Gets the possible attribute values for a specific trait within an NFT collection contract on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `collectionContract` (string): The NFT collection contract address.
-        - `trait` (string): The specific trait name.
-    - Returns: A list of attribute values for the specified trait in the collection.
-
-39. `getCollectionTraitsSummary`
-
-    - Gets a summary of traits and their distribution within an NFT collection contract on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `collectionContract` (string): The NFT collection contract address.
-    - Returns: A summary of the trait distribution for the specified collection.
-
-40. `getHistoricalFloorPricesForCollection`
-
-    - Gets the historical floor prices for an NFT collection over a specified number of days on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `collectionAddress` (string): The NFT collection contract address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `days` (number, optional): The number of days of historical data to retrieve.
-    - Returns: Historical floor price data for the specified collection.
-
-41. `getHistoricalVolumeForCollection`
-
-    - Gets the historical trading volume for an NFT collection over a specified number of days on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `collectionAddress` (string): The NFT collection contract address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `days` (number, optional): The number of days of historical data to retrieve.
-    - Returns: Historical trading volume data for the specified collection.
-
-42. `getHistoricalSalesCountForCollection`
-
-    - Gets the historical sales count for an NFT collection over a specified number of days on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `collectionAddress` (string): The NFT collection contract address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in (may not be used directly but included for consistency).
-        - `days` (number, optional): The number of days of historical data to retrieve.
-    - Returns: Historical sales count data for the specified collection.
-
-43. `checkOwnershipInNft`
-
-    - Checks if a wallet address owns any NFT within a specific collection on a given chain, potentially filtered by traits.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet address to check.
-        - `collectionContract` (string): The NFT collection contract address.
-        - `traitsFilter` (string, optional): Filter by traits (e.g., 'trait1:value1,trait2:value2').
-        - `valuesFilter` (string, optional): Filter by trait values (e.g., 'value1,value2').
-    - Returns: Information about the ownership status within the specified collection.
-
-44. `checkOwnershipInNftForSpecificTokenId`
-
-    - Checks if a wallet address owns a specific token ID within an NFT collection on a given chain.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `walletAddress` (string): The wallet address to check.
-        - `collectionContract` (string): The NFT collection contract address.
-        - `tokenId` (string): The specific token ID to check ownership for.
-    - Returns: Information about the ownership status for the specific token ID.
-
-45. `getTokenPrices`
-
-    - Gets the historical prices for a specific token contract address on a given chain within a date range.
-    - Inputs
-        - `chainName` (string): The name of the blockchain network.
-        - `quoteCurrency` (string): The currency to quote prices in.
-        - `contractAddress` (string): The token contract address.
-        - `from` (string, optional): The start date (YYYY-MM-DD) for the price history.
-        - `to` (string, optional): The end date (YYYY-MM-DD) for the price history.
-        - `pricesAtAsc` (boolean, optional): Sort prices by date in ascending order.
-    - Returns: Historical price data for the specified token.
-
-46. `getMultiChainMultiAddressTransactions`
-
-    - Gets transactions across multiple chains and multiple addresses.
-    - Inputs
-        - `chains` (array(string), optional): List of chain names or IDs.
-        - `addresses` (array(string), optional): List of wallet or contract addresses.
-        - `limit` (number, optional): Maximum number of transactions to return.
-        - `before` (string, optional): Cursor for pagination (previous page).
-        - `after` (string, optional): Cursor for pagination (next page).
-        - `withLogs` (boolean, optional): Include logs in the response.
-        - `withDecodedLogs` (boolean, optional): Include decoded logs in the response.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-    - Returns: A list of transactions matching the multi-chain and multi-address criteria.
-
-47. `getMultiChainBalances`
-
-    - Gets token balances for a wallet address across multiple chains.
-    - Inputs
-        - `walletAddress` (string): The wallet address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-        - `before` (string, optional): Cursor for pagination (previous page).
-        - `limit` (number, optional): Maximum number of results per chain.
-        - `chains` (array(string), optional): List of chain names or IDs to include.
-        - `cutoffTimestamp` (number, optional): Timestamp to query historical balances at.
-    - Returns: Token balances for the wallet address aggregated across the specified chains.
-
-48. `getAddressActivity`
-
-    - Checks the activity status (active chains) for a given wallet address across all supported chains.
-    - Inputs
-        - `walletAddress` (string): The wallet address.
-        - `testnets` (boolean, optional): Include testnet chains in the activity check.
-    - Returns: A list of chains where the address has been active.
-
-49. `getBitcoinHdWalletBalances`
-
-    - Gets balances for a Bitcoin Hierarchical Deterministic (HD) wallet address (xpub).
-    - Inputs
-        - `walletAddress` (string): The Bitcoin xpub address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-    - Returns: Balance information for the specified Bitcoin HD wallet.
-
-50. `getTransactionsForBtcAddress`
-
-    - Gets transactions for a specific Bitcoin address (standard, non-HD).
-    - Inputs
-        - `address` (string): The Bitcoin address.
-        - `pageSize` (number, optional): Number of results per page.
-        - `pageNumber` (number, optional): Page number to retrieve.
-    - Returns: A page of transactions for the specified Bitcoin address.
-
-51. `getBitcoinNonHdWalletBalances`
-    - Gets balances for a standard (non-HD) Bitcoin wallet address.
-    - Inputs
-        - `walletAddress` (string): The standard Bitcoin address.
-        - `quoteCurrency` (string, optional): The currency to quote prices in.
-    - Returns: Balance information for the specified standard Bitcoin wallet address.
+1. `bitcoin_hd_wallet_balances`
+
+   - Fetch balances for each active child address derived from a Bitcoin HD wallet. This tool provides detailed balance data for Bitcoin wallets identified by an xpub key. Required: walletAddress - The xpub key of the HD wallet. Optional: quoteCurrency - The currency for price conversion (USD, EUR, etc). Returns complete balance details including total balance, available balance, and transaction history summary.
+
+2. `bitcoin_non_hd_wallet_balances`
+
+   - Fetch Bitcoin balance for a non-HD address. Response includes spot prices and other metadata. This tool provides detailed balance data for regular Bitcoin addresses. Required: walletAddress - The Bitcoin address to query. Optional: quoteCurrency - The currency for price conversion (USD, EUR, etc). Returns complete balance details including total balance, available balance, and transaction count.
+
+3. `bitcoin_transactions`
+
+   - Fetch transactions for a specific Bitcoin address with full transaction details. Required: address - The Bitcoin address to query. Optional: pageSize - Number of results per page (default 100), pageNumber - Page number (default 0). Returns a paginated list of transactions with timestamps, amounts, inputs, outputs, and fees.
+
+4. `block`
+
+   - Commonly used to fetch and render a single block for a block explorer. Requires chainName (blockchain network) and blockHeight (block number). Returns comprehensive block data including timestamp, transaction count, size, miner information, and other blockchain-specific details.
+
+5. `block_heights`
+
+   - Commonly used to get all the block heights within a particular date range. Requires chainName (blockchain network), startDate (YYYY-MM-DD format), and endDate (YYYY-MM-DD or 'latest'). Optional pagination parameters include pageSize (default 10) and pageNumber (default 0). Returns block heights, timestamps, and related data for blocks within the specified date range, useful for historical analysis and time-based blockchain queries.
+
+6. `erc20_token_transfers`
+
+   - Commonly used to render the transfer-in and transfer-out of a token along with historical prices from an address. Required: chainName (blockchain network), walletAddress (wallet address). Optional: quoteCurrency for value conversion, contractAddress to filter by specific token, startingBlock/endingBlock to set range, pageSize (default 10) and pageNumber (default 0). Returns token transfer events with timestamps, values, and transaction details.
+
+7. `gas_prices`
+
+   - Get real-time gas estimates for different transaction speeds on a specific network, enabling users to optimize transaction costs and confirmation times. Requires chainName (blockchain network) and eventType (erc20, nativetokens, or uniswapv3). Optional parameter quoteCurrency allows conversion to different currencies (USD, EUR, etc). Returns estimated gas prices for low, medium, and high priority transactions for the specified event type.
+
+8. `historical_portfolio_value`
+
+   - Commonly used to render a daily portfolio balance for an address broken down by the token. Required: chainName (blockchain network), walletAddress (wallet address). Optional: quoteCurrency for value conversion, days (timeframe to analyze, default 7). Returns portfolio value time series data showing value changes over the specified timeframe.
+
+9. `historical_token_balances`
+
+   - Commonly used to fetch the historical native and fungible (ERC20) tokens held by an address at a given block height or date. Required: chainName (blockchain network), address (wallet address). Optional: quoteCurrency for value conversion, blockHeight or date to specify point in time, nft (include NFTs, default false), noNftFetch, noSpam, and noNftAssetMetadata (all default true). Returns token balances as they existed at the specified historical point.
+
+10. `historical_token_prices`
+
+    - Commonly used to get historic prices of a token between date ranges. Supports native tokens. Required: chainName (blockchain network), quoteCurrency (price currency), contractAddress (token contract), from (start date YYYY-MM-DD), to (end date YYYY-MM-DD). Optional: pricesAtAsc (set to true for chronological ascending order, default is false for descending order). Returns historical token prices for the specified time range.
+
+11. `log_events_by_address`
+
+    - Commonly used to get all the event logs emitted from a particular contract address. Useful for building dashboards that examine on-chain interactions. Requires chainName (blockchain network) and contractAddress (the address emitting events). Optional parameters include block range (startingBlock, endingBlock) and pagination settings (pageSize default 10, pageNumber default 0). Returns decoded event logs for the specified contract, useful for monitoring specific smart contract activity and analyzing on-chain events.
+
+12. `log_events_by_topic`
+
+    - Commonly used to get all event logs of the same topic hash across all contracts within a particular chain. Useful for cross-sectional analysis of event logs that are emitted on-chain. Requires chainName (blockchain network) and topicHash (the event signature hash). Optional parameters include block range (startingBlock, endingBlock), secondaryTopics for filtering by additional parameters, and pagination settings (pageSize default 10, pageNumber default 0). Returns decoded event logs matching the specified topic hash, ideal for tracking specific event types across multiple contracts on a blockchain.
+
+13. `multichain_address_activity`
+
+    - Gets a summary of wallet activity across all supported blockchains. Requires walletAddress. Optional parameter testnets (default false) determines whether to include testnet activity. Returns a comprehensive summary of chain activity including transaction counts, first/last activity timestamps, and activity status across all networks.
+
+14. `multichain_balances`
+
+    - Gets token balances for a wallet address across multiple blockchains. Requires walletAddress. Optional parameters include chains array to specify networks, quoteCurrency for value conversion, limit (default 10), pagination (before), and cutoffTimestamp to filter by time. Use this to get a comprehensive view of token holdings across different blockchains.
+
+15. `multichain_transactions`
+
+    - Gets transactions for multiple wallet addresses across multiple blockchains. Requires addresses array. Optional parameters include chains array, pagination (before/after), limit (default 10), quoteCurrency for value conversion, and options to include logs (withLogs, withDecodedLogs). Use this to analyze transaction history across different networks simultaneously.
+
+16. `native_token_balance`
+
+    - Get the native token balance (ETH, BNB, MATIC, etc.) for a specified wallet address on a blockchain. Required: chainName (blockchain network) and walletAddress. Optional: quoteCurrency for value conversion and blockHeight for historical queries. Returns detailed balance information including formatted amounts and USD values.
+
+17. `nft_approvals`
+
+    - Gets a list of NFT collection approvals (setApprovalForAll) granted by a wallet that may pose security risks. Required: chainName (blockchain network, e.g. eth-mainnet or 1), walletAddress (wallet address, supports ENS, RNS, Lens Handle, or Unstoppable Domain). Returns a list of NFT collection approvals and their associated security risk levels.
+
+18. `nft_attributes_for_trait_in_collection`
+
+    - Commonly used to get the count of unique values for traits within an NFT collection. Returns all values for a given trait (e.g., all possible 'Background' colors). Required: chainName (blockchain network name), collectionContract (NFT collection address), trait (trait name to query).
+
+19. `nft_chain_collections`
+
+    - Commonly used to discover NFT collections on a blockchain. Useful for exploring the NFT ecosystem on a specific chain. Required: chainName (blockchain network). Optional: pageSize (default 100), pageNumber (default 0), noSpam (exclude spam collections, default true). Returns a paginated list of NFT collections with detailed metadata.
+
+20. `nft_collection_traits_summary`
+
+    - Commonly used to calculate rarity scores for a collection based on its traits. Returns statistics for all traits including rarity information. Required: chainName (blockchain network name), collectionContract (NFT collection address).
+
+21. `nft_for_address`
+
+    - Commonly used to get all NFTs owned by a specific wallet address on a blockchain. Useful for NFT portfolio viewers. Required: chainName (blockchain network), walletAddress (wallet address). Optional: noSpam (exclude spam NFTs, default true), noNftAssetMetadata (exclude detailed metadata, default false), withUncached (include uncached items, default false). Returns a comprehensive list of all NFTs owned by the specified wallet.
+
+22. `nft_historical_floor_prices_for_collection`
+
+    - Commonly used to render a price floor chart for an NFT collection. Returns time-series data showing how minimum prices have changed. Required: chainName (blockchain network name), collectionAddress (NFT collection address). Optional: quoteCurrency (currency for price conversion), days (time period in days, default 7).
+
+23. `nft_historical_sales_count_for_collection`
+
+    - Commonly used to build a time-series chart of the sales count of an NFT collection. Returns time-series data showing number of sales per period. Required: chainName (blockchain network name), collectionAddress (NFT collection address). Optional: quoteCurrency (currency for sales conversion), days (time period in days, default 7).
+
+24. `nft_historical_volume_for_collection`
+
+    - Commonly used to build a time-series chart of the transaction volume of an NFT collection. Returns time-series data showing total value of trades per period. Required: chainName (blockchain network name), collectionAddress (NFT collection address). Optional: quoteCurrency (currency for volume conversion), days (time period in days, default 7).
+
+25. `nft_metadata_for_token_id`
+
+    - Commonly used to get a single NFT metadata by token ID from a collection. Useful for building NFT card displays. Returns comprehensive details about a single NFT token. Required: chainName (blockchain network name), contractAddress (NFT contract address), tokenId (specific NFT token ID). Optional: noMetadata (exclude metadata), withUncached (fetch uncached metadata).
+
+26. `nft_token_ids`
+
+    - Commonly used to get NFT token IDs with metadata from a collection. Useful for building NFT card displays. Returns token IDs and their metadata for a single page of results. Required: chainName (blockchain network name), contractAddress (NFT contract address). Optional: noMetadata (exclude metadata), pageSize (default 10), pageNumber (default 0), traitsFilter (filter by traits, URL encoded), valuesFilter (filter by values, URL encoded), withUncached (fetch uncached metadata, default false).
+
+27. `nft_traits_for_collection`
+
+    - Commonly used to fetch and render the traits of a collection as seen in rarity calculators. Returns list of traits like 'Background', 'Eyes', etc. for the collection. Required: chainName (blockchain network name), collectionContract (NFT collection address).
+
+28. `nft_transactions`
+
+    - Commonly used to get all transactions of an NFT token. Useful for building a transaction history table or price chart. Returns all historical transactions involving the specified NFT token. Required: chainName (blockchain network name), contractAddress (NFT contract address), tokenId (specific NFT token ID). Optional: noSpam (filter spam transactions, default true).
+
+29. `token_approvals`
+
+    - Commonly used to get a list of approvals across all token contracts categorized by spenders for a wallet's assets. Required: chainName (blockchain network, e.g. eth-mainnet or 1), walletAddress (wallet address, supports ENS, RNS, Lens Handle, or Unstoppable Domain). Returns a list of ERC20 token approvals and their associated security risk levels.
+
+30. `token_balances`
+
+    - Commonly used to fetch the native and fungible (ERC20) tokens held by an address. Required: chainName (blockchain network), address (wallet address). Optional: quoteCurrency for value conversion, nft (include NFTs, default false), noNftFetch, noSpam, and noNftAssetMetadata (all default true) to control data returned. Returns detailed token balance information including spot prices and metadata.
+
+31. `token_holders`
+
+    - Used to get a paginated list of current or historical token holders for a specified ERC20 or ERC721 token. Required: chainName (blockchain network), tokenAddress (token contract address). Optional: blockHeight or date for historical data, pageSize and pageNumber for pagination. Returns list of addresses holding the token with balance amounts and ownership percentages.
+
+32. `transaction`
+
+    - Commonly used to fetch and render a single transaction including its decoded log events. Required: chainName (blockchain network), txHash (transaction hash). Optional: quoteCurrency (currency to convert to, USD by default), noLogs (exclude event logs, true by default), withInternal (include internal transactions, false by default), withState (include state changes, false by default), withInputData (include input data, false by default). Tracing features (withInternal, withState, withInputData) supported on the following chains: eth-mainnet. Returns comprehensive details about the specified transaction.
+
+33. `transactions_for_address`
+
+    - Commonly used to fetch and render the most recent transactions involving an address. Required: chainName (blockchain network), walletAddress (wallet address), page (page number). Optional: quoteCurrency, noLogs, blockSignedAtAsc (chronological order). Returns transactions for the specified page of results.
+
+34. `transactions_for_block`
+
+    - Commonly used to fetch all transactions including their decoded log events in a block and further flag interesting wallets or transactions. Required: chainName (blockchain network), blockHeight (block number or latest). Optional: quoteCurrency, noLogs (exclude event logs). Returns all transactions from the specified block.
+
+35. `transaction_summary`
+
+    - Commonly used to fetch the earliest and latest transactions, and the transaction count for a wallet. Required: chainName (blockchain network), walletAddress (wallet address). Optional: quoteCurrency, withGas (include gas usage statistics). Returns summary of transaction activity for the specified wallet.
 
 ---
 
@@ -878,19 +475,3 @@ goldrush-mcp-server
 https://modelcontextprotocol.io/docs/tools/inspector
 
 ```
-npx @modelcontextprotocol/inspector node dist/index.js
-```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from the community! If you have suggestions, improvements, or new spam contract addresses to add, please open an issue or submit a pull request. Feel free to check <a href="https://github.com/covalenthq/goldrush-mcp-server/issues">issues</a> page.
-
-## Show your support
-
-Give a ⭐️ if this project helped you!
-
-## 📝 License
-
-This project is <a href="https://github.com/covalenthq/goldrush-mcp-server/blob/main/LICENSE">MIT</a> licensed.
