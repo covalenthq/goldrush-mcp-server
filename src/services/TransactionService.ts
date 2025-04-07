@@ -27,7 +27,7 @@ export function addTransactionServiceTools(
 ) {
     server.tool(
         "transaction",
-        "Gets detailed information about a specific transaction.\n" +
+        "Commonly used to fetch and render a single transaction including its decoded log events.\n" +
             "Required: chainName (blockchain network), txHash (transaction hash).\n" +
             "Optional: quoteCurrency (currency to convert to, USD by default), " +
             "noLogs (exclude event logs, true by default), " +
@@ -82,7 +82,7 @@ export function addTransactionServiceTools(
 
     server.tool(
         "transaction_summary",
-        "Gets a summary of transaction activity for a wallet address.\n" +
+        "Commonly used to fetch the earliest and latest transactions, and the transaction count for a wallet.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
             "Optional: quoteCurrency, withGas (include gas usage statistics).\n" +
             "Returns summary of transaction activity for the specified wallet.",
@@ -126,7 +126,7 @@ export function addTransactionServiceTools(
 
     server.tool(
         "transactions_for_address",
-        "Gets transactions for a wallet address using V3 API endpoint with specific page number.\n" +
+        "Commonly used to fetch and render the most recent transactions involving an address.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address), page (page number).\n" +
             "Optional: quoteCurrency, noLogs, blockSignedAtAsc (chronological order).\n" +
             "Returns transactions for the specified page of results.",
@@ -174,7 +174,7 @@ export function addTransactionServiceTools(
 
     server.tool(
         "transactions_for_block",
-        "Commonly used to fetch all transactions including their decoded log events in a block and further flag interesting wallets or transactions..\n" +
+        "Commonly used to fetch all transactions including their decoded log events in a block and further flag interesting wallets or transactions.\n" +
             "Required: chainName (blockchain network), blockHeight (block number or latest).\n" +
             "Optional: quoteCurrency, noLogs (exclude event logs).\n" +
             "Returns all transactions from the specified block.",

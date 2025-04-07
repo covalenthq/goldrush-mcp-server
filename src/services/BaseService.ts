@@ -28,10 +28,10 @@ export function addBaseServiceTools(
 ) {
     server.tool(
         "gas_prices",
-        "Gets gas price estimations for a specific event type on a given chain.\n" +
-            "Required: chainName (blockchain network), eventType (erc20, nativetokens, or uniswapv3).\n" +
-            "Optional: quoteCurrency (USD, EUR, etc).\n" +
-            "Returns gas price estimations for the specified event type.",
+        "Get real-time gas estimates for different transaction speeds on a specific network, enabling users to optimize transaction costs and confirmation times. " +
+            "Requires chainName (blockchain network) and eventType (erc20, nativetokens, or uniswapv3). " +
+            "Optional parameter quoteCurrency allows conversion to different currencies (USD, EUR, etc). " +
+            "Returns estimated gas prices for low, medium, and high priority transactions for the specified event type.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -69,9 +69,10 @@ export function addBaseServiceTools(
 
     server.tool(
         "block",
-        "Gets details for a specific block height on a given chain.\n" +
-            "Required: chainName (blockchain network), blockHeight (block number).\n" +
-            "Returns detailed information about the specified block.",
+        "Commonly used to fetch and render a single block for a block explorer." +
+            "Requires chainName (blockchain network) and blockHeight (block number). " +
+            "Returns comprehensive block data including timestamp, transaction count, size, " +
+            "miner information, and other blockchain-specific details.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -103,10 +104,11 @@ export function addBaseServiceTools(
 
     server.tool(
         "block_heights",
-        "Gets block heights within a specified date range on a given chain with pagination.\n" +
-            "Required: chainName (blockchain network), startDate (YYYY-MM-DD), endDate (YYYY-MM-DD or latest).\n" +
-            "Optional: pageSize, pageNumber (pagination parameters).\n" +
-            "Returns block details for a single page of results.",
+        "Commonly used to get all the block heights within a particular date range. " +
+            "Requires chainName (blockchain network), startDate (YYYY-MM-DD format), and endDate (YYYY-MM-DD or 'latest'). " +
+            "Optional pagination parameters include pageSize (default 10) and pageNumber (default 0). " +
+            "Returns block heights, timestamps, and related data for blocks within the specified date range, " +
+            "useful for historical analysis and time-based blockchain queries.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -147,10 +149,13 @@ export function addBaseServiceTools(
 
     server.tool(
         "log_events_by_address",
-        "Gets event logs emitted by a specific contract address with pagination.\n" +
-            "Required: chainName (blockchain network), contractAddress (contract emitting events).\n" +
-            "Optional: startingBlock, endingBlock, pageSize, pageNumber (pagination parameters).\n" +
-            "Returns event logs for a single page of results.",
+        "Commonly used to get all the event logs emitted from a particular contract address. " +
+            "Useful for building dashboards that examine on-chain interactions." +
+            "Requires chainName (blockchain network) and contractAddress (the address emitting events). " +
+            "Optional parameters include block range (startingBlock, endingBlock) and pagination settings " +
+            "(pageSize default 10, pageNumber default 0). " +
+            "Returns decoded event logs for the specified contract, useful for monitoring specific " +
+            "smart contract activity and analyzing on-chain events.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -193,10 +198,13 @@ export function addBaseServiceTools(
 
     server.tool(
         "log_events_by_topic",
-        "Gets event logs matching a specific event signature (topic hash) with pagination.\n" +
-            "Required: chainName (blockchain network), topicHash (event signature hash).\n" +
-            "Optional: startingBlock, endingBlock, secondaryTopics, pageSize, pageNumber.\n" +
-            "Returns event logs for a single page of results.",
+        "Commonly used to get all event logs of the same topic hash across all contracts within a particular chain. " +
+            "Useful for cross-sectional analysis of event logs that are emitted on-chain." +
+            "Requires chainName (blockchain network) and topicHash (the event signature hash). " +
+            "Optional parameters include block range (startingBlock, endingBlock), secondaryTopics for " +
+            "filtering by additional parameters, and pagination settings (pageSize default 10, pageNumber default 0). " +
+            "Returns decoded event logs matching the specified topic hash, ideal for tracking specific " +
+            "event types across multiple contracts on a blockchain.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]

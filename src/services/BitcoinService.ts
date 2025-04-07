@@ -23,10 +23,11 @@ export function addBitcoinServiceTools(
 ) {
     server.tool(
         "bitcoin_hd_wallet_balances",
-        "Gets balances for a Bitcoin Hierarchical Deterministic (HD) wallet address (xpub).\n" +
-            "Required: walletAddress (Bitcoin xpub).\n" +
-            "Optional: quoteCurrency (USD, EUR, etc).\n" +
-            "Returns balance information for the specified Bitcoin HD wallet.",
+        "Fetch balances for each active child address derived from a Bitcoin HD wallet.\n" +
+            "This tool provides detailed balance data for Bitcoin wallets identified by an xpub key.\n" +
+            "Required: walletAddress - The xpub key of the HD wallet.\n" +
+            "Optional: quoteCurrency - The currency for price conversion (USD, EUR, etc).\n" +
+            "Returns complete balance details including total balance, available balance, and transaction history summary.",
         {
             walletAddress: z.string(),
             quoteCurrency: z
@@ -61,10 +62,11 @@ export function addBitcoinServiceTools(
 
     server.tool(
         "bitcoin_transactions",
-        "Gets transactions for a standard (non-HD) Bitcoin address.\n" +
-            "Required: address (Bitcoin address).\n" +
-            "Optional: pageNumber, pageSize (pagination parameters).\n" +
-            "Returns transactions for the specified Bitcoin address.",
+        "Used to fetch the full transaction history of a Bitcoin wallet.\n" +
+            "Required: address - The Bitcoin address to query transactions for.\n" +
+            "Optional: pageSize - Number of results per page (default: 10).\n" +
+            "Optional: pageNumber - Page number for pagination (default: 0, first page).\n" +
+            "Returns comprehensive transaction details including timestamps, amounts, and transaction IDs.",
         {
             address: z.string(),
             pageSize: z.number().optional().default(10),
@@ -99,10 +101,11 @@ export function addBitcoinServiceTools(
 
     server.tool(
         "bitcoin_non_hd_wallet_balances",
-        "Gets balances for a standard (non-HD) Bitcoin address.\n" +
-            "Required: walletAddress (Bitcoin address).\n" +
-            "Optional: quoteCurrency (USD, EUR, etc).\n" +
-            "Returns balance information for the specified Bitcoin address.",
+        "Fetch Bitcoin balance for a non-HD address. Response includes spot prices and other metadata.\n" +
+            "This tool provides detailed balance data for regular Bitcoin addresses.\n" +
+            "Required: walletAddress - The Bitcoin address to query.\n" +
+            "Optional: quoteCurrency - The currency for price conversion (USD, EUR, etc).\n" +
+            "Returns complete balance details including total balance, available balance, and transaction count.",
         {
             walletAddress: z.string(),
             quoteCurrency: z

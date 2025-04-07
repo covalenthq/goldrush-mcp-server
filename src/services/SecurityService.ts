@@ -25,8 +25,8 @@ export function addSecurityServiceTools(
 ) {
     server.tool(
         "token_approvals",
-        "Gets token approvals granted by a wallet that may pose security risks.\n" +
-            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
+        "Commonly used to get a list of approvals across all token contracts categorized by spenders for a wallet's assets.\n" +
+            "Required: chainName (blockchain network, e.g. eth-mainnet or 1), walletAddress (wallet address, supports ENS, RNS, Lens Handle, or Unstoppable Domain).\n" +
             "Returns a list of ERC20 token approvals and their associated security risk levels.",
         {
             chainName: z.enum(
@@ -60,8 +60,8 @@ export function addSecurityServiceTools(
 
     server.tool(
         "nft_approvals",
-        "Gets NFT approvals (setApprovalForAll) granted by a wallet that may pose security risks.\n" +
-            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
+        "Gets a list of NFT collection approvals (setApprovalForAll) granted by a wallet that may pose security risks.\n" +
+            "Required: chainName (blockchain network, e.g. eth-mainnet or 1), walletAddress (wallet address, supports ENS, RNS, Lens Handle, or Unstoppable Domain).\n" +
             "Returns a list of NFT collection approvals and their associated security risk levels.",
         {
             chainName: z.enum(

@@ -34,10 +34,10 @@ export function addNftServiceTools(
 ) {
     server.tool(
         "nft_chain_collections",
-        "Gets NFT collections on a specific blockchain network with pagination.\n" +
-            "Required: chainName (blockchain network).\n" +
-            "Optional: pageSize, pageNumber, noSpam (filter out spam collections).\n" +
-            "Returns NFT collections for a single page of results.",
+        "Commonly used to fetch the list of NFT collections with downloaded and cached off chain data like token metadata and asset files." +
+            " Returns collections with cached metadata for a single page of results.\n" +
+            "Required: chainName (blockchain network name).\n" +
+            "Optional: pageSize (default 10), pageNumber (default 0), noSpam (filter spam collections, default true).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -76,10 +76,11 @@ export function addNftServiceTools(
 
     server.tool(
         "nft_for_address",
-        "Gets all NFTs owned by a specific wallet address.\n" +
-            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
-            "Optional: noSpam (filter spam NFTs), noNftAssetMetadata (exclude metadata), withUncached (include uncached data).\n" +
-            "Returns all NFTs owned by the specified wallet.",
+        "Commonly used to render the NFTs (including ERC721 and ERC1155) held by an address." +
+            " Returns complete details of NFTs in the wallet including metadata.\n" +
+            "Required: chainName (blockchain network name), walletAddress (wallet address or ENS/domain).\n" +
+            "Optional: noSpam (filter spam, default true), noNftAssetMetadata (exclude metadata for faster response, default true), " +
+            "withUncached (fetch uncached metadata, may be slower, default false).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -120,10 +121,12 @@ export function addNftServiceTools(
 
     server.tool(
         "nft_token_ids",
-        "Gets token IDs with metadata for a specific NFT contract with pagination.\n" +
-            "Required: chainName (blockchain network), contractAddress (NFT contract address).\n" +
-            "Optional: noMetadata, pageSize, pageNumber, traitsFilter, valuesFilter, withUncached.\n" +
-            "Returns token IDs with metadata for a single page of results.",
+        "Commonly used to get NFT token IDs with metadata from a collection. Useful for building NFT card displays." +
+            " Returns token IDs and their metadata for a single page of results.\n" +
+            "Required: chainName (blockchain network name), contractAddress (NFT contract address).\n" +
+            "Optional: noMetadata (exclude metadata), pageSize (default 10), pageNumber (default 0), " +
+            "traitsFilter (filter by traits, URL encoded), valuesFilter (filter by values, URL encoded), " +
+            "withUncached (fetch uncached metadata, default false).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -170,10 +173,11 @@ export function addNftServiceTools(
 
     server.tool(
         "nft_metadata_for_token_id",
-        "Gets detailed metadata for a specific NFT token ID.\n" +
-            "Required: chainName (blockchain network), contractAddress (NFT contract), tokenId (specific NFT ID).\n" +
-            "Optional: noMetadata (exclude metadata), withUncached (include uncached data).\n" +
-            "Returns comprehensive metadata for the specified NFT token.",
+        "Commonly used to get a single NFT metadata by token ID from a collection. Useful for building NFT card displays." +
+            " Returns comprehensive details about a single NFT token.\n" +
+            "Required: chainName (blockchain network name), contractAddress (NFT contract address), " +
+            "tokenId (specific NFT token ID).\n" +
+            "Optional: noMetadata (exclude metadata), withUncached (fetch uncached metadata).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -214,10 +218,11 @@ export function addNftServiceTools(
 
     server.tool(
         "nft_transactions",
-        "Gets transaction history for a specific NFT token.\n" +
-            "Required: chainName (blockchain network), contractAddress (NFT contract), tokenId (specific NFT ID).\n" +
-            "Optional: noSpam (filter spam transactions).\n" +
-            "Returns all transactions involving the specified NFT token.",
+        "Commonly used to get all transactions of an NFT token. Useful for building a transaction history table or price chart." +
+            " Returns all historical transactions involving the specified NFT token.\n" +
+            "Required: chainName (blockchain network name), contractAddress (NFT contract address), " +
+            "tokenId (specific NFT token ID).\n" +
+            "Optional: noSpam (filter spam transactions, default true).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -254,9 +259,9 @@ export function addNftServiceTools(
 
     server.tool(
         "nft_traits_for_collection",
-        "Gets all trait types (e.g., 'Background', 'Eyes') available in an NFT collection.\n" +
-            "Required: chainName (blockchain network), collectionContract (NFT collection address).\n" +
-            "Returns all available trait types for the specified NFT collection.",
+        "Commonly used to fetch and render the traits of a collection as seen in rarity calculators." +
+            " Returns list of traits like 'Background', 'Eyes', etc. for the collection.\n" +
+            "Required: chainName (blockchain network name), collectionContract (NFT collection address).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -289,9 +294,10 @@ export function addNftServiceTools(
 
     server.tool(
         "nft_attributes_for_trait_in_collection",
-        "Gets all possible attribute values for a specific trait in an NFT collection.\n" +
-            "Required: chainName (blockchain network), collectionContract (NFT collection), trait (trait name).\n" +
-            "Returns all attribute values for the specified trait (e.g., all 'Background' values).",
+        "Commonly used to get the count of unique values for traits within an NFT collection." +
+            " Returns all values for a given trait (e.g., all possible 'Background' colors).\n" +
+            "Required: chainName (blockchain network name), collectionContract (NFT collection address), " +
+            "trait (trait name to query).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -326,9 +332,9 @@ export function addNftServiceTools(
 
     server.tool(
         "nft_collection_traits_summary",
-        "Gets a summary of all traits and their distribution in an NFT collection.\n" +
-            "Required: chainName (blockchain network), collectionContract (NFT collection address).\n" +
-            "Returns statistics for all traits and values in the specified collection.",
+        "Commonly used to calculate rarity scores for a collection based on its traits." +
+            " Returns statistics for all traits including rarity information.\n" +
+            "Required: chainName (blockchain network name), collectionContract (NFT collection address).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -361,10 +367,10 @@ export function addNftServiceTools(
 
     server.tool(
         "nft_historical_floor_prices_for_collection",
-        "Gets historical floor prices over time for an NFT collection.\n" +
-            "Required: chainName (blockchain network), collectionAddress (NFT collection).\n" +
-            "Optional: quoteCurrency (currency for prices), days (time period to analyze).\n" +
-            "Returns floor price data points over the specified time period.",
+        "Commonly used to render a price floor chart for an NFT collection." +
+            " Returns time-series data showing how minimum prices have changed.\n" +
+            "Required: chainName (blockchain network name), collectionAddress (NFT collection address).\n" +
+            "Optional: quoteCurrency (currency for price conversion), days (time period in days, default 7).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -405,10 +411,10 @@ export function addNftServiceTools(
 
     server.tool(
         "nft_historical_volume_for_collection",
-        "Gets historical trading volume over time for an NFT collection.\n" +
-            "Required: chainName (blockchain network), collectionAddress (NFT collection).\n" +
-            "Optional: quoteCurrency (currency for volume), days (time period to analyze).\n" +
-            "Returns trading volume data points over the specified time period.",
+        "Commonly used to build a time-series chart of the transaction volume of an NFT collection." +
+            " Returns time-series data showing total value of trades per period.\n" +
+            "Required: chainName (blockchain network name), collectionAddress (NFT collection address).\n" +
+            "Optional: quoteCurrency (currency for volume conversion), days (time period in days, default 7).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -449,10 +455,10 @@ export function addNftServiceTools(
 
     server.tool(
         "nft_historical_sales_count_for_collection",
-        "Gets historical count of sales over time for an NFT collection.\n" +
-            "Required: chainName (blockchain network), collectionAddress (NFT collection).\n" +
-            "Optional: quoteCurrency (currency for sales), days (time period to analyze).\n" +
-            "Returns sales count data points over the specified time period.",
+        "Commonly used to build a time-series chart of the sales count of an NFT collection." +
+            " Returns time-series data showing number of sales per period.\n" +
+            "Required: chainName (blockchain network name), collectionAddress (NFT collection address).\n" +
+            "Optional: quoteCurrency (currency for sales conversion), days (time period in days, default 7).",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]

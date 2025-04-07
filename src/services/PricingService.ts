@@ -26,9 +26,9 @@ export function addPricingServiceTools(
 ) {
     server.tool(
         "historical_token_prices",
-        "Gets historical price data for a specific token over a time period.\n" +
-            "Required: chainName (blockchain network), quoteCurrency (price currency), contractAddress (token contract).\n" +
-            "Optional: from (start date), to (end date), pricesAtAsc (chronological order).\n" +
+        "Commonly used to get historic prices of a token between date ranges. Supports native tokens.\n" +
+            "Required: chainName (blockchain network), quoteCurrency (price currency), contractAddress (token contract), from (start date YYYY-MM-DD), to (end date YYYY-MM-DD).\n" +
+            "Optional: pricesAtAsc (set to true for chronological ascending order, default is false for descending order).\n" +
             "Returns historical token prices for the specified time range.",
         {
             chainName: z.enum(
