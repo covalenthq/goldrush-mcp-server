@@ -7,8 +7,8 @@
  *
  * @description
  * Tests the following SecurityService methods:
- * - getApprovals
- * - getNftApprovals
+ * - get_token_approvals
+ * - get_nft_approvals
  *
  * Notes:
  * - We do minimal checks, ensuring no error and verifying response is defined
@@ -43,28 +43,28 @@ describe("SecurityService Tools", () => {
         await client.connect(transport);
     }, 60000);
 
-    it("getApprovals - minimal check", async () => {
+    it("token_approvals - minimal check", async () => {
         const response = await client.callTool({
-            name: "getApprovals",
+            name: "token_approvals",
             arguments: {
                 chainName: "eth-mainnet",
                 walletAddress: "demo.eth",
             },
         });
-        console.log("getApprovals response:", response.content);
+        console.log("token_approvals response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);
 
-    it("getNftApprovals - minimal check", async () => {
+    it("nft_approvals - minimal check", async () => {
         const response = await client.callTool({
-            name: "getNftApprovals",
+            name: "nft_approvals",
             arguments: {
                 chainName: "eth-mainnet",
                 walletAddress: "demo.eth",
             },
         });
-        console.log("getNftApprovals response:", response.content);
+        console.log("nft_approvals response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);

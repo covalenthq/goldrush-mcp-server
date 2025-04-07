@@ -13,16 +13,16 @@ import { z } from "zod";
  * @param {GoldRushClient} goldRushClient - The GoldRush client
  * @remarks
  * This function creates tools:
- * - getBitcoinHdWalletBalances
- * - getTransactionsForBtcAddress
- * - getBitcoinNonHdWalletBalances
+ * - bitcoin_hd_wallet_balances
+ * - bitcoin_transactions
+ * - bitcoin_non_hd_wallet_balances
  */
 export function addBitcoinServiceTools(
     server: McpServer,
     goldRushClient: GoldRushClient
 ) {
     server.tool(
-        "getBitcoinHdWalletBalances",
+        "bitcoin_hd_wallet_balances",
         "Gets balances for a Bitcoin Hierarchical Deterministic (HD) wallet address (xpub).\n" +
             "Required: walletAddress (Bitcoin xpub).\n" +
             "Optional: quoteCurrency (USD, EUR, etc).\n" +
@@ -60,7 +60,7 @@ export function addBitcoinServiceTools(
     );
 
     server.tool(
-        "getTransactionsForBtcAddress",
+        "bitcoin_transactions",
         "Gets transactions for a standard (non-HD) Bitcoin address.\n" +
             "Required: address (Bitcoin address).\n" +
             "Optional: pageNumber, pageSize (pagination parameters).\n" +
@@ -98,7 +98,7 @@ export function addBitcoinServiceTools(
     );
 
     server.tool(
-        "getBitcoinNonHdWalletBalances",
+        "bitcoin_non_hd_wallet_balances",
         "Gets balances for a standard (non-HD) Bitcoin address.\n" +
             "Required: walletAddress (Bitcoin address).\n" +
             "Optional: quoteCurrency (USD, EUR, etc).\n" +

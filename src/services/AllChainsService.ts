@@ -17,20 +17,21 @@ import { z } from "zod";
  * @param {GoldRushClient} goldRushClient - The GoldRush client
  * @remarks
  * This function creates tools:
- * - getMultiChainMultiAddressTransactions
- * - getMultiChainBalances
- * - getAddressActivity
+ * - multichain_transactions
+ * - multichain_balances
+ * - multichain_address_activity
  */
 export function addAllChainsServiceTools(
     server: McpServer,
     goldRushClient: GoldRushClient
 ) {
     server.tool(
-        "getMultiChainMultiAddressTransactions",
-        "Gets transactions for multiple wallet addresses across multiple blockchains.\n" +
-            "Required: addresses (array of wallet addresses).\n" +
-            "Optional: chains (array of blockchain networks), before/after (pagination), limit, quoteCurrency, withDecodedLogs, withLogs.\n" +
-            "Returns transactions for the specified addresses across selected chains.",
+        "multichain_transactions",
+        "Gets transactions for multiple wallet addresses across multiple blockchains. " +
+            "Requires addresses array. Optional parameters include chains array, " +
+            "pagination (before/after), limit (default 10), quoteCurrency for value conversion, " +
+            "and options to include logs (withLogs, withDecodedLogs). " +
+            "Use this to analyze transaction history across different networks simultaneously.",
         {
             chains: z
                 .array(
@@ -85,11 +86,12 @@ export function addAllChainsServiceTools(
     );
 
     server.tool(
-        "getMultiChainBalances",
-        "Gets token balances for a wallet address across multiple blockchains.\n" +
-            "Required: walletAddress (wallet address).\n" +
-            "Optional: chains (array of blockchain networks), quoteCurrency, before, cutoffTimestamp, limit.\n" +
-            "Returns token balances across all specified chains.",
+        "multichain_balances",
+        "Gets token balances for a wallet address across multiple blockchains. " +
+            "Requires walletAddress. Optional parameters include chains array to specify networks, " +
+            "quoteCurrency for value conversion, limit (default 10), pagination (before), " +
+            "and cutoffTimestamp to filter by time. " +
+            "Use this to get a comprehensive view of token holdings across different blockchains.",
         {
             walletAddress: z.string(),
             quoteCurrency: z
@@ -140,11 +142,12 @@ export function addAllChainsServiceTools(
     );
 
     server.tool(
-        "getAddressActivity",
-        "Gets a summary of wallet activity across all supported blockchains.\n" +
-            "Required: walletAddress (wallet address).\n" +
-            "Optional: testnets (include testnet activity).\n" +
-            "Returns chain activity summary across all networks.",
+        "multichain_address_activity",
+        "Gets a summary of wallet activity across all supported blockchains. " +
+            "Requires walletAddress. Optional parameter testnets (default false) " +
+            "determines whether to include testnet activity. " +
+            "Returns a comprehensive summary of chain activity including transaction counts, " +
+            "first/last activity timestamps, and activity status across all networks.",
         {
             walletAddress: z.string(),
             testnets: z.boolean().optional().default(false),

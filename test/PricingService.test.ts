@@ -7,13 +7,13 @@
  *
  * @description
  * Tests the following PricingService method:
- * - getTokenPrices
+ * - historical_token_prices
  *
  * Notes:
  * - We do minimal checks just to ensure that the call does not error out, as we do
  *   not have a real contract address nor a real chain to test thoroughly.
  * - Start server as a subprocess using StdioClientTransport
- * - For getTokenPrices, pass minimal valid arguments
+ * - For historical_token_prices, pass minimal valid arguments
  * - Confirm we get a non-error response
  */
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -46,9 +46,9 @@ describe("PricingService Tools", () => {
         await client.connect(transport);
     }, 60000);
 
-    it("getTokenPrices - minimal check", async () => {
+    it("historical_token_prices - minimal check", async () => {
         const resp = await client.callTool({
-            name: "getTokenPrices",
+            name: "historical_token_prices",
             arguments: {
                 chainName: "eth-mainnet",
                 quoteCurrency: "USD",
@@ -59,7 +59,7 @@ describe("PricingService Tools", () => {
             },
         });
 
-        console.log("getTokenPrices response:", resp.content);
+        console.log("historical_token_prices response:", resp.content);
 
         expect(resp.isError).toBeFalsy();
         expect(resp.content).toBeDefined();

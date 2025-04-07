@@ -8,13 +8,13 @@
  *
  *
  * @description
- * Tests the following BalanceService methods:
- * - getTokenBalancesForWalletAddress
- * - getHistoricalTokenBalancesForWalletAddress
- * - getHistoricalPortfolioForWalletAddress
- * - getErc20TransfersForWalletAddress
- * - getTokenHoldersV2ForTokenAddress
- * - getNativeTokenBalance
+ * Tests the following BalanceService tools:
+ * - token_balances
+ * - historical_token_balances
+ * - historical_portfolio_value
+ * - erc20_token_transfers
+ * - token_holders
+ * - native_token_balance
  *
  * Notes:
  * - We use the Vitest framework
@@ -53,26 +53,23 @@ describe("BalanceService Tool", () => {
         await client.connect(transport);
     }, 60000);
 
-    it("getTokenBalancesForWalletAddress - minimal check", async () => {
+    it("token_balances - minimal check", async () => {
         const response = await client.callTool({
-            name: "getTokenBalancesForWalletAddress",
+            name: "token_balances",
             arguments: {
                 chainName: "eth-mainnet",
                 address: "demo.eth",
                 noSpam: true,
             },
         });
-        console.log(
-            "getTokenBalancesForWalletAddress response:",
-            response.content
-        );
+        console.log("token_balances response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);
 
-    it("getHistoricalTokenBalancesForWalletAddress - minimal check", async () => {
+    it("historical_token_balances - minimal check", async () => {
         const response = await client.callTool({
-            name: "getHistoricalTokenBalancesForWalletAddress",
+            name: "historical_token_balances",
             arguments: {
                 chainName: "eth-mainnet",
                 address: "demo.eth",
@@ -80,33 +77,27 @@ describe("BalanceService Tool", () => {
                 noSpam: true,
             },
         });
-        console.log(
-            "getHistoricalTokenBalancesForWalletAddress response:",
-            response.content
-        );
+        console.log("historical_token_balances response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);
 
-    it("getHistoricalPortfolioForWalletAddress - minimal check", async () => {
+    it("historical_portfolio_value - minimal check", async () => {
         const response = await client.callTool({
-            name: "getHistoricalPortfolioForWalletAddress",
+            name: "historical_portfolio_value",
             arguments: {
                 chainName: "eth-mainnet",
                 walletAddress: "demo.eth",
             },
         });
-        console.log(
-            "getHistoricalPortfolioForWalletAddress response:",
-            response.content
-        );
+        console.log("historical_portfolio_value response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);
 
-    it("getErc20TransfersForWalletAddress - minimal check", async () => {
+    it("erc20_token_transfers - minimal check", async () => {
         const response = await client.callTool({
-            name: "getErc20TransfersForWalletAddress",
+            name: "erc20_token_transfers",
             arguments: {
                 chainName: "eth-mainnet",
                 walletAddress: "demo.eth",
@@ -115,17 +106,14 @@ describe("BalanceService Tool", () => {
                 endingBlock: 20681557,
             },
         });
-        console.log(
-            "getErc20TransfersForWalletAddress response:",
-            response.content
-        );
+        console.log("erc20_token_transfers response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);
 
-    it("getTokenHoldersV2ForTokenAddress - minimal check", async () => {
+    it("token_holders - minimal check", async () => {
         const response = await client.callTool({
-            name: "getTokenHoldersV2ForTokenAddress",
+            name: "token_holders",
             arguments: {
                 chainName: "eth-mainnet",
                 tokenAddress: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D", // CXT
@@ -133,23 +121,20 @@ describe("BalanceService Tool", () => {
                 pageNumber: 0,
             },
         });
-        console.log(
-            "getTokenHoldersV2ForTokenAddress response:",
-            response.content
-        );
+        console.log("token_holders response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);
 
-    it("getNativeTokenBalance - minimal check", async () => {
+    it("native_token_balance - minimal check", async () => {
         const response = await client.callTool({
-            name: "getNativeTokenBalance",
+            name: "native_token_balance",
             arguments: {
                 chainName: "eth-mainnet",
                 walletAddress: "demo.eth",
             },
         });
-        console.log("getNativeTokenBalance response:", response.content);
+        console.log("native_token_balance response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);

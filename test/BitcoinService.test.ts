@@ -7,9 +7,9 @@
  *
  * @description
  * Tests the following BitcoinService methods:
- * - getBitcoinHdWalletBalances
- * - getTransactionsForBtcAddress
- * - getBitcoinNonHdWalletBalances
+ * - bitcoin_hd_wallet_balances
+ * - bitcoin_transactions
+ * - bitcoin_non_hd_wallet_balances
  *
  * Notes:
  * - We use the Vitest framework
@@ -48,41 +48,41 @@ describe("BitcoinService Tools", () => {
         await client.connect(transport);
     }, 60000);
 
-    it("getBitcoinHdWalletBalances - minimal check", async () => {
+    it("bitcoin_hd_wallet_balances - minimal check", async () => {
         const response = await client.callTool({
-            name: "getBitcoinHdWalletBalances",
+            name: "bitcoin_hd_wallet_balances",
             arguments: {
                 walletAddress: "bc1qxjpqzt38xwh09x34dgjn4jtnw2vus82p88haqp",
             },
         });
-        console.log("getBitcoinHdWalletBalances response:", response.content);
+        console.log("bitcoin_hd_wallet_balances response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);
 
-    it("getTransactionsForBtcAddress - minimal check", async () => {
+    it("bitcoin_transactions - minimal check", async () => {
         const response = await client.callTool({
-            name: "getTransactionsForBtcAddress",
+            name: "bitcoin_transactions",
             arguments: {
                 address: "bc1qxjpqzt38xwh09x34dgjn4jtnw2vus82p88haqp",
                 pageSize: 10,
                 pageNumber: 0,
             },
         });
-        console.log("getTransactionsForBtcAddress response:", response.content);
+        console.log("bitcoin_transactions response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);
 
-    it("getBitcoinNonHdWalletBalances - minimal check", async () => {
+    it("bitcoin_non_hd_wallet_balances - minimal check", async () => {
         const response = await client.callTool({
-            name: "getBitcoinNonHdWalletBalances",
+            name: "bitcoin_non_hd_wallet_balances",
             arguments: {
                 walletAddress: "34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo",
             },
         });
         console.log(
-            "getBitcoinNonHdWalletBalances response:",
+            "bitcoin_non_hd_wallet_balances response:",
             response.content
         );
         expect(response.isError).toBeFalsy();

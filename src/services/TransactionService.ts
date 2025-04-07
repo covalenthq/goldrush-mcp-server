@@ -16,17 +16,17 @@ import { z } from "zod";
  * @param {GoldRushClient} goldRushClient - The GoldRush client
  * @remarks
  * This function creates tools:
- * - getTransaction
- * - getTransactionSummary
- * - getTransactionsForAddress
- * - getTransactionsForBlock
+ * - transaction
+ * - transaction_summary
+ * - transactions_for_address
+ * - transactions_for_block
  */
 export function addTransactionServiceTools(
     server: McpServer,
     goldRushClient: GoldRushClient
 ) {
     server.tool(
-        "getTransaction",
+        "transaction",
         "Gets detailed information about a specific transaction.\n" +
             "Required: chainName (blockchain network), txHash (transaction hash).\n" +
             "Optional: quoteCurrency (currency to convert to, USD by default), " +
@@ -81,7 +81,7 @@ export function addTransactionServiceTools(
     );
 
     server.tool(
-        "getTransactionSummary",
+        "transaction_summary",
         "Gets a summary of transaction activity for a wallet address.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
             "Optional: quoteCurrency, withGas (include gas usage statistics).\n" +
@@ -125,7 +125,7 @@ export function addTransactionServiceTools(
     );
 
     server.tool(
-        "getTransactionsForAddress",
+        "transactions_for_address",
         "Gets transactions for a wallet address using V3 API endpoint with specific page number.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address), page (page number).\n" +
             "Optional: quoteCurrency, noLogs, blockSignedAtAsc (chronological order).\n" +
@@ -173,7 +173,7 @@ export function addTransactionServiceTools(
     );
 
     server.tool(
-        "getTransactionsForBlock",
+        "transactions_for_block",
         "Commonly used to fetch all transactions including their decoded log events in a block and further flag interesting wallets or transactions..\n" +
             "Required: chainName (blockchain network), blockHeight (block number or latest).\n" +
             "Optional: quoteCurrency, noLogs (exclude event logs).\n" +

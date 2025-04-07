@@ -17,23 +17,24 @@ import { z } from "zod";
  * @param {GoldRushClient} goldRushClient - The GoldRush client
  * @remarks
  * This function creates tools:
- * - getTokenBalancesForWalletAddress
- * - getHistoricalTokenBalancesForWalletAddress
- * - getHistoricalPortfolioForWalletAddress
- * - getErc20TransfersForWalletAddress
- * - getTokenHoldersV2ForTokenAddress
- * - getNativeTokenBalance
+ * - token_balances
+ * - historical_token_balances
+ * - historical_portfolio_value
+ * - erc20_token_transfers
+ * - token_holders
+ * - native_token_balance
  */
 export function addBalanceServiceTools(
     server: McpServer,
     goldRushClient: GoldRushClient
 ) {
     server.tool(
-        "getTokenBalancesForWalletAddress",
-        "Gets current token balances for a wallet address on a specified chain.\n" +
-            "Required: chainName (blockchain network), address (wallet address).\n" +
-            "Optional: quoteCurrency, nft, noNftFetch, noSpam, noNftAssetMetadata.\n" +
-            "Returns detailed token balance information including prices.",
+        "token_balances",
+        "Commonly used to fetch the native and fungible (ERC20) tokens held by an address. " +
+            "Required: chainName (blockchain network), address (wallet address). " +
+            "Optional: quoteCurrency for value conversion, nft (include NFTs, default false), " +
+            "noNftFetch, noSpam, and noNftAssetMetadata (all default true) to control data returned. " +
+            "Returns detailed token balance information including spot prices and metadata.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -79,11 +80,12 @@ export function addBalanceServiceTools(
     );
 
     server.tool(
-        "getHistoricalTokenBalancesForWalletAddress",
-        "Gets historical token balances for a wallet at a specific block height or date.\n" +
-            "Required: chainName (blockchain network), address (wallet address).\n" +
-            "Optional: quoteCurrency, nft, noNftFetch, noSpam, noNftAssetMetadata, blockHeight, date.\n" +
-            "Returns token balances as they were at the specified point in time.",
+        "historical_token_balances",
+        "Commonly used to fetch the historical native and fungible (ERC20) tokens held by an address at a given block height or date" +
+            "Required: chainName (blockchain network), address (wallet address). " +
+            "Optional: quoteCurrency for value conversion, blockHeight or date to specify point in time, " +
+            "nft (include NFTs, default false), noNftFetch, noSpam, and noNftAssetMetadata (all default true). " +
+            "Returns token balances as they existed at the specified historical point.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -133,11 +135,11 @@ export function addBalanceServiceTools(
     );
 
     server.tool(
-        "getHistoricalPortfolioForWalletAddress",
-        "Gets historical portfolio value for a wallet over time.\n" +
-            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
-            "Optional: quoteCurrency (USD, EUR, etc), days (number of days to look back).\n" +
-            "Returns portfolio value time series data for the specified period.",
+        "historical_portfolio_value",
+        "Commonly used to render a daily portfolio balance for an address broken down by the token. " +
+            "Required: chainName (blockchain network), walletAddress (wallet address). " +
+            "Optional: quoteCurrency for value conversion, days (timeframe to analyze, default 7). " +
+            "Returns portfolio value time series data showing value changes over the specified timeframe.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -177,11 +179,12 @@ export function addBalanceServiceTools(
     );
 
     server.tool(
-        "getErc20TransfersForWalletAddress",
-        "Gets ERC20 token transfers for a wallet address with pagination.\n" +
-            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
-            "Optional: quoteCurrency, contractAddress (specific token), startingBlock, endingBlock, pageSize, pageNumber.\n" +
-            "Returns token transfer events for a single page of results.",
+        "erc20_token_transfers",
+        "Commonly used to render the transfer-in and transfer-out of a token along with historical prices from an address. " +
+            "Required: chainName (blockchain network), walletAddress (wallet address). " +
+            "Optional: quoteCurrency for value conversion, contractAddress to filter by specific token, " +
+            "startingBlock/endingBlock to set range, pageSize (default 10) and pageNumber (default 0). " +
+            "Returns token transfer events with timestamps, values, and transaction details.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -229,11 +232,11 @@ export function addBalanceServiceTools(
     );
 
     server.tool(
-        "getTokenHoldersV2ForTokenAddress",
-        "Gets token holders for a specific token with pagination.\n" +
-            "Required: chainName (blockchain network), tokenAddress (token contract address).\n" +
-            "Optional: blockHeight, date (historical point), pageSize, pageNumber (pagination parameters).\n" +
-            "Returns token holders for a single page of results.",
+        "token_holders",
+        "Used to get a paginated list of current or historical token holders for a specified ERC20 or ERC721 token." +
+            "Required: chainName (blockchain network), tokenAddress (token contract address). " +
+            "Optional: blockHeight or date for historical data, pageSize and pageNumber for pagination. " +
+            "Returns list of addresses holding the token with balance amounts and ownership percentages.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
@@ -276,11 +279,11 @@ export function addBalanceServiceTools(
     );
 
     server.tool(
-        "getNativeTokenBalance",
-        "Gets the native token balance (ETH, MATIC, etc.) for a wallet address.\n" +
-            "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
-            "Optional: quoteCurrency (USD, EUR, etc), blockHeight (for historical balance).\n" +
-            "Returns native token balance information.",
+        "native_token_balance",
+        "Commonly used to fetch the native token balance (ETH, MATIC, etc.) for an address. " +
+            "Required: chainName (blockchain network), walletAddress (wallet address). " +
+            "Optional: quoteCurrency for value conversion, blockHeight for historical balance. " +
+            "Returns native token balance with current market value and token metadata.",
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]

@@ -16,18 +16,18 @@ import { z } from "zod";
  * @param {GoldRushClient} goldRushClient - The GoldRush client
  * @remarks
  * This function creates tools:
- * - getGasPrices
- * - getBlock
- * - getBlockHeights
- * - getLogEventsByAddress
- * - getLogEventsByTopicHash
+ * - gas_prices
+ * - block
+ * - block_heights
+ * - log_events_by_address
+ * - log_events_by_topic
  */
 export function addBaseServiceTools(
     server: McpServer,
     goldRushClient: GoldRushClient
 ) {
     server.tool(
-        "getGasPrices",
+        "gas_prices",
         "Gets gas price estimations for a specific event type on a given chain.\n" +
             "Required: chainName (blockchain network), eventType (erc20, nativetokens, or uniswapv3).\n" +
             "Optional: quoteCurrency (USD, EUR, etc).\n" +
@@ -68,7 +68,7 @@ export function addBaseServiceTools(
     );
 
     server.tool(
-        "getBlock",
+        "block",
         "Gets details for a specific block height on a given chain.\n" +
             "Required: chainName (blockchain network), blockHeight (block number).\n" +
             "Returns detailed information about the specified block.",
@@ -102,7 +102,7 @@ export function addBaseServiceTools(
     );
 
     server.tool(
-        "getBlockHeights",
+        "block_heights",
         "Gets block heights within a specified date range on a given chain with pagination.\n" +
             "Required: chainName (blockchain network), startDate (YYYY-MM-DD), endDate (YYYY-MM-DD or latest).\n" +
             "Optional: pageSize, pageNumber (pagination parameters).\n" +
@@ -146,7 +146,7 @@ export function addBaseServiceTools(
     );
 
     server.tool(
-        "getLogEventsByAddress",
+        "log_events_by_address",
         "Gets event logs emitted by a specific contract address with pagination.\n" +
             "Required: chainName (blockchain network), contractAddress (contract emitting events).\n" +
             "Optional: startingBlock, endingBlock, pageSize, pageNumber (pagination parameters).\n" +
@@ -192,7 +192,7 @@ export function addBaseServiceTools(
     );
 
     server.tool(
-        "getLogEventsByTopicHash",
+        "log_events_by_topic",
         "Gets event logs matching a specific event signature (topic hash) with pagination.\n" +
             "Required: chainName (blockchain network), topicHash (event signature hash).\n" +
             "Optional: startingBlock, endingBlock, secondaryTopics, pageSize, pageNumber.\n" +

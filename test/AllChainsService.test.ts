@@ -4,8 +4,8 @@
  * @remarks
  * These tests rely on having GOLDRUSH_API_KEY environment variable set,
  * and also rely on the server being started. They test the
- * getMultiChainMultiAddressTransactions, getMultiChainBalances,
- * and getAddressActivity tools.
+ * multichain_transactions, multichain_balances,
+ * and multichain_address_activity tools.
  *
  * @description
  * - We use the Vitest framework
@@ -43,15 +43,15 @@ describe("AllChainsService Tools", () => {
         await client.connect(transport);
     }, 60000);
 
-    it("should call getAddressActivity successfully (minimal check)", async () => {
+    it("should call multichain_address_activity successfully (minimal check)", async () => {
         const response = await client.callTool({
-            name: "getAddressActivity",
+            name: "multichain_address_activity",
             arguments: {
                 walletAddress: "demo.eth",
             },
         });
         // Log the full API response
-        console.log("getAddressActivity response:", response.content);
+        console.log("multichain_address_activity response:", response.content);
         // We won't parse deeply, just ensure no error
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
@@ -59,33 +59,30 @@ describe("AllChainsService Tools", () => {
         // For real usage we might parse and do further checks
     }, 30000);
 
-    it("should call getMultiChainBalances successfully (minimal check)", async () => {
+    it("should call multichain_balances successfully (minimal check)", async () => {
         const response = await client.callTool({
-            name: "getMultiChainBalances",
+            name: "multichain_balances",
             arguments: {
                 walletAddress: "demo.eth",
                 limit: 1,
             },
         });
         // Log the full API response
-        console.log("getMultiChainBalances response:", response.content);
+        console.log("multichain_balances response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);
 
-    it("should call getMultiChainMultiAddressTransactions successfully (minimal check)", async () => {
+    it("should call multichain_transactions successfully (minimal check)", async () => {
         const response = await client.callTool({
-            name: "getMultiChainMultiAddressTransactions",
+            name: "multichain_transactions",
             arguments: {
                 addresses: ["demo.eth"],
                 limit: 1,
             },
         });
         // Log the full API response
-        console.log(
-            "getMultiChainMultiAddressTransactions response:",
-            response.content
-        );
+        console.log("multichain_transactions response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
     }, 30000);

@@ -9,13 +9,11 @@
  *
  * @description
  * Tests the following BaseService methods:
- * - getGasPrices
- * - getBlock
- * - getResolvedAddress
- * - getBlockHeights
- * - getLogs
- * - getLogEventsByAddress
- * - getLogEventsByTopicHash
+ * - gas_prices
+ * - block
+ * - block_heights
+ * - log_events_by_address
+ * - log_events_by_topic
  *
  * Notes:
  * - We use the Vitest framework
@@ -52,48 +50,48 @@ describe("BaseService Tools", () => {
         await client.connect(transport);
     }, 60000);
 
-    it("getGasPrices - minimal check", async () => {
+    it("gas_prices - minimal check", async () => {
         const resp = await client.callTool({
-            name: "getGasPrices",
+            name: "gas_prices",
             arguments: {
                 chainName: "eth-mainnet",
                 eventType: "erc20",
             },
         });
-        console.log("getGasPrices response:", resp.content);
+        console.log("gas_prices response:", resp.content);
         expect(resp.isError).toBeFalsy();
         expect(resp.content).toBeDefined();
     }, 30000);
 
-    it("getBlock - minimal check", async () => {
+    it("block - minimal check", async () => {
         const resp = await client.callTool({
-            name: "getBlock",
+            name: "block",
             arguments: {
                 chainName: "eth-mainnet",
                 blockHeight: "latest",
             },
         });
-        console.log("getBlock response:", resp.content);
+        console.log("block response:", resp.content);
         expect(resp.isError).toBeFalsy();
         expect(resp.content).toBeDefined();
     }, 30000);
 
-    it("getBlockHeights - minimal check", async () => {
+    it("block_heights - minimal check", async () => {
         const resp = await client.callTool({
-            name: "getBlockHeights",
+            name: "block_heights",
             arguments: {
                 chainName: "eth-mainnet",
                 startDate: "2025-01-01",
                 endDate: "2025-01-02",
             },
         });
-        console.log("getBlockHeights (all pages) response:", resp.content);
+        console.log("block_heights response:", resp.content);
         expect(resp.isError).toBeFalsy();
     }, 30000);
 
-    it("getLogEventsByAddress - minimal check", async () => {
+    it("log_events_by_address - minimal check", async () => {
         const resp = await client.callTool({
-            name: "getLogEventsByAddress",
+            name: "log_events_by_address",
             arguments: {
                 chainName: "eth-mainnet",
                 startingBlock: 22096686,
@@ -101,14 +99,14 @@ describe("BaseService Tools", () => {
                 contractAddress: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D",
             },
         });
-        console.log("getLogEventsByAddress response:", resp.content);
+        console.log("log_events_by_address response:", resp.content);
         expect(resp.isError).toBeFalsy();
         expect(resp.content).toBeDefined();
     }, 30000);
 
-    it("getLogEventsByTopicHash - minimal check", async () => {
+    it("log_events_by_topic - minimal check", async () => {
         const resp = await client.callTool({
-            name: "getLogEventsByTopicHash",
+            name: "log_events_by_topic",
             arguments: {
                 chainName: "eth-mainnet",
                 topicHash:
@@ -117,7 +115,7 @@ describe("BaseService Tools", () => {
                 endingBlock: 22096786,
             },
         });
-        console.log("getLogEventsByTopicHash response:", resp.content);
+        console.log("log_events_by_topic response:", resp.content);
         expect(resp.isError).toBeFalsy();
         expect(resp.content).toBeDefined();
     }, 30000);

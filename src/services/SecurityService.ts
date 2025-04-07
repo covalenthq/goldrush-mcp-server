@@ -11,8 +11,8 @@ import { z } from "zod";
  * @function addSecurityServiceTools
  * @description
  * Adds tools for the SecurityService. This includes:
- *  - getApprovals
- *  - getNftApprovals
+ *  - token_approvals
+ *  - nft_approvals
  *
  * These calls fetch approvals for tokens and NFTs, respectively.
  *
@@ -24,7 +24,7 @@ export function addSecurityServiceTools(
     goldRushClient: GoldRushClient
 ) {
     server.tool(
-        "getApprovals",
+        "token_approvals",
         "Gets token approvals granted by a wallet that may pose security risks.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
             "Returns a list of ERC20 token approvals and their associated security risk levels.",
@@ -59,7 +59,7 @@ export function addSecurityServiceTools(
     );
 
     server.tool(
-        "getNftApprovals",
+        "nft_approvals",
         "Gets NFT approvals (setApprovalForAll) granted by a wallet that may pose security risks.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
             "Returns a list of NFT collection approvals and their associated security risk levels.",

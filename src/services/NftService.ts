@@ -16,24 +16,24 @@ import { z } from "zod";
  * @param {GoldRushClient} goldRushClient - The GoldRush client
  * @remarks
  * This function creates tools:
- * - getChainCollections
- * - getNftsForAddress
- * - getTokenIdsForContractWithMetadata
- * - getNftMetadataForGivenTokenIdForContract
- * - getNftTransactionsForContractTokenId
- * - getTraitsForCollection
- * - getAttributesForTraitInCollection
- * - getCollectionTraitsSummary
- * - getHistoricalFloorPricesForCollection
- * - getHistoricalVolumeForCollection
- * - getHistoricalSalesCountForCollection
+ * - nft_chain_collections
+ * - nft_for_address
+ * - nft_token_ids
+ * - nft_metadata_for_token_id
+ * - nft_transactions
+ * - nft_traits_for_collection
+ * - nft_attributes_for_trait_in_collection
+ * - nft_collection_traits_summary
+ * - nft_historical_floor_prices_for_collection
+ * - nft_historical_volume_for_collection
+ * - nft_historical_sales_count_for_collection
  */
 export function addNftServiceTools(
     server: McpServer,
     goldRushClient: GoldRushClient
 ) {
     server.tool(
-        "getChainCollections",
+        "nft_chain_collections",
         "Gets NFT collections on a specific blockchain network with pagination.\n" +
             "Required: chainName (blockchain network).\n" +
             "Optional: pageSize, pageNumber, noSpam (filter out spam collections).\n" +
@@ -74,9 +74,8 @@ export function addNftServiceTools(
         }
     );
 
-    // getNftsForAddress
     server.tool(
-        "getNftsForAddress",
+        "nft_for_address",
         "Gets all NFTs owned by a specific wallet address.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address).\n" +
             "Optional: noSpam (filter spam NFTs), noNftAssetMetadata (exclude metadata), withUncached (include uncached data).\n" +
@@ -119,9 +118,8 @@ export function addNftServiceTools(
         }
     );
 
-    // getTokenIdsForContractWithMetadata
     server.tool(
-        "getTokenIdsForContractWithMetadata",
+        "nft_token_ids",
         "Gets token IDs with metadata for a specific NFT contract with pagination.\n" +
             "Required: chainName (blockchain network), contractAddress (NFT contract address).\n" +
             "Optional: noMetadata, pageSize, pageNumber, traitsFilter, valuesFilter, withUncached.\n" +
@@ -170,9 +168,8 @@ export function addNftServiceTools(
         }
     );
 
-    // getNftMetadataForGivenTokenIdForContract
     server.tool(
-        "getNftMetadataForGivenTokenIdForContract",
+        "nft_metadata_for_token_id",
         "Gets detailed metadata for a specific NFT token ID.\n" +
             "Required: chainName (blockchain network), contractAddress (NFT contract), tokenId (specific NFT ID).\n" +
             "Optional: noMetadata (exclude metadata), withUncached (include uncached data).\n" +
@@ -215,9 +212,8 @@ export function addNftServiceTools(
         }
     );
 
-    // getNftTransactionsForContractTokenId
     server.tool(
-        "getNftTransactionsForContractTokenId",
+        "nft_transactions",
         "Gets transaction history for a specific NFT token.\n" +
             "Required: chainName (blockchain network), contractAddress (NFT contract), tokenId (specific NFT ID).\n" +
             "Optional: noSpam (filter spam transactions).\n" +
@@ -256,9 +252,8 @@ export function addNftServiceTools(
         }
     );
 
-    // getTraitsForCollection
     server.tool(
-        "getTraitsForCollection",
+        "nft_traits_for_collection",
         "Gets all trait types (e.g., 'Background', 'Eyes') available in an NFT collection.\n" +
             "Required: chainName (blockchain network), collectionContract (NFT collection address).\n" +
             "Returns all available trait types for the specified NFT collection.",
@@ -292,9 +287,8 @@ export function addNftServiceTools(
         }
     );
 
-    // getAttributesForTraitInCollection
     server.tool(
-        "getAttributesForTraitInCollection",
+        "nft_attributes_for_trait_in_collection",
         "Gets all possible attribute values for a specific trait in an NFT collection.\n" +
             "Required: chainName (blockchain network), collectionContract (NFT collection), trait (trait name).\n" +
             "Returns all attribute values for the specified trait (e.g., all 'Background' values).",
@@ -330,9 +324,8 @@ export function addNftServiceTools(
         }
     );
 
-    // getCollectionTraitsSummary
     server.tool(
-        "getCollectionTraitsSummary",
+        "nft_collection_traits_summary",
         "Gets a summary of all traits and their distribution in an NFT collection.\n" +
             "Required: chainName (blockchain network), collectionContract (NFT collection address).\n" +
             "Returns statistics for all traits and values in the specified collection.",
@@ -366,9 +359,8 @@ export function addNftServiceTools(
         }
     );
 
-    // getHistoricalFloorPricesForCollection
     server.tool(
-        "getHistoricalFloorPricesForCollection",
+        "nft_historical_floor_prices_for_collection",
         "Gets historical floor prices over time for an NFT collection.\n" +
             "Required: chainName (blockchain network), collectionAddress (NFT collection).\n" +
             "Optional: quoteCurrency (currency for prices), days (time period to analyze).\n" +
@@ -411,9 +403,8 @@ export function addNftServiceTools(
         }
     );
 
-    // getHistoricalVolumeForCollection
     server.tool(
-        "getHistoricalVolumeForCollection",
+        "nft_historical_volume_for_collection",
         "Gets historical trading volume over time for an NFT collection.\n" +
             "Required: chainName (blockchain network), collectionAddress (NFT collection).\n" +
             "Optional: quoteCurrency (currency for volume), days (time period to analyze).\n" +
@@ -456,9 +447,8 @@ export function addNftServiceTools(
         }
     );
 
-    // getHistoricalSalesCountForCollection
     server.tool(
-        "getHistoricalSalesCountForCollection",
+        "nft_historical_sales_count_for_collection",
         "Gets historical count of sales over time for an NFT collection.\n" +
             "Required: chainName (blockchain network), collectionAddress (NFT collection).\n" +
             "Optional: quoteCurrency (currency for sales), days (time period to analyze).\n" +

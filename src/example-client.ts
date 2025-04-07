@@ -2,19 +2,10 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import path from "path";
 
-async function getAllChainsExample(client: Client) {
-    console.log("\n=== getAllChains Example ===");
-    const result = await client.callTool({
-        name: "getAllChains",
-        arguments: {},
-    });
-    console.log("Supported chains:", result.content);
-}
-
 async function tokenBalancesExample(client: Client) {
-    console.log("\n=== getTokenBalancesForWalletAddress Example ===");
+    console.log("\n=== token_balances Example ===");
     const result = await client.callTool({
-        name: "getTokenBalancesForWalletAddress",
+        name: "token_balances",
         arguments: {
             chainName: "eth-mainnet",
             address: "demo.eth",
@@ -26,9 +17,9 @@ async function tokenBalancesExample(client: Client) {
 }
 
 async function historicalBalancesExample(client: Client) {
-    console.log("\n=== getHistoricalTokenBalancesForWalletAddress Example ===");
+    console.log("\n=== historical_token_balances Example ===");
     const result = await client.callTool({
-        name: "getHistoricalTokenBalancesForWalletAddress",
+        name: "historical_token_balances",
         arguments: {
             chainName: "eth-mainnet",
             address: "demo.eth",
@@ -40,12 +31,13 @@ async function historicalBalancesExample(client: Client) {
 }
 
 async function transactionsExample(client: Client) {
-    console.log("\n=== getAllTransactionsForAddress Example ===");
+    console.log("\n=== transactions_for_address Example ===");
     const result = await client.callTool({
-        name: "getAllTransactionsForAddress",
+        name: "transactions_for_address",
         arguments: {
             chainName: "eth-mainnet",
-            address: "demo.eth",
+            walletAddress: "demo.eth",
+            page: 0,
             quoteCurrency: "USD",
             noLogs: true,
         },
@@ -54,9 +46,9 @@ async function transactionsExample(client: Client) {
 }
 
 async function specificTransactionExample(client: Client) {
-    console.log("\n=== getTransaction Example ===");
+    console.log("\n=== transaction Example ===");
     const result = await client.callTool({
-        name: "getTransaction",
+        name: "transaction",
         arguments: {
             chainName: "eth-mainnet",
             txHash: "0x5c504ed432cb51138bcf09aa5e8a410dd4a1e204ef84bfed1be16dfba1b22060", // First DAO hack transaction
@@ -143,7 +135,6 @@ async function main() {
         );
 
         // Run all examples
-        await getAllChainsExample(client);
         await tokenBalancesExample(client);
         await historicalBalancesExample(client);
         await transactionsExample(client);

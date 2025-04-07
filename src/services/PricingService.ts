@@ -18,14 +18,14 @@ import { z } from "zod";
  * @param {GoldRushClient} goldRushClient - The GoldRush client
  * @remarks
  * This function creates tools:
- * - getTokenPrices
+ * - historical_token_prices
  */
 export function addPricingServiceTools(
     server: McpServer,
     goldRushClient: GoldRushClient
 ) {
     server.tool(
-        "getTokenPrices",
+        "historical_token_prices",
         "Gets historical price data for a specific token over a time period.\n" +
             "Required: chainName (blockchain network), quoteCurrency (price currency), contractAddress (token contract).\n" +
             "Optional: from (start date), to (end date), pricesAtAsc (chronological order).\n" +
