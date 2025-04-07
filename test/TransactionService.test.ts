@@ -7,11 +7,10 @@
  *
  * @description
  * Tests the following TransactionService methods:
- * - getAllTransactionsForAddressByPage
- * - getTransactionsForBlock
+ * - getTransaction
  * - getTransactionSummary
- * - getTransactionsForAddressV3
- * - getTimeBucketTransactionsForAddress
+ * - getTransactionsForAddress
+ * - getTransactionsForBlock
  *
  * Notes:
  * - Start the server as a subprocess using StdioClientTransport
@@ -48,19 +47,6 @@ describe("TransactionService Tools", () => {
 
         await client.connect(transport);
     }, 60000);
-
-    // it("getTransactionsForBlock - minimal check", async () => {
-    //     const resp = await client.callTool({
-    //         name: "getTransactionsForBlock",
-    //         arguments: {
-    //             chainName: "eth-mainnet",
-    //             blockHeight: "latest",
-    //         },
-    //     });
-    //     console.log("getTransactionsForBlock response:", resp.content);
-    //     expect(resp.isError).toBeFalsy();
-    //     expect(resp.content).toBeDefined();
-    // }, 30000);
 
     it("getTransaction - minimal check", async () => {
         const resp = await client.callTool({
@@ -102,19 +88,16 @@ describe("TransactionService Tools", () => {
         expect(resp.content).toBeDefined();
     }, 30000);
 
-    it("getTimeBucketTransactionsForAddress - minimal check", async () => {
+    it("getTransactionsForBlock - minimal check", async () => {
         const resp = await client.callTool({
-            name: "getTimeBucketTransactionsForAddress",
+            name: "getTransactionsForBlock",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
-                timeBucket: 1863861, // example bucket
+                blockHeight: "latest",
+                page: 0,
             },
         });
-        console.log(
-            "getTimeBucketTransactionsForAddress response:",
-            resp.content
-        );
+        console.log("getTransactionsForBlock response:", resp.content);
         expect(resp.isError).toBeFalsy();
         expect(resp.content).toBeDefined();
     }, 30000);
