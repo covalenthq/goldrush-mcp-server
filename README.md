@@ -202,39 +202,39 @@ Tools are designed to be model-controlled, meaning that tools are exposed from s
 
 1. `bitcoin_hd_wallet_balances`
 
-   - Fetch balances for each active child address derived from a Bitcoin HD wallet. This tool provides detailed balance data for Bitcoin wallets identified by an xpub key. Required: walletAddress - The xpub key of the HD wallet. Optional: quoteCurrency - The currency for price conversion (USD, EUR, etc). Returns complete balance details including total balance, available balance, and transaction history summary.
+    - Fetch balances for each active child address derived from a Bitcoin HD wallet. This tool provides detailed balance data for Bitcoin wallets identified by an xpub key. Required: walletAddress - The xpub key of the HD wallet. Optional: quoteCurrency - The currency for price conversion (USD, EUR, etc). Returns complete balance details including total balance, available balance, and transaction history summary.
 
 2. `bitcoin_non_hd_wallet_balances`
 
-   - Fetch Bitcoin balance for a non-HD address. Response includes spot prices and other metadata. This tool provides detailed balance data for regular Bitcoin addresses. Required: walletAddress - The Bitcoin address to query. Optional: quoteCurrency - The currency for price conversion (USD, EUR, etc). Returns complete balance details including total balance, available balance, and transaction count.
+    - Fetch Bitcoin balance for a non-HD address. Response includes spot prices and other metadata. This tool provides detailed balance data for regular Bitcoin addresses. Required: walletAddress - The Bitcoin address to query. Optional: quoteCurrency - The currency for price conversion (USD, EUR, etc). Returns complete balance details including total balance, available balance, and transaction count.
 
 3. `bitcoin_transactions`
 
-   - Fetch transactions for a specific Bitcoin address with full transaction details. Required: address - The Bitcoin address to query. Optional: pageSize - Number of results per page (default 100), pageNumber - Page number (default 0). Returns a paginated list of transactions with timestamps, amounts, inputs, outputs, and fees.
+    - Fetch transactions for a specific Bitcoin address with full transaction details. Required: address - The Bitcoin address to query. Optional: pageSize - Number of results per page (default 100), pageNumber - Page number (default 0). Returns a paginated list of transactions with timestamps, amounts, inputs, outputs, and fees.
 
 4. `block`
 
-   - Commonly used to fetch and render a single block for a block explorer. Requires chainName (blockchain network) and blockHeight (block number). Returns comprehensive block data including timestamp, transaction count, size, miner information, and other blockchain-specific details.
+    - Commonly used to fetch and render a single block for a block explorer. Requires chainName (blockchain network) and blockHeight (block number). Returns comprehensive block data including timestamp, transaction count, size, miner information, and other blockchain-specific details.
 
 5. `block_heights`
 
-   - Commonly used to get all the block heights within a particular date range. Requires chainName (blockchain network), startDate (YYYY-MM-DD format), and endDate (YYYY-MM-DD or 'latest'). Optional pagination parameters include pageSize (default 10) and pageNumber (default 0). Returns block heights, timestamps, and related data for blocks within the specified date range, useful for historical analysis and time-based blockchain queries.
+    - Commonly used to get all the block heights within a particular date range. Requires chainName (blockchain network), startDate (YYYY-MM-DD format), and endDate (YYYY-MM-DD or 'latest'). Optional pagination parameters include pageSize (default 10) and pageNumber (default 0). Returns block heights, timestamps, and related data for blocks within the specified date range, useful for historical analysis and time-based blockchain queries.
 
 6. `erc20_token_transfers`
 
-   - Commonly used to render the transfer-in and transfer-out of a token along with historical prices from an address. Required: chainName (blockchain network), walletAddress (wallet address). Optional: quoteCurrency for value conversion, contractAddress to filter by specific token, startingBlock/endingBlock to set range, pageSize (default 10) and pageNumber (default 0). Returns token transfer events with timestamps, values, and transaction details.
+    - Commonly used to render the transfer-in and transfer-out of a token along with historical prices from an address. Required: chainName (blockchain network), walletAddress (wallet address). Optional: quoteCurrency for value conversion, contractAddress to filter by specific token, startingBlock/endingBlock to set range, pageSize (default 10) and pageNumber (default 0). Returns token transfer events with timestamps, values, and transaction details.
 
 7. `gas_prices`
 
-   - Get real-time gas estimates for different transaction speeds on a specific network, enabling users to optimize transaction costs and confirmation times. Requires chainName (blockchain network) and eventType (erc20, nativetokens, or uniswapv3). Optional parameter quoteCurrency allows conversion to different currencies (USD, EUR, etc). Returns estimated gas prices for low, medium, and high priority transactions for the specified event type.
+    - Get real-time gas estimates for different transaction speeds on a specific network, enabling users to optimize transaction costs and confirmation times. Requires chainName (blockchain network) and eventType (erc20, nativetokens, or uniswapv3). Optional parameter quoteCurrency allows conversion to different currencies (USD, EUR, etc). Returns estimated gas prices for low, medium, and high priority transactions for the specified event type.
 
 8. `historical_portfolio_value`
 
-   - Commonly used to render a daily portfolio balance for an address broken down by the token. Required: chainName (blockchain network), walletAddress (wallet address). Optional: quoteCurrency for value conversion, days (timeframe to analyze, default 7). Returns portfolio value time series data showing value changes over the specified timeframe.
+    - Commonly used to render a daily portfolio balance for an address broken down by the token. Required: chainName (blockchain network), walletAddress (wallet address). Optional: quoteCurrency for value conversion, days (timeframe to analyze, default 7). Returns portfolio value time series data showing value changes over the specified timeframe.
 
 9. `historical_token_balances`
 
-   - Commonly used to fetch the historical native and fungible (ERC20) tokens held by an address at a given block height or date. Required: chainName (blockchain network), address (wallet address). Optional: quoteCurrency for value conversion, blockHeight or date to specify point in time, nft (include NFTs, default false), noNftFetch, noSpam, and noNftAssetMetadata (all default true). Returns token balances as they existed at the specified historical point.
+    - Commonly used to fetch the historical native and fungible (ERC20) tokens held by an address at a given block height or date. Required: chainName (blockchain network), address (wallet address). Optional: quoteCurrency for value conversion, blockHeight or date to specify point in time, nft (include NFTs, default false), noNftFetch, noSpam, and noNftAssetMetadata (all default true). Returns token balances as they existed at the specified historical point.
 
 10. `historical_token_prices`
 
@@ -474,4 +474,20 @@ goldrush-mcp-server
 
 https://modelcontextprotocol.io/docs/tools/inspector
 
+```bash
+npx @modelcontextprotocol/inspector node dist/index.js
 ```
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions from the community! If you have suggestions, improvements, or new spam contract addresses to add, please open an issue or submit a pull request. Feel free to check <a href="https://github.com/covalenthq/goldrush-mcp-server/issues">issues</a> page.
+
+## Show your support
+
+Give a ⭐️ if this project helped you!
+
+## 📝 License
+
+This project is <a href="https://github.com/covalenthq/goldrush-mcp-server/blob/main/LICENSE">MIT</a> licensed.
