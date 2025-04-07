@@ -190,7 +190,7 @@ export function addBalanceServiceTools(
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional(),
-            contractAddress: z.string().optional(),
+            contractAddress: z.string().nullable(),
             startingBlock: z.number().optional(),
             endingBlock: z.number().optional(),
             pageSize: z.number().optional().default(10),

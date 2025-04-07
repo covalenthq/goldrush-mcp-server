@@ -78,7 +78,7 @@
         "eslint-config-prettier": "^10.0.2",
         "eslint-plugin-prettier": "^5.2.3",
         "prettier": "^3.5.3",
-        "@types/node": "^20.17.24",
+        "@types/node": "^22.14.0",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.2",
         "vitest": "^3.0.9"
