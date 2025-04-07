@@ -45,6 +45,8 @@ This project provides a [MCP (Model Context Protocol)](https://modelcontextproto
     - [Setting GOLDRUSH_API_KEY](#setting-goldrush_api_key)
     - [File Layout](#file-layout)
     - [Debugging](#debugging)
+- [Contributing](#contributing)
+- [Show your support](#show-your-support)
 - [License](#license)
 
 ---
@@ -480,7 +482,7 @@ npx @modelcontextprotocol/inspector node dist/index.js
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions from the community! If you have suggestions, improvements, or new spam contract addresses to add, please open an issue or submit a pull request. Feel free to check <a href="https://github.com/covalenthq/goldrush-mcp-server/issues">issues</a> page.
 
@@ -488,6 +490,6 @@ We welcome contributions from the community! If you have suggestions, improvemen
 
 Give a ⭐️ if this project helped you!
 
-## 📝 License
+## License
 
 This project is <a href="https://github.com/covalenthq/goldrush-mcp-server/blob/main/LICENSE">MIT</a> licensed.
