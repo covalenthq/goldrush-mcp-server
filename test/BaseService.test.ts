@@ -78,19 +78,6 @@ describe("BaseService Tools", () => {
         expect(resp.content).toBeDefined();
     }, 30000);
 
-    it("getResolvedAddress - minimal check", async () => {
-        const resp = await client.callTool({
-            name: "getResolvedAddress",
-            arguments: {
-                chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
-            },
-        });
-        console.log("getResolvedAddress response:", resp.content);
-        expect(resp.isError).toBeFalsy();
-        expect(resp.content).toBeDefined();
-    }, 30000);
-
     it("getBlockHeights - minimal check", async () => {
         const resp = await client.callTool({
             name: "getBlockHeights",
@@ -102,22 +89,6 @@ describe("BaseService Tools", () => {
         });
         console.log("getBlockHeights (all pages) response:", resp.content);
         expect(resp.isError).toBeFalsy();
-    }, 30000);
-
-    it("getLogs - minimal check", async () => {
-        const resp = await client.callTool({
-            name: "getLogs",
-            arguments: {
-                chainName: "eth-mainnet",
-                startingBlock: 22096686,
-                endingBlock: 22098876,
-                address: "0x7ABc8A5768E6bE61A6c693a6e4EAcb5B60602C4D",
-                topics: "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
-            },
-        });
-        console.log("getLogs response:", resp.content);
-        expect(resp.isError).toBeFalsy();
-        expect(resp.content).toBeDefined();
     }, 30000);
 
     it("getLogEventsByAddress - minimal check", async () => {

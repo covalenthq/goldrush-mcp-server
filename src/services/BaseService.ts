@@ -18,9 +18,7 @@ import { z } from "zod";
  * This function creates tools:
  * - getGasPrices
  * - getBlock
- * - getResolvedAddress
  * - getBlockHeights
- * - getLogs
  * - getLogEventsByAddress
  * - getLogEventsByTopicHash
  */
@@ -104,41 +102,6 @@ export function addBaseServiceTools(
     );
 
     server.tool(
-        "getResolvedAddress",
-        "Resolves an ENS or RNS domain name to its corresponding wallet address on a given chain.\n" +
-            "Required: chainName (blockchain network), walletAddress (domain name or address).\n" +
-            "Returns the resolved address information.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            walletAddress: z.string(),
-        },
-        async (params) => {
-            try {
-                const response =
-                    await goldRushClient.BaseService.getResolvedAddress(
-                        params.chainName as Chain,
-                        params.walletAddress
-                    );
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt(response.data),
-                        },
-                    ],
-                };
-            } catch (err) {
-                return {
-                    content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
-
-    server.tool(
         "getBlockHeights",
         "Gets block heights within a specified date range on a given chain with pagination.\n" +
             "Required: chainName (blockchain network), startDate (YYYY-MM-DD), endDate (YYYY-MM-DD or latest).\n" +
@@ -165,53 +128,6 @@ export function addBaseServiceTools(
                             pageNumber: params.pageNumber,
                         }
                     );
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt(response.data),
-                        },
-                    ],
-                };
-            } catch (err) {
-                return {
-                    content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
-
-    server.tool(
-        "getLogs",
-        "Gets blockchain event logs matching specified filters.\n" +
-            "Required: chainName (blockchain network).\n" +
-            "Optional: startingBlock, endingBlock, address (contract), topics (event signatures), blockHash, skipDecode.\n" +
-            "Returns filtered event logs from the blockchain.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            startingBlock: z.number(), // Making this required for MCP usage
-            endingBlock: z.number(), // Making this required for MCP usage
-            address: z.string().optional(),
-            topics: z.string().optional(),
-            blockHash: z.string().optional(),
-            skipDecode: z.boolean().optional(),
-        },
-        async (params) => {
-            try {
-                const response = await goldRushClient.BaseService.getLogs(
-                    params.chainName as Chain,
-                    {
-                        startingBlock: params.startingBlock,
-                        endingBlock: params.endingBlock.toString(),
-                        address: params.address,
-                        topics: params.topics,
-                        blockHash: params.blockHash,
-                        skipDecode: params.skipDecode,
-                    }
-                );
                 return {
                     content: [
                         {
