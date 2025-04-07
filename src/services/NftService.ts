@@ -27,8 +27,6 @@ import { z } from "zod";
  * - getHistoricalFloorPricesForCollection
  * - getHistoricalVolumeForCollection
  * - getHistoricalSalesCountForCollection
- * - checkOwnershipInNft
- * - checkOwnershipInNftForSpecificTokenId
  */
 export function addNftServiceTools(
     server: McpServer,
@@ -485,91 +483,6 @@ export function addNftServiceTools(
                             quote_currency: params.quoteCurrency as Quote,
                             days: params.days,
                         }
-                    );
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt(response.data),
-                        },
-                    ],
-                };
-            } catch (err) {
-                return {
-                    content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
-
-    // checkOwnershipInNft
-    server.tool(
-        "checkOwnershipInNft",
-        "Verifies if a wallet owns any NFTs from a specific collection, optionally filtered by traits.\n" +
-            "Required: chainName (blockchain network), walletAddress (wallet address), collectionContract (NFT collection).\n" +
-            "Optional: traitsFilter (filter by trait types), valuesFilter (filter by trait values).\n" +
-            "Returns ownership status and matching NFTs if owned.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            walletAddress: z.string(),
-            collectionContract: z.string(),
-            traitsFilter: z.string().optional(),
-            valuesFilter: z.string().optional(),
-        },
-        async (params) => {
-            try {
-                const response =
-                    await goldRushClient.NftService.checkOwnershipInNft(
-                        params.chainName as Chain,
-                        params.walletAddress,
-                        params.collectionContract,
-                        {
-                            traitsFilter: params.traitsFilter,
-                            valuesFilter: params.valuesFilter,
-                        }
-                    );
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt(response.data),
-                        },
-                    ],
-                };
-            } catch (err) {
-                return {
-                    content: [{ type: "text", text: `Error: ${err}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
-
-    // checkOwnershipInNftForSpecificTokenId
-    server.tool(
-        "checkOwnershipInNftForSpecificTokenId",
-        "Verifies if a wallet owns a specific NFT token.\n" +
-            "Required: chainName (blockchain network), walletAddress (wallet address), collectionContract (NFT collection), tokenId (NFT ID).\n" +
-            "Returns ownership status for the specified NFT token.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            walletAddress: z.string(),
-            collectionContract: z.string(),
-            tokenId: z.string(),
-        },
-        async (params) => {
-            try {
-                const response =
-                    await goldRushClient.NftService.checkOwnershipInNftForSpecificTokenId(
-                        params.chainName as Chain,
-                        params.walletAddress,
-                        params.collectionContract,
-                        params.tokenId
                     );
                 return {
                     content: [

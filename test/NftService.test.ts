@@ -18,8 +18,6 @@
  * - getHistoricalFloorPricesForCollection
  * - getHistoricalVolumeForCollection
  * - getHistoricalSalesCountForCollection
- * - checkOwnershipInNft
- * - checkOwnershipInNftForSpecificTokenId
  *
  * Notes:
  * - Start server as a subprocess using StdioClientTransport
@@ -220,40 +218,6 @@ describe("NftService Tools", () => {
         });
         console.log(
             "getHistoricalSalesCountForCollection result:",
-            result.content
-        );
-        expect(result.isError).toBeFalsy();
-        expect(result.content).toBeDefined();
-    }, 30000);
-
-    it("checkOwnershipInNft - minimal check", async () => {
-        const result = await client.callTool({
-            name: "checkOwnershipInNft",
-            arguments: {
-                chainName: "eth-mainnet",
-                walletAddress: "0xb7F7F6C52F2e2fdb1963Eab30438024864c313F6",
-                collectionContract:
-                    "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
-            },
-        });
-        console.log("checkOwnershipInNft result:", result.content);
-        expect(result.isError).toBeFalsy();
-        expect(result.content).toBeDefined();
-    }, 30000);
-
-    it("checkOwnershipInNftForSpecificTokenId - minimal check", async () => {
-        const result = await client.callTool({
-            name: "checkOwnershipInNftForSpecificTokenId",
-            arguments: {
-                chainName: "eth-mainnet",
-                walletAddress: "0xb7F7F6C52F2e2fdb1963Eab30438024864c313F6",
-                collectionContract:
-                    "0xb47e3cd837dDF8e4c57F05d70Ab865de6e193BBB",
-                tokenId: "1",
-            },
-        });
-        console.log(
-            "checkOwnershipInNftForSpecificTokenId result:",
             result.content
         );
         expect(result.isError).toBeFalsy();
