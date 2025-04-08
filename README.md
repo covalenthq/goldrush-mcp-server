@@ -187,11 +187,9 @@ console.log(result);
 
 ### Example LLM Flow
 
-<!-- TODO: add more and better examples -->
-
 1. An LLM-based application starts.
 2. It spawns or connects to this MCP server.
-3. The LLM decides to call a tool like `getTransactionSummary` to gather data about a wallet.
+3. The LLM decides to call a tool like `transaction_summary` to gather data about a wallet.
 4. The server calls the Covalent endpoint under the hood, returns JSON to the LLM, which then uses it in the conversation context.
 
 ---
@@ -462,12 +460,15 @@ goldrush-mcp-server
 │   ├── BitcoinService.test.ts
 │   ├── NftService.test.ts
 │   ├── PricingService.test.ts
+│   ├── Resources.test.ts
 │   ├── SecurityService.test.ts
-│   ├── TransactionService.test.ts
-│   └── Resources.test.ts
-├── package.json
-├── tsconfig.json
-└── README.md (this file)
+│   └── TransactionService.test.ts
+├── eslint.config.mjs            # ESLint configuration
+├── package.json                 # Project dependencies and scripts
+├── package-lock.json            # Locked dependencies
+├── tsconfig.json                # TypeScript configuration
+├── LICENSE                      # MIT license
+└── README.md                    # Project documentation
 ```
 
 ### Debugging
