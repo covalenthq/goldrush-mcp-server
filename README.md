@@ -177,11 +177,15 @@ console.log("Available tools:", tools.tools.map(tool => tool.name).join(", "));
 
 // Now you can call tools
 const result = await client.callTool({
-  name: "getAllChains",
-  arguments: {}
+    name: "token_balances",
+    arguments: {
+        chainName: "eth-mainnet",
+        address: "demo.eth",
+        quoteCurrency: "USD",
+        nft: false,
+    },
 });
-
-console.log(result);
+console.log("Token balances:", result.content);
 ...
 ```
 
