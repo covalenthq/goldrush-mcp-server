@@ -12,7 +12,6 @@ import { z } from "zod";
  * @description
  * Adds tools for the SecurityService. This includes:
  *  - token_approvals
- *  - nft_approvals
  *
  * These calls fetch approvals for tokens and NFTs, respectively.
  *
@@ -38,41 +37,6 @@ export function addSecurityServiceTools(
             try {
                 const response =
                     await goldRushClient.SecurityService.getApprovals(
-                        params.chainName as Chain,
-                        params.walletAddress
-                    );
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: stringifyWithBigInt(response.data),
-                        },
-                    ],
-                };
-            } catch (error) {
-                return {
-                    content: [{ type: "text", text: `Error: ${error}` }],
-                    isError: true,
-                };
-            }
-        }
-    );
-
-    server.tool(
-        "nft_approvals",
-        "Gets a list of NFT collection approvals (setApprovalForAll) granted by a wallet that may pose security risks.\n" +
-            "Required: chainName (blockchain network, e.g. eth-mainnet or 1), walletAddress (wallet address, supports ENS, RNS, Lens Handle, or Unstoppable Domain).\n" +
-            "Returns a list of NFT collection approvals and their associated security risk levels.",
-        {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            walletAddress: z.string(),
-        },
-        async (params) => {
-            try {
-                const response =
-                    await goldRushClient.SecurityService.getNftApprovals(
                         params.chainName as Chain,
                         params.walletAddress
                     );

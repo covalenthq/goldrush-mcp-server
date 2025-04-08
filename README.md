@@ -268,79 +268,39 @@ Tools are designed to be model-controlled, meaning that tools are exposed from s
 
     - Get the native token balance (ETH, BNB, MATIC, etc.) for a specified wallet address on a blockchain. Required: chainName (blockchain network) and walletAddress. Optional: quoteCurrency for value conversion and blockHeight for historical queries. Returns detailed balance information including formatted amounts and USD values.
 
-17. `nft_approvals`
-
-    - Gets a list of NFT collection approvals (setApprovalForAll) granted by a wallet that may pose security risks. Required: chainName (blockchain network, e.g. eth-mainnet or 1), walletAddress (wallet address, supports ENS, RNS, Lens Handle, or Unstoppable Domain). Returns a list of NFT collection approvals and their associated security risk levels.
-
-18. `nft_attributes_for_trait_in_collection`
-
-    - Commonly used to get the count of unique values for traits within an NFT collection. Returns all values for a given trait (e.g., all possible 'Background' colors). Required: chainName (blockchain network name), collectionContract (NFT collection address), trait (trait name to query).
-
-19. `nft_chain_collections`
-
-    - Commonly used to discover NFT collections on a blockchain. Useful for exploring the NFT ecosystem on a specific chain. Required: chainName (blockchain network). Optional: pageSize (default 100), pageNumber (default 0), noSpam (exclude spam collections, default true). Returns a paginated list of NFT collections with detailed metadata.
-
-20. `nft_collection_traits_summary`
-
-    - Commonly used to calculate rarity scores for a collection based on its traits. Returns statistics for all traits including rarity information. Required: chainName (blockchain network name), collectionContract (NFT collection address).
-
-21. `nft_for_address`
+17. `nft_for_address`
 
     - Commonly used to get all NFTs owned by a specific wallet address on a blockchain. Useful for NFT portfolio viewers. Required: chainName (blockchain network), walletAddress (wallet address). Optional: noSpam (exclude spam NFTs, default true), noNftAssetMetadata (exclude detailed metadata, default false), withUncached (include uncached items, default false). Returns a comprehensive list of all NFTs owned by the specified wallet.
 
-22. `nft_historical_floor_prices_for_collection`
+18. `nft_check_ownership`
 
-    - Commonly used to render a price floor chart for an NFT collection. Returns time-series data showing how minimum prices have changed. Required: chainName (blockchain network name), collectionAddress (NFT collection address). Optional: quoteCurrency (currency for price conversion), days (time period in days, default 7).
+    - Commonly used to verify ownership of NFTs (including ERC-721 and ERC-1155) within a collection. Required: chainName (blockchain network), walletAddress (wallet address), collectionContract (NFT collection). Optional: traitsFilter (filter by trait types), valuesFilter (filter by trait values). Returns ownership status and matching NFTs if owned.
 
-23. `nft_historical_sales_count_for_collection`
-
-    - Commonly used to build a time-series chart of the sales count of an NFT collection. Returns time-series data showing number of sales per period. Required: chainName (blockchain network name), collectionAddress (NFT collection address). Optional: quoteCurrency (currency for sales conversion), days (time period in days, default 7).
-
-24. `nft_historical_volume_for_collection`
-
-    - Commonly used to build a time-series chart of the transaction volume of an NFT collection. Returns time-series data showing total value of trades per period. Required: chainName (blockchain network name), collectionAddress (NFT collection address). Optional: quoteCurrency (currency for volume conversion), days (time period in days, default 7).
-
-25. `nft_metadata_for_token_id`
-
-    - Commonly used to get a single NFT metadata by token ID from a collection. Useful for building NFT card displays. Returns comprehensive details about a single NFT token. Required: chainName (blockchain network name), contractAddress (NFT contract address), tokenId (specific NFT token ID). Optional: noMetadata (exclude metadata), withUncached (fetch uncached metadata).
-
-26. `nft_token_ids`
-
-    - Commonly used to get NFT token IDs with metadata from a collection. Useful for building NFT card displays. Returns token IDs and their metadata for a single page of results. Required: chainName (blockchain network name), contractAddress (NFT contract address). Optional: noMetadata (exclude metadata), pageSize (default 10), pageNumber (default 0), traitsFilter (filter by traits, URL encoded), valuesFilter (filter by values, URL encoded), withUncached (fetch uncached metadata, default false).
-
-27. `nft_traits_for_collection`
-
-    - Commonly used to fetch and render the traits of a collection as seen in rarity calculators. Returns list of traits like 'Background', 'Eyes', etc. for the collection. Required: chainName (blockchain network name), collectionContract (NFT collection address).
-
-28. `nft_transactions`
-
-    - Commonly used to get all transactions of an NFT token. Useful for building a transaction history table or price chart. Returns all historical transactions involving the specified NFT token. Required: chainName (blockchain network name), contractAddress (NFT contract address), tokenId (specific NFT token ID). Optional: noSpam (filter spam transactions, default true).
-
-29. `token_approvals`
+19. `token_approvals`
 
     - Commonly used to get a list of approvals across all token contracts categorized by spenders for a wallet's assets. Required: chainName (blockchain network, e.g. eth-mainnet or 1), walletAddress (wallet address, supports ENS, RNS, Lens Handle, or Unstoppable Domain). Returns a list of ERC20 token approvals and their associated security risk levels.
 
-30. `token_balances`
+20. `token_balances`
 
     - Commonly used to fetch the native and fungible (ERC20) tokens held by an address. Required: chainName (blockchain network), address (wallet address). Optional: quoteCurrency for value conversion, nft (include NFTs, default false), noNftFetch, noSpam, and noNftAssetMetadata (all default true) to control data returned. Returns detailed token balance information including spot prices and metadata.
 
-31. `token_holders`
+21. `token_holders`
 
     - Used to get a paginated list of current or historical token holders for a specified ERC20 or ERC721 token. Required: chainName (blockchain network), tokenAddress (token contract address). Optional: blockHeight or date for historical data, pageSize and pageNumber for pagination. Returns list of addresses holding the token with balance amounts and ownership percentages.
 
-32. `transaction`
+22. `transaction`
 
     - Commonly used to fetch and render a single transaction including its decoded log events. Required: chainName (blockchain network), txHash (transaction hash). Optional: quoteCurrency (currency to convert to, USD by default), noLogs (exclude event logs, true by default), withInternal (include internal transactions, false by default), withState (include state changes, false by default), withInputData (include input data, false by default). Tracing features (withInternal, withState, withInputData) supported on the following chains: eth-mainnet. Returns comprehensive details about the specified transaction.
 
-33. `transactions_for_address`
+23. `transactions_for_address`
 
     - Commonly used to fetch and render the most recent transactions involving an address. Required: chainName (blockchain network), walletAddress (wallet address), page (page number). Optional: quoteCurrency, noLogs, blockSignedAtAsc (chronological order). Returns transactions for the specified page of results.
 
-34. `transactions_for_block`
+24. `transactions_for_block`
 
     - Commonly used to fetch all transactions including their decoded log events in a block and further flag interesting wallets or transactions. Required: chainName (blockchain network), blockHeight (block number or latest). Optional: quoteCurrency, noLogs (exclude event logs). Returns all transactions from the specified block.
 
-35. `transaction_summary`
+25. `transaction_summary`
 
     - Commonly used to fetch the earliest and latest transactions, and the transaction count for a wallet. Required: chainName (blockchain network), walletAddress (wallet address). Optional: quoteCurrency, withGas (include gas usage statistics). Returns summary of transaction activity for the specified wallet.
 
