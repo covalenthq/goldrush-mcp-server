@@ -336,7 +336,7 @@ Dynamic resources fetch real-time data from the Covalent API on each request, en
 ### Prerequisites
 
 - **Node.js** v18 or higher
-- **npm** or **yarn**
+- **npm**, **yarn**, or **pnpm**
 - **GOLDRUSH_API_KEY** environment variable containing a valid GoldRush API key
 
 ### Installation
