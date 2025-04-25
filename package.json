@@ -12,6 +12,9 @@
             "require": "./dist/index.js"
         }
     },
+    "bin": {
+        "goldrush-mcp-server": "dist/index.js"
+    },
     "files": [
         "dist",
         "README.md"
