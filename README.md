@@ -78,7 +78,7 @@ Add this to your `claude_desktop_config.json`:
     "mcpServers": {
         "goldrush": {
             "command": "npx",
-            "args": ["-y", "@covalenthq/goldrush-mcp-server"],
+            "args": ["-y", "@covalenthq/goldrush-mcp-server@latest"],
             "env": {
                 "GOLDRUSH_API_KEY": "YOUR_API_KEY_HERE"
             }
@@ -92,7 +92,7 @@ For more details follow the official [MCP Quickstart for Claude Desktop Users](h
 ### Usage with Claude Code CLI
 
 ```
-$ claude mcp add goldrush -e GOLDRUSH_API_KEY=<YOUR_API_KEY_HERE> -- npx @covalenthq/goldrush-mcp-server
+$ claude mcp add goldrush -e GOLDRUSH_API_KEY=<YOUR_API_KEY_HERE> -- npx -y @covalenthq/goldrush-mcp-server@latest
 ```
 
 For more details see [Set up Model Context Protocol (MCP)](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/tutorials#set-up-model-context-protocol-mcp)
@@ -109,7 +109,7 @@ For more details see [Set up Model Context Protocol (MCP)](https://docs.anthropi
     "mcpServers": {
         "goldrush": {
             "command": "npx",
-            "args": ["-y", "@covalenthq/goldrush-mcp-server"],
+            "args": ["-y", "@covalenthq/goldrush-mcp-server@latest"],
             "env": {
                 "GOLDRUSH_API_KEY": "YOUR_API_KEY_HERE"
             }
@@ -133,7 +133,7 @@ Add this to your `~/.codeium/windsurf/mcp_config.json` file:
     "mcpServers": {
         "goldrush": {
             "command": "npx",
-            "args": ["-y", "@covalenthq/goldrush-mcp-server"],
+            "args": ["-y", "@covalenthq/goldrush-mcp-server@latest"],
             "env": {
                 "GOLDRUSH_API_KEY": "YOUR_API_KEY_HERE"
             }
@@ -152,7 +152,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 
 const transport = new StdioClientTransport({
   command: "npx",
-  args: ["-y", "@covalenthq/goldrush-mcp-server"],
+  args: ["-y", "@covalenthq/goldrush-mcp-server@latest"],
   env: {"GOLDRUSH_API_KEY"="your_api_key_here"}
 });
 

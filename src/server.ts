@@ -38,7 +38,6 @@ export function createGoldRushClient() {
  */
 export function createServer() {
     const goldRushClient = createGoldRushClient();
-
     const server = new McpServer({
         name: "GoldRush MCP Server",
         version: "1.0.0",
@@ -57,18 +56,11 @@ export function createServer() {
     addNftServiceTools(server, goldRushClient);
     addPricingServiceTools(server, goldRushClient);
     addSecurityServiceTools(server, goldRushClient);
-
     return server;
 }
 
 /**
  * Initializes the server using STDIO transport for communication.
- *
- * @async
- * @returns {Promise<void>}
- * @throws {Error} If server fails to start
- * @remarks
- * Logs success or failure to the console.
  */
 export async function startServer() {
     try {
@@ -80,6 +72,3 @@ export async function startServer() {
         process.exit(1);
     }
 }
-
-// Start the server
-startServer().catch(console.error);
