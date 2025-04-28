@@ -1,13 +1,8 @@
-export * from "./server.js";
-export * from "./resources/staticResources.js";
-export * from "./resources/dynamicResources.js";
-export * from "./services/AllChainsService.js";
-export * from "./services/BalanceService.js";
-export * from "./services/BaseService.js";
-export * from "./services/BitcoinService.js";
-export * from "./services/NftService.js";
-export * from "./services/PricingService.js";
-export * from "./services/SecurityService.js";
-export * from "./services/TransactionService.js";
-export * from "./utils/constants.js";
-export * from "./utils/helpers.js";
+#!/usr/bin/env node
+import { createGoldRushClient, createServer, startServer } from "./server.js";
+
+// Start the server
+startServer().catch(console.error);
+
+// Re-export for external usage
+export { createGoldRushClient, createServer, startServer };
