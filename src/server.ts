@@ -3,6 +3,7 @@
  *
  * This file sets up an MCP server providing tools for Covalent GoldRush services.
  */
+import packageJson from "../package.json" with { type: "json" };
 import { addRealTimeChainStatusResources } from "./resources/dynamicResources.js";
 import { addStaticResources } from "./resources/staticResources.js";
 import { addAllChainsServiceTools } from "./services/AllChainsService.js";
@@ -17,6 +18,9 @@ import { GoldRushClient } from "@covalenthq/client-sdk";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import dotenv from "dotenv";
+
+// Get the version from the package.json file
+const { version } = packageJson;
 
 // Load environment variables
 dotenv.config();
@@ -40,7 +44,7 @@ export function createServer() {
     const goldRushClient = createGoldRushClient();
     const server = new McpServer({
         name: "GoldRush MCP Server",
-        version: "1.0.0",
+        version: version,
     });
 
     // Add resources
