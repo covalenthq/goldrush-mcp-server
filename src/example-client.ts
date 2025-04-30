@@ -57,6 +57,19 @@ async function specificTransactionExample(client: Client) {
     console.log("Transaction details:", result.content);
 }
 
+async function poolSpotPricesExample(client: Client) {
+    console.log("\n=== pool_spot_prices Example ===");
+    const result = await client.callTool({
+        name: "pool_spot_prices",
+        arguments: {
+            chainName: "eth-mainnet",
+            contractAddress: "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8", // Uniswap V3 USDC/ETH pool
+            quoteCurrency: "USD",
+        },
+    });
+    console.log("Pool spot prices:", result.content);
+}
+
 async function getSupportedChainsResourceExample(client: Client) {
     console.log("\n=== supported-chains Resource Example ===");
     const result = await client.readResource({
@@ -139,6 +152,7 @@ async function main() {
         await historicalBalancesExample(client);
         await transactionsExample(client);
         await specificTransactionExample(client);
+        await poolSpotPricesExample(client);
 
         // Run resource examples
         await getSupportedChainsResourceExample(client);
