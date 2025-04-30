@@ -58,7 +58,7 @@ describe("BalanceService Tool", () => {
             name: "token_balances",
             arguments: {
                 chainName: "eth-mainnet",
-                address: "demo.eth",
+                address: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
                 noSpam: true,
             },
         });
@@ -72,7 +72,7 @@ describe("BalanceService Tool", () => {
             name: "historical_token_balances",
             arguments: {
                 chainName: "eth-mainnet",
-                address: "demo.eth",
+                address: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
                 blockHeight: 20681357,
                 noSpam: true,
             },
@@ -87,7 +87,7 @@ describe("BalanceService Tool", () => {
             name: "historical_portfolio_value",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
+                walletAddress: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
             },
         });
         console.log("historical_portfolio_value response:", response.content);
@@ -100,7 +100,7 @@ describe("BalanceService Tool", () => {
             name: "erc20_token_transfers",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
+                walletAddress: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
                 contractAddress: "0xf8C3527CC04340b208C854E985240c02F7B7793f",
                 startingBlock: 20681357,
                 endingBlock: 20681557,
@@ -131,7 +131,7 @@ describe("BalanceService Tool", () => {
             name: "native_token_balance",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
+                walletAddress: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
             },
         });
         console.log("native_token_balance response:", response.content);

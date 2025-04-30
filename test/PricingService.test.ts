@@ -8,6 +8,7 @@
  * @description
  * Tests the following PricingService method:
  * - historical_token_prices
+ * - pool_spot_prices
  *
  * Notes:
  * - We do minimal checks just to ensure that the call does not error out, as we do
@@ -60,6 +61,22 @@ describe("PricingService Tools", () => {
         });
 
         console.log("historical_token_prices response:", resp.content);
+
+        expect(resp.isError).toBeFalsy();
+        expect(resp.content).toBeDefined();
+    }, 30000);
+
+    it("pool_spot_prices - minimal check", async () => {
+        const resp = await client.callTool({
+            name: "pool_spot_prices",
+            arguments: {
+                chainName: "eth-mainnet",
+                contractAddress: "0x8ad599c3A0ff1De082011EFDDc58f1908eb6e6D8", // Uniswap V3 USDC/ETH pool
+                quoteCurrency: "USD",
+            },
+        });
+
+        console.log("pool_spot_prices response:", resp.content);
 
         expect(resp.isError).toBeFalsy();
         expect(resp.content).toBeDefined();

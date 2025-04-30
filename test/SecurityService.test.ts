@@ -47,7 +47,7 @@ describe("SecurityService Tools", () => {
             name: "token_approvals",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
+                walletAddress: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
             },
         });
         console.log("token_approvals response:", response.content);

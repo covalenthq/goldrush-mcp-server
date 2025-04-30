@@ -19,6 +19,7 @@ import { z } from "zod";
  * @remarks
  * This function creates tools:
  * - historical_token_prices
+ * - pool_spot_prices
  */
 export function addPricingServiceTools(
     server: McpServer,
@@ -53,6 +54,48 @@ export function addPricingServiceTools(
                             from: params.from,
                             to: params.to,
                             pricesAtAsc: params.pricesAtAsc,
+                        }
+                    );
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
+                };
+            } catch (error) {
+                return {
+                    content: [{ type: "text", text: `Error: ${error}` }],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    server.tool(
+        "pool_spot_prices",
+        "Get the spot token pair prices for a specified pool contract address. Supports pools on Uniswap V2, V3 and their forks.\n" +
+            "Required: chainName (blockchain network), contractAddress (pool contract address).\n" +
+            "Optional: quoteCurrency (price currency) for value conversion.\n" +
+            "Returns spot token pair prices with pool details and token metadata.",
+        {
+            chainName: z.enum(
+                Object.values(ChainName) as [string, ...string[]]
+            ),
+            contractAddress: z.string(),
+            quoteCurrency: z
+                .enum(Object.values(validQuoteValues) as [string, ...string[]])
+                .optional(),
+        },
+        async (params) => {
+            try {
+                const response =
+                    await goldRushClient.PricingService.getPoolSpotPrices(
+                        params.chainName as Chain,
+                        params.contractAddress,
+                        {
+                            quoteCurrency: params.quoteCurrency as Quote,
                         }
                     );
                 return {

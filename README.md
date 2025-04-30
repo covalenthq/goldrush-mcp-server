@@ -180,7 +180,7 @@ const result = await client.callTool({
     name: "token_balances",
     arguments: {
         chainName: "eth-mainnet",
-        address: "demo.eth",
+        address: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
         quoteCurrency: "USD",
         nft: false,
     },
@@ -268,41 +268,45 @@ Tools are designed to be model-controlled, meaning that tools are exposed from s
 
     - Get the native token balance (ETH, BNB, MATIC, etc.) for a specified wallet address on a blockchain. Required: chainName (blockchain network) and walletAddress. Optional: quoteCurrency for value conversion and blockHeight for historical queries. Returns detailed balance information including formatted amounts and USD values.
 
-17. `nft_for_address`
-
-    - Commonly used to get all NFTs owned by a specific wallet address on a blockchain. Useful for NFT portfolio viewers. Required: chainName (blockchain network), walletAddress (wallet address). Optional: noSpam (exclude spam NFTs, default true), noNftAssetMetadata (exclude detailed metadata, default false), withUncached (include uncached items, default false). Returns a comprehensive list of all NFTs owned by the specified wallet.
-
-18. `nft_check_ownership`
+17. `nft_check_ownership`
 
     - Commonly used to verify ownership of NFTs (including ERC-721 and ERC-1155) within a collection. Required: chainName (blockchain network), walletAddress (wallet address), collectionContract (NFT collection). Optional: traitsFilter (filter by trait types), valuesFilter (filter by trait values). Returns ownership status and matching NFTs if owned.
 
-19. `token_approvals`
+18. `nft_for_address`
+
+    - Commonly used to get all NFTs owned by a specific wallet address on a blockchain. Useful for NFT portfolio viewers. Required: chainName (blockchain network), walletAddress (wallet address). Optional: noSpam (exclude spam NFTs, default true), noNftAssetMetadata (exclude detailed metadata, default false), withUncached (include uncached items, default false). Returns a comprehensive list of all NFTs owned by the specified wallet.
+
+19. `pool_spot_prices`
+
+    - Get the spot token pair prices for a specified pool contract address. Supports pools on Uniswap V2, V3 and their forks. Required: chainName (blockchain network), contractAddress (pool contract address). Optional: quoteCurrency (price currency) for value conversion. Returns spot token pair prices with pool details and token metadata.
+
+20. `token_approvals`
 
     - Commonly used to get a list of approvals across all token contracts categorized by spenders for a wallet's assets. Required: chainName (blockchain network, e.g. eth-mainnet or 1), walletAddress (wallet address, supports ENS, RNS, Lens Handle, or Unstoppable Domain). Returns a list of ERC20 token approvals and their associated security risk levels.
 
-20. `token_balances`
+21. `token_balances`
 
     - Commonly used to fetch the native and fungible (ERC20) tokens held by an address. Required: chainName (blockchain network), address (wallet address). Optional: quoteCurrency for value conversion, nft (include NFTs, default false), noNftFetch, noSpam, and noNftAssetMetadata (all default true) to control data returned. Returns detailed token balance information including spot prices and metadata.
 
-21. `token_holders`
+22. `token_holders`
 
     - Used to get a paginated list of current or historical token holders for a specified ERC20 or ERC721 token. Required: chainName (blockchain network), tokenAddress (token contract address). Optional: blockHeight or date for historical data, pageSize and pageNumber for pagination. Returns list of addresses holding the token with balance amounts and ownership percentages.
 
-22. `transaction`
+23. `transaction`
 
     - Commonly used to fetch and render a single transaction including its decoded log events. Required: chainName (blockchain network), txHash (transaction hash). Optional: quoteCurrency (currency to convert to, USD by default), noLogs (exclude event logs, true by default), withInternal (include internal transactions, false by default), withState (include state changes, false by default), withInputData (include input data, false by default). Tracing features (withInternal, withState, withInputData) supported on the following chains: eth-mainnet. Returns comprehensive details about the specified transaction.
 
-23. `transactions_for_address`
+24. `transaction_summary`
+
+    - Commonly used to fetch the earliest and latest transactions, and the transaction count for a wallet. Required: chainName (blockchain network), walletAddress (wallet address). Optional: quoteCurrency, withGas (include gas usage statistics). Returns summary of transaction activity for the specified wallet.
+
+25. `transactions_for_address`
 
     - Commonly used to fetch and render the most recent transactions involving an address. Required: chainName (blockchain network), walletAddress (wallet address), page (page number). Optional: quoteCurrency, noLogs, blockSignedAtAsc (chronological order). Returns transactions for the specified page of results.
 
-24. `transactions_for_block`
+26. `transactions_for_block`
 
     - Commonly used to fetch all transactions including their decoded log events in a block and further flag interesting wallets or transactions. Required: chainName (blockchain network), blockHeight (block number or latest). Optional: quoteCurrency, noLogs (exclude event logs). Returns all transactions from the specified block.
-
-25. `transaction_summary`
-
-    - Commonly used to fetch the earliest and latest transactions, and the transaction count for a wallet. Required: chainName (blockchain network), walletAddress (wallet address). Optional: quoteCurrency, withGas (include gas usage statistics). Returns summary of transaction activity for the specified wallet.
 
 ---
 

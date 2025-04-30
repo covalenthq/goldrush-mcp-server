@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@covalenthq/client-sdk':
-        specifier: ^2.2.4
-        version: 2.2.5
+        specifier: ^2.2.6
+        version: 2.2.6
       '@modelcontextprotocol/sdk':
         specifier: ^1.7.0
         version: 1.9.0
@@ -99,8 +99,8 @@ packages:
     resolution: {integrity: sha512-H45s8fVLYjbhFH62dIJ3WtmJ6RSPt/3DRO0ZcT2SUiYiQyz3BLVb9ADEnLl91m74aQPS3AzzeajZHYOalWe3bg==}
     engines: {node: '>=6.9.0'}
 
-  '@covalenthq/client-sdk@2.2.5':
-    resolution: {integrity: sha512-bI+81SIo/SNgKZtaASeNYTHkdeYG6zX/ogWF9pbuqOysfUjmlFFjsmfUWxs2Nt5E5j1E25spg62VEeJYGfs0lQ==}
+  '@covalenthq/client-sdk@2.2.6':
+    resolution: {integrity: sha512-vownunnpD19Ljb0FhSPbario+xUna2rE8cirkfjIPJK070ZW1KrMMOIiEFClyauMfzBp6IUCmLiOJAElmmIFpA==}
 
   '@cspotcode/source-map-support@0.8.1':
     resolution: {integrity: sha512-IchNf6dN4tHoMFIn/7OE8LWZ19Y6q/67Bmf6vnGREv8RSbBVb9LPJxEcnwrcwX6ixSvaiGoomAUvu4YSxXrVgw==}
@@ -1625,7 +1625,7 @@ snapshots:
       '@babel/helper-string-parser': 7.25.9
       '@babel/helper-validator-identifier': 7.25.9
 
-  '@covalenthq/client-sdk@2.2.5':
+  '@covalenthq/client-sdk@2.2.6':
     dependencies:
       big.js: 6.2.2
 
