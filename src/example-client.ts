@@ -8,7 +8,7 @@ async function tokenBalancesExample(client: Client) {
         name: "token_balances",
         arguments: {
             chainName: "eth-mainnet",
-            address: "demo.eth",
+            address: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
             quoteCurrency: "USD",
             nft: false,
         },
@@ -22,7 +22,7 @@ async function historicalBalancesExample(client: Client) {
         name: "historical_token_balances",
         arguments: {
             chainName: "eth-mainnet",
-            address: "demo.eth",
+            address: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
             quoteCurrency: "USD",
             date: "2024-01-01",
         },
@@ -36,7 +36,7 @@ async function transactionsExample(client: Client) {
         name: "transactions_for_address",
         arguments: {
             chainName: "eth-mainnet",
-            walletAddress: "demo.eth",
+            walletAddress: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
             page: 0,
             quoteCurrency: "USD",
             noLogs: true,

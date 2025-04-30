@@ -180,7 +180,7 @@ const result = await client.callTool({
     name: "token_balances",
     arguments: {
         chainName: "eth-mainnet",
-        address: "demo.eth",
+        address: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
         quoteCurrency: "USD",
         nft: false,
     },

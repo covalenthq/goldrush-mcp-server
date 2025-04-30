@@ -47,7 +47,7 @@ describe("AllChainsService Tools", () => {
         const response = await client.callTool({
             name: "multichain_address_activity",
             arguments: {
-                walletAddress: "demo.eth",
+                walletAddress: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
             },
         });
         // Log the full API response
@@ -63,7 +63,7 @@ describe("AllChainsService Tools", () => {
         const response = await client.callTool({
             name: "multichain_balances",
             arguments: {
-                walletAddress: "demo.eth",
+                walletAddress: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
                 limit: 1,
             },
         });
@@ -77,7 +77,7 @@ describe("AllChainsService Tools", () => {
         const response = await client.callTool({
             name: "multichain_transactions",
             arguments: {
-                addresses: ["demo.eth"],
+                addresses: ["0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de"],
                 limit: 1,
             },
         });

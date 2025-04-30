@@ -66,7 +66,7 @@ describe("TransactionService Tools", () => {
             name: "transaction_summary",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
+                walletAddress: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
             },
         });
         console.log("transaction_summary response:", resp.content);
@@ -79,7 +79,7 @@ describe("TransactionService Tools", () => {
             name: "transactions_for_address",
             arguments: {
                 chainName: "eth-mainnet",
-                walletAddress: "demo.eth",
+                walletAddress: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
                 page: 0,
             },
         });
