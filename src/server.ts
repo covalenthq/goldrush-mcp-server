@@ -63,6 +63,13 @@ export function startServer() {
         try {
             // Get the API key from the Authorization header
             const authHeader = req.headers.authorization;
+            const requestId = (() => {
+                try {
+                    return req.body?.id || null;
+                } catch {
+                    return null;
+                }
+            })();
             if (!authHeader || !authHeader.startsWith("Bearer ")) {
                 console.log("Received invalid Authorization header");
                 res.writeHead(401).end(
@@ -73,7 +80,7 @@ export function startServer() {
                             message:
                                 "Missing or invalid Authorization header. Expected format: Bearer <GOLDRUSH_API_KEY>",
                         },
-                        id: req.body?.id || null,
+                        id: requestId,
                     })
                 );
                 return;
@@ -89,7 +96,7 @@ export function startServer() {
                             code: -32001,
                             message: "API key is empty or invalid",
                         },
-                        id: req.body?.id || null,
+                        id: requestId,
                     })
                 );
                 return;
