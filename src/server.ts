@@ -16,32 +16,18 @@ import { addSecurityServiceTools } from "./services/SecurityService.js";
 import { addTransactionServiceTools } from "./services/TransactionService.js";
 import { GoldRushClient } from "@covalenthq/client-sdk";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import dotenv from "dotenv";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import express from "express";
+import { type Request, type Response } from "express";
 
 // Get the version from the package.json file
 const { version } = packageJson;
 
-// Load environment variables
-dotenv.config();
-
-/**
- * Create a Covalent GoldRush client using the provided API key.
- */
-export function createGoldRushClient() {
-    const apiKey = process.env["GOLDRUSH_API_KEY"];
-    if (!apiKey) {
-        console.error("GOLDRUSH_API_KEY environment variable is not set.");
-        process.exit(1);
-    }
-    return new GoldRushClient(apiKey);
-}
-
 /**
  * Create and configure an MCP server instance
  */
-export function createServer() {
-    const goldRushClient = createGoldRushClient();
+export function createServer(apiKey: string) {
+    const goldRushClient = new GoldRushClient(apiKey);
     const server = new McpServer({
         name: "GoldRush MCP Server",
         version: version,
@@ -63,16 +49,84 @@ export function createServer() {
     return server;
 }
 
-/**
- * Initializes the server using STDIO transport for communication.
- */
-export async function startServer() {
-    try {
-        const server = createServer();
-        const transport = new StdioServerTransport();
-        await server.connect(transport);
-    } catch (error) {
-        console.error("Failed to start server:", error);
-        process.exit(1);
-    }
+export function startServer() {
+    const app = express();
+    app.use(express.json());
+
+    app.post("/mcp", async (req: Request, res: Response) => {
+        // In stateless mode, create a new instance of transport and server for each request
+        // to ensure complete isolation. A single instance would cause request ID collisions
+        // when multiple clients connect concurrently.
+
+        try {
+            // Get the API key from the Authorization header
+            const apiKey = req.headers.authorization?.split(" ")[1];
+            if (!apiKey) {
+                console.error(
+                    "Authorization header missing or invalid. Expected format: Bearer <GOLDRUSH_API_KEY>"
+                );
+                process.exit(1);
+            }
+            const server = createServer(apiKey);
+            const transport: StreamableHTTPServerTransport =
+                new StreamableHTTPServerTransport({
+                    sessionIdGenerator: undefined,
+                });
+            res.on("close", () => {
+                console.log("Request closed");
+                transport.close();
+                server.close();
+            });
+            await server.connect(transport);
+            await transport.handleRequest(req, res, req.body);
+        } catch (error) {
+            console.error("Error handling MCP request:", error);
+            if (!res.headersSent) {
+                res.status(500).json({
+                    jsonrpc: "2.0",
+                    error: {
+                        code: -32603,
+                        message: "Internal server error",
+                    },
+                    id: null,
+                });
+            }
+        }
+    });
+
+    app.get("/mcp", async (req: Request, res: Response) => {
+        console.log("Received GET MCP request");
+        res.writeHead(405).end(
+            JSON.stringify({
+                jsonrpc: "2.0",
+                error: {
+                    code: -32000,
+                    message: "Method not allowed.",
+                },
+                id: null,
+            })
+        );
+    });
+
+    app.delete("/mcp", async (req: Request, res: Response) => {
+        console.log("Received DELETE MCP request");
+        res.writeHead(405).end(
+            JSON.stringify({
+                jsonrpc: "2.0",
+                error: {
+                    code: -32000,
+                    message: "Method not allowed.",
+                },
+                id: null,
+            })
+        );
+    });
+
+    // Start the server
+    const PORT = 3000;
+    app.listen(PORT, () => {
+        console.log(
+            `MCP Stateless Streamable HTTP Server listening on port ${PORT}`
+        );
+    });
 }
