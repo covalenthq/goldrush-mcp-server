@@ -17,8 +17,7 @@ import { addTransactionServiceTools } from "./services/TransactionService.js";
 import { GoldRushClient } from "@covalenthq/client-sdk";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import express from "express";
-import { type Request, type Response } from "express";
+import express, { type Request, type Response } from "express";
 
 // Get the version from the package.json file
 const { version } = packageJson;
@@ -28,10 +27,13 @@ const { version } = packageJson;
  */
 export function createServer(apiKey: string) {
     const goldRushClient = new GoldRushClient(apiKey);
-    const server = new McpServer({
-        name: "GoldRush MCP Server",
-        version: version,
-    });
+    const server = new McpServer(
+        {
+            name: "GoldRush MCP Server",
+            version: version,
+        },
+        { capabilities: { logging: {} } }
+    );
 
     // Add resources
     addStaticResources(server);
@@ -60,13 +62,39 @@ export function startServer() {
 
         try {
             // Get the API key from the Authorization header
-            const apiKey = req.headers.authorization?.split(" ")[1];
-            if (!apiKey) {
-                console.error(
-                    "Authorization header missing or invalid. Expected format: Bearer <GOLDRUSH_API_KEY>"
+            const authHeader = req.headers.authorization;
+            if (!authHeader || !authHeader.startsWith("Bearer ")) {
+                console.log("Received invalid Authorization header");
+                res.writeHead(401).end(
+                    JSON.stringify({
+                        jsonrpc: "2.0",
+                        error: {
+                            code: -32001,
+                            message:
+                                "Missing or invalid Authorization header. Expected format: Bearer <GOLDRUSH_API_KEY>",
+                        },
+                        id: req.body?.id || null,
+                    })
                 );
-                process.exit(1);
+                return;
             }
+
+            const apiKey = authHeader?.split(" ")[1];
+            if (!apiKey || apiKey.trim() === "") {
+                console.log("Received invalid API key");
+                res.writeHead(401).end(
+                    JSON.stringify({
+                        jsonrpc: "2.0",
+                        error: {
+                            code: -32001,
+                            message: "API key is empty or invalid",
+                        },
+                        id: req.body?.id || null,
+                    })
+                );
+                return;
+            }
+
             const server = createServer(apiKey);
             const transport: StreamableHTTPServerTransport =
                 new StreamableHTTPServerTransport({
@@ -128,5 +156,11 @@ export function startServer() {
         console.log(
             `MCP Stateless Streamable HTTP Server listening on port ${PORT}`
         );
+    });
+
+    // Handle server shutdown
+    process.on("SIGINT", async () => {
+        console.log("Shutting down server...");
+        process.exit(0);
     });
 }
