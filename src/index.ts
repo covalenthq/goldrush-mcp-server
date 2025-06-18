@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { startServer } from "./server.js";
+import { parseArgsAndStart } from "./server.js";
 
-// Start the server
-startServer();
+// Parse command line arguments and start the server
+parseArgsAndStart();

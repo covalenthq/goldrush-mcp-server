@@ -57,6 +57,8 @@ Model Context Protocol (MCP) is a message protocol for connecting context or too
 
 - Call Covalent GoldRush API endpoints as MCP Tools
 - Read from MCP Resources that give chain info, quote currencies, chain statuses, etc.
+- **Flexible Transport Support**: Unified server supporting both STDIO and HTTP transports
+- **Command-line Interface**: Easy configuration via CLI arguments
 - Fully testable with [Vitest](https://vitest.dev/) for testing each group of tools.
 - Modular architecture where each service is implemented as a separate module, making the codebase easier to maintain and extend.
 
@@ -144,7 +146,9 @@ Add this to your `~/.codeium/windsurf/mcp_config.json` file:
 
 ### Programmatic Usage
 
-The server is designed to be started as a subprocess by an MCP client. For example, using the [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk):
+The server supports both STDIO and HTTP transports for different integration scenarios:
+
+#### STDIO Transport (Recommended for MCP Clients)
 
 ```typescript
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
@@ -153,7 +157,7 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 const transport = new StdioClientTransport({
   command: "npx",
   args: ["-y", "@covalenthq/goldrush-mcp-server@latest"],
-  env: {"GOLDRUSH_API_KEY"="your_api_key_here"}
+  env: {"GOLDRUSH_API_KEY": "your_api_key_here"}
 });
 
 const client = new Client(
@@ -170,12 +174,10 @@ const client = new Client(
 
 await client.connect(transport);
 
-// List tools
-const resources = await client.listTools();
+// List tools and call them
 const tools = await client.listTools();
 console.log("Available tools:", tools.tools.map(tool => tool.name).join(", "));
 
-// Now you can call tools
 const result = await client.callTool({
     name: "token_balances",
     arguments: {
@@ -186,7 +188,42 @@ const result = await client.callTool({
     },
 });
 console.log("Token balances:", result.content);
-...
+```
+
+#### HTTP Transport (For Web Integrations)
+
+```bash
+# Start the HTTP server
+node dist/index.js --transport http --port 3000
+```
+
+Then make HTTP requests:
+
+```javascript
+const response = await fetch('http://localhost:3000/mcp', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_GOLDRUSH_API_KEY'
+  },
+  body: JSON.stringify({
+    jsonrpc: '2.0',
+    id: 1,
+    method: 'tools/call',
+    params: {
+      name: 'token_balances',
+      arguments: {
+        chainName: 'eth-mainnet',
+        address: '0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de',
+        quoteCurrency: 'USD',
+        nft: false
+      }
+    }
+  })
+});
+
+const result = await response.json();
+console.log('Token balances:', result);
 ```
 
 ### Example LLM Flow
@@ -359,12 +396,36 @@ npm run build
 
 ### Running the MCP Server
 
+The server supports multiple transport options:
+
 ```bash
-# Start the server (runs dist/index.js)
+# Start with default STDIO transport (recommended for MCP clients)
 npm run start
+
+# Or explicitly specify STDIO transport
+npm run start:stdio
+
+# Start with HTTP transport on port 3000
+npm run start:http
+
+# Custom configuration with CLI arguments
+node dist/index.js --transport http --port 8080
+node dist/index.js --transport stdio --api-key YOUR_KEY_HERE
 ```
 
-This spawns the MCP server on stdin/stdout. Typically, an MCP client will connect to the server.
+#### Transport Options
+
+- **STDIO (default)**: Direct MCP protocol communication via stdin/stdout - ideal for MCP clients like Claude Desktop
+- **HTTP**: RESTful HTTP server with `/mcp` endpoint - useful for web integrations
+
+#### Command Line Arguments
+
+- `--transport`, `-t`: Choose transport type (`stdio` or `http`)
+- `--port`, `-p`: Set HTTP port (default: 3000)
+- `--api-key`, `-k`: Provide API key directly
+- `--help`, `-h`: Show usage information
+
+STDIO transport spawns the MCP server on stdin/stdout where MCP clients can connect directly. HTTP transport starts a server that accepts POST requests to `/mcp` with Bearer token authentication.
 
 ### Example Client
 
@@ -404,7 +465,9 @@ set GOLDRUSH_API_KEY=YOUR_KEY_HERE
 ```
 goldrush-mcp-server
 ├── src
-│   ├── index.ts                 # Main MCP server entry point
+│   ├── index.ts                 # Main entry point with CLI parsing
+│   ├── server.ts                # Unified server with STDIO and HTTP transports
+│   ├── server-stdio.ts          # Legacy STDIO-only server (backup)
 │   ├── services/                # Modular service implementations
 │   │   ├── AllChainsService.ts  # Cross-chain service tools
 │   │   ├── BalanceService.ts    # Balance-related tools
