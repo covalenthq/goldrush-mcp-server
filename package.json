@@ -69,7 +69,7 @@
     "license": "MIT",
     "dependencies": {
         "@covalenthq/client-sdk": "^2.2.6",
-        "@modelcontextprotocol/sdk": "^1.12.0",
+        "@modelcontextprotocol/sdk": "^1.13.1",
         "dotenv": "^16.5.0",
         "express": "^5.1.0",
         "zod": "^3.25.30"

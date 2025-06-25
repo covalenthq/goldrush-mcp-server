@@ -130,3 +130,8 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Dev containers
+.devcontainer/
+.pnpm-store/
+package-lock.json
