@@ -30,8 +30,8 @@ export function addSecurityServiceTools(
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
-            ),
-            walletAddress: z.string(),
+            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
+            walletAddress: z.string().describe("The wallet address to get token approvals for. Supports wallet addresses, ENS, RNS, Lens Handle, or Unstoppable Domain names."),
         },
         async (params) => {
             try {

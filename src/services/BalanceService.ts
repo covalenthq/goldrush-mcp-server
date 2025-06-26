@@ -38,15 +38,16 @@ export function addBalanceServiceTools(
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
-            ),
-            address: z.string(),
+            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
+            address: z.string().describe("The wallet address to get token balances for. Must be a valid blockchain address."),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
-            nft: z.boolean().optional().default(false),
-            noNftFetch: z.boolean().optional().default(true),
-            noSpam: z.boolean().optional().default(true),
-            noNftAssetMetadata: z.boolean().optional().default(true),
+                .optional()
+                .describe("Currency to quote token values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."),
+            nft: z.boolean().optional().default(false).describe("Include NFT token balances in the response. Default is false."),
+            noNftFetch: z.boolean().optional().default(true).describe("Skip fetching NFT metadata. Default is true for better performance."),
+            noSpam: z.boolean().optional().default(true).describe("Filter out spam/scam tokens from results. Default is true."),
+            noNftAssetMetadata: z.boolean().optional().default(true).describe("Skip fetching NFT asset metadata. Default is true for better performance."),
         },
         async (params) => {
             try {
@@ -89,17 +90,18 @@ export function addBalanceServiceTools(
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
-            ),
-            address: z.string(),
+            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
+            address: z.string().describe("The wallet address to get historical token balances for. Must be a valid blockchain address."),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
-            nft: z.boolean().optional().default(false),
-            noNftFetch: z.boolean().optional().default(true),
-            noSpam: z.boolean().optional().default(true),
-            noNftAssetMetadata: z.boolean().optional().default(true),
-            blockHeight: z.number().optional(),
-            date: z.string().optional(),
+                .optional()
+                .describe("Currency to quote token values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."),
+            nft: z.boolean().optional().default(false).describe("Include NFT token balances in the response. Default is false."),
+            noNftFetch: z.boolean().optional().default(true).describe("Skip fetching NFT metadata. Default is true for better performance."),
+            noSpam: z.boolean().optional().default(true).describe("Filter out spam/scam tokens from results. Default is true."),
+            noNftAssetMetadata: z.boolean().optional().default(true).describe("Skip fetching NFT asset metadata. Default is true for better performance."),
+            blockHeight: z.number().optional().describe("Specific block height to get historical balances from. Cannot be used with date parameter."),
+            date: z.string().optional().describe("Specific date to get historical balances from (YYYY-MM-DD format). Cannot be used with blockHeight parameter."),
         },
         async (params) => {
             try {
@@ -143,12 +145,13 @@ export function addBalanceServiceTools(
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
-            ),
-            walletAddress: z.string(),
+            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
+            walletAddress: z.string().describe("The wallet address to get portfolio history for. Must be a valid blockchain address."),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
-            days: z.number().optional().default(7),
+                .optional()
+                .describe("Currency to quote portfolio values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."),
+            days: z.number().optional().default(7).describe("Number of days of historical data to retrieve. Default is 7 days."),
         },
         async (params) => {
             try {
@@ -188,16 +191,17 @@ export function addBalanceServiceTools(
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
-            ),
-            walletAddress: z.string(),
+            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
+            walletAddress: z.string().describe("The wallet address to get ERC20 transfers for. Must be a valid blockchain address."),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
-            contractAddress: z.string().nullable(),
-            startingBlock: z.number().optional(),
-            endingBlock: z.number().optional(),
-            pageSize: z.number().optional().default(10),
-            pageNumber: z.number().optional().default(0),
+                .optional()
+                .describe("Currency to quote transfer values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."),
+            contractAddress: z.string().nullable().describe("Specific ERC20 token contract address to filter transfers. If null, returns transfers for all ERC20 tokens."),
+            startingBlock: z.number().optional().describe("Starting block number to begin search from. Use with endingBlock to define a range."),
+            endingBlock: z.number().optional().describe("Ending block number to search until. Use with startingBlock to define a range."),
+            pageSize: z.number().optional().default(10).describe("Number of transfers to return per page. Default is 10, maximum is 100."),
+            pageNumber: z.number().optional().default(0).describe("Page number for pagination, starting from 0. Default is 0."),
         },
         async (params) => {
             try {
@@ -240,12 +244,12 @@ export function addBalanceServiceTools(
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
-            ),
-            tokenAddress: z.string(),
-            blockHeight: z.union([z.string(), z.number()]).optional(),
-            date: z.string().optional(),
-            pageSize: z.number().optional(),
-            pageNumber: z.number().optional(),
+            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
+            tokenAddress: z.string().describe("The token contract address to get holders for. Must be a valid ERC20 or ERC721 contract address."),
+            blockHeight: z.union([z.string(), z.number()]).optional().describe("Specific block height to get historical token holders from. Cannot be used with date parameter."),
+            date: z.string().optional().describe("Specific date to get historical token holders from (YYYY-MM-DD format). Cannot be used with blockHeight parameter."),
+            pageSize: z.number().optional().describe("Number of token holders to return per page. Maximum is 100."),
+            pageNumber: z.number().optional().describe("Page number for pagination, starting from 0."),
         },
         async (params) => {
             try {
@@ -287,12 +291,13 @@ export function addBalanceServiceTools(
         {
             chainName: z.enum(
                 Object.values(ChainName) as [string, ...string[]]
-            ),
-            walletAddress: z.string(),
+            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
+            walletAddress: z.string().describe("The wallet address to get native token balance for. Must be a valid blockchain address."),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
-            blockHeight: z.union([z.string(), z.number()]).optional(),
+                .optional()
+                .describe("Currency to quote native token value in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."),
+            blockHeight: z.union([z.string(), z.number()]).optional().describe("Specific block height to get historical native token balance from."),
         },
         async (params) => {
             try {
