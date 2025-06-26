@@ -37,18 +37,47 @@ export function addTransactionServiceTools(
             "Tracing features (withInternal, withState, withInputData) supported on the following chains: eth-mainnet\n" +
             "Returns comprehensive details about the specified transaction.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
-            txHash: z.string().describe("The transaction hash to get details for. Must be a valid transaction hash."),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            txHash: z
+                .string()
+                .describe(
+                    "The transaction hash to get details for. Must be a valid transaction hash."
+                ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional()
-                .describe("Currency to quote transaction values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."),
-            noLogs: z.boolean().optional().default(true).describe("Exclude event logs from the response for faster performance. Default is true."),
-            withInternal: z.boolean().optional().describe("Include internal transaction traces. Only supported on eth-mainnet. Default is false."),
-            withState: z.boolean().optional().describe("Include state changes in the response. Only supported on eth-mainnet. Default is false."),
-            withInputData: z.boolean().optional().describe("Include transaction input data in the response. Only supported on eth-mainnet. Default is false."),
+                .describe(
+                    "Currency to quote transaction values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."
+                ),
+            noLogs: z
+                .boolean()
+                .optional()
+                .default(true)
+                .describe(
+                    "Exclude event logs from the response for faster performance. Default is true."
+                ),
+            withInternal: z
+                .boolean()
+                .optional()
+                .describe(
+                    "Include internal transaction traces. Only supported on eth-mainnet. Default is false."
+                ),
+            withState: z
+                .boolean()
+                .optional()
+                .describe(
+                    "Include state changes in the response. Only supported on eth-mainnet. Default is false."
+                ),
+            withInputData: z
+                .boolean()
+                .optional()
+                .describe(
+                    "Include transaction input data in the response. Only supported on eth-mainnet. Default is false."
+                ),
         },
         async (params) => {
             try {
@@ -88,15 +117,28 @@ export function addTransactionServiceTools(
             "Optional: quoteCurrency, withGas (include gas usage statistics).\n" +
             "Returns summary of transaction activity for the specified wallet.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
-            walletAddress: z.string().describe("The wallet address to get transaction summary for. Must be a valid blockchain address."),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            walletAddress: z
+                .string()
+                .describe(
+                    "The wallet address to get transaction summary for. Must be a valid blockchain address."
+                ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional()
-                .describe("Currency to quote transaction values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."),
-            withGas: z.boolean().optional().describe("Include gas usage statistics in the summary. Default is false."),
+                .describe(
+                    "Currency to quote transaction values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."
+                ),
+            withGas: z
+                .boolean()
+                .optional()
+                .describe(
+                    "Include gas usage statistics in the summary. Default is false."
+                ),
         },
         async (params) => {
             try {
@@ -133,17 +175,40 @@ export function addTransactionServiceTools(
             "Optional: quoteCurrency, noLogs, blockSignedAtAsc (chronological order).\n" +
             "Returns transactions for the specified page of results.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
-            walletAddress: z.string().describe("The wallet address to get transactions for. Must be a valid blockchain address."),
-            page: z.number().describe("Page number for pagination, starting from 0. Each page contains multiple transactions."),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            walletAddress: z
+                .string()
+                .describe(
+                    "The wallet address to get transactions for. Must be a valid blockchain address."
+                ),
+            page: z
+                .number()
+                .describe(
+                    "Page number for pagination, starting from 0. Each page contains multiple transactions."
+                ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional()
-                .describe("Currency to quote transaction values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."),
-            noLogs: z.boolean().optional().default(true).describe("Exclude event logs from transactions for faster performance. Default is true."),
-            blockSignedAtAsc: z.boolean().optional().describe("Sort transactions in ascending chronological order. Default is false (newest first)."),
+                .describe(
+                    "Currency to quote transaction values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."
+                ),
+            noLogs: z
+                .boolean()
+                .optional()
+                .default(true)
+                .describe(
+                    "Exclude event logs from transactions for faster performance. Default is true."
+                ),
+            blockSignedAtAsc: z
+                .boolean()
+                .optional()
+                .describe(
+                    "Sort transactions in ascending chronological order. Default is false (newest first)."
+                ),
         },
         async (params) => {
             try {
@@ -182,16 +247,33 @@ export function addTransactionServiceTools(
             "Optional: quoteCurrency, noLogs (exclude event logs).\n" +
             "Returns all transactions from the specified block.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
-            blockHeight: z.union([z.string(), z.number(), z.literal("latest")]).describe("The block number to get transactions from. Can be a block number or 'latest' for the most recent block."),
-            page: z.number().describe("Page number for pagination, starting from 0. Each page contains multiple transactions from the block."),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            blockHeight: z
+                .union([z.string(), z.number(), z.literal("latest")])
+                .describe(
+                    "The block number to get transactions from. Can be a block number or 'latest' for the most recent block."
+                ),
+            page: z
+                .number()
+                .describe(
+                    "Page number for pagination, starting from 0. Each page contains multiple transactions from the block."
+                ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional()
-                .describe("Currency to quote transaction values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."),
-            noLogs: z.boolean().optional().describe("Exclude event logs from transactions for faster performance. Default varies by implementation."),
+                .describe(
+                    "Currency to quote transaction values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."
+                ),
+            noLogs: z
+                .boolean()
+                .optional()
+                .describe(
+                    "Exclude event logs from transactions for faster performance. Default varies by implementation."
+                ),
         },
         async (params) => {
             try {

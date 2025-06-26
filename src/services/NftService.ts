@@ -29,13 +29,37 @@ export function addNftServiceTools(
             "withUncached (fetch uncached metadata, may be slower, default false).\n" +
             "Returns complete details of NFTs in the wallet including metadata.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
-            walletAddress: z.string().describe("The wallet address to get NFTs for. Can be a wallet address or ENS/domain name."),
-            noSpam: z.boolean().optional().default(true).describe("Filter out spam/scam NFTs from results. Default is true."),
-            noNftAssetMetadata: z.boolean().optional().default(true).describe("Skip fetching NFT asset metadata for faster response. Default is true."),
-            withUncached: z.boolean().optional().default(false).describe("Fetch uncached metadata directly from source (may be slower but more up-to-date). Default is false."),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            walletAddress: z
+                .string()
+                .describe(
+                    "The wallet address to get NFTs for. Can be a wallet address or ENS/domain name."
+                ),
+            noSpam: z
+                .boolean()
+                .optional()
+                .default(true)
+                .describe(
+                    "Filter out spam/scam NFTs from results. Default is true."
+                ),
+            noNftAssetMetadata: z
+                .boolean()
+                .optional()
+                .default(true)
+                .describe(
+                    "Skip fetching NFT asset metadata for faster response. Default is true."
+                ),
+            withUncached: z
+                .boolean()
+                .optional()
+                .default(false)
+                .describe(
+                    "Fetch uncached metadata directly from source (may be slower but more up-to-date). Default is false."
+                ),
         },
         async (params) => {
             try {
@@ -73,13 +97,33 @@ export function addNftServiceTools(
             "Optional: traitsFilter (filter by trait types), valuesFilter (filter by trait values).\n" +
             "Returns ownership status and matching NFTs if owned.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
-            walletAddress: z.string().describe("The wallet address to check NFT ownership for. Must be a valid blockchain address."),
-            collectionContract: z.string().describe("The NFT collection contract address to check ownership in. Must be a valid ERC-721 or ERC-1155 contract address."),
-            traitsFilter: z.string().optional().describe("Filter by specific trait types (comma-separated list of trait names to filter by)."),
-            valuesFilter: z.string().optional().describe("Filter by specific trait values (comma-separated list of trait values to match)."),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            walletAddress: z
+                .string()
+                .describe(
+                    "The wallet address to check NFT ownership for. Must be a valid blockchain address."
+                ),
+            collectionContract: z
+                .string()
+                .describe(
+                    "The NFT collection contract address to check ownership in. Must be a valid ERC-721 or ERC-1155 contract address."
+                ),
+            traitsFilter: z
+                .string()
+                .optional()
+                .describe(
+                    "Filter by specific trait types (comma-separated list of trait names to filter by)."
+                ),
+            valuesFilter: z
+                .string()
+                .optional()
+                .describe(
+                    "Filter by specific trait values (comma-separated list of trait values to match)."
+                ),
         },
         async (params) => {
             try {

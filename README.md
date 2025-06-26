@@ -155,28 +155,31 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 const transport = new StdioClientTransport({
-  command: "npx",
-  args: ["-y", "@covalenthq/goldrush-mcp-server@latest"],
-  env: {"GOLDRUSH_API_KEY": "your_api_key_here"}
+    command: "npx",
+    args: ["-y", "@covalenthq/goldrush-mcp-server@latest"],
+    env: { GOLDRUSH_API_KEY: "your_api_key_here" },
 });
 
 const client = new Client(
-  {
-    name: "example-client",
-    version: "1.0.0"
-  },
-  {
-    capabilities: {
-      tools: {}
+    {
+        name: "example-client",
+        version: "1.0.0",
+    },
+    {
+        capabilities: {
+            tools: {},
+        },
     }
-  }
 );
 
 await client.connect(transport);
 
 // List tools and call them
 const tools = await client.listTools();
-console.log("Available tools:", tools.tools.map(tool => tool.name).join(", "));
+console.log(
+    "Available tools:",
+    tools.tools.map((tool) => tool.name).join(", ")
+);
 
 const result = await client.callTool({
     name: "token_balances",
@@ -200,30 +203,30 @@ node dist/index.js --transport http --port 3000
 Then make HTTP requests:
 
 ```javascript
-const response = await fetch('http://localhost:3000/mcp', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer YOUR_GOLDRUSH_API_KEY'
-  },
-  body: JSON.stringify({
-    jsonrpc: '2.0',
-    id: 1,
-    method: 'tools/call',
-    params: {
-      name: 'token_balances',
-      arguments: {
-        chainName: 'eth-mainnet',
-        address: '0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de',
-        quoteCurrency: 'USD',
-        nft: false
-      }
-    }
-  })
+const response = await fetch("http://localhost:3000/mcp", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer YOUR_GOLDRUSH_API_KEY",
+    },
+    body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/call",
+        params: {
+            name: "token_balances",
+            arguments: {
+                chainName: "eth-mainnet",
+                address: "0xfC43f5F9dd45258b3AFf31Bdbe6561D97e8B71de",
+                quoteCurrency: "USD",
+                nft: false,
+            },
+        },
+    }),
 });
 
 const result = await response.json();
-console.log('Token balances:', result);
+console.log("Token balances:", result);
 ```
 
 ### Example LLM Flow

@@ -32,16 +32,37 @@ export function addPricingServiceTools(
             "Optional: pricesAtAsc (set to true for chronological ascending order, default is false for descending order).\n" +
             "Returns historical token prices for the specified time range.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
-            quoteCurrency: z.enum(
-                Object.values(validQuoteValues) as [string, ...string[]]
-            ).describe("Currency to quote token prices in (e.g., 'USD', 'EUR'). This determines the currency for historical price data."),
-            contractAddress: z.string().describe("The token contract address to get historical prices for. Use the native token address for native token prices."),
-            from: z.string().describe("Start date for historical price data in YYYY-MM-DD format (e.g., '2023-01-01')."),
-            to: z.string().describe("End date for historical price data in YYYY-MM-DD format (e.g., '2023-12-31')."),
-            pricesAtAsc: z.boolean().optional().describe("Sort prices in ascending chronological order. Default is false (descending order, newest first)."),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            quoteCurrency: z
+                .enum(Object.values(validQuoteValues) as [string, ...string[]])
+                .describe(
+                    "Currency to quote token prices in (e.g., 'USD', 'EUR'). This determines the currency for historical price data."
+                ),
+            contractAddress: z
+                .string()
+                .describe(
+                    "The token contract address to get historical prices for. Use the native token address for native token prices."
+                ),
+            from: z
+                .string()
+                .describe(
+                    "Start date for historical price data in YYYY-MM-DD format (e.g., '2023-01-01')."
+                ),
+            to: z
+                .string()
+                .describe(
+                    "End date for historical price data in YYYY-MM-DD format (e.g., '2023-12-31')."
+                ),
+            pricesAtAsc: z
+                .boolean()
+                .optional()
+                .describe(
+                    "Sort prices in ascending chronological order. Default is false (descending order, newest first)."
+                ),
         },
         async (params) => {
             try {
@@ -80,14 +101,22 @@ export function addPricingServiceTools(
             "Optional: quoteCurrency (price currency) for value conversion.\n" +
             "Returns spot token pair prices with pool details and token metadata.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ).describe("The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."),
-            contractAddress: z.string().describe("The liquidity pool contract address to get spot prices for. Must be a valid Uniswap V2/V3 or compatible DEX pool address."),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            contractAddress: z
+                .string()
+                .describe(
+                    "The liquidity pool contract address to get spot prices for. Must be a valid Uniswap V2/V3 or compatible DEX pool address."
+                ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
                 .optional()
-                .describe("Currency to quote pool token values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."),
+                .describe(
+                    "Currency to quote pool token values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."
+                ),
         },
         async (params) => {
             try {
