@@ -84,7 +84,6 @@ export async function startStdioServer(apiKey?: string) {
         const server = createServer(apiKey);
         const transport = new StdioServerTransport();
         await server.connect(transport);
-        console.log("MCP Server started with STDIO transport");
     } catch (error) {
         console.error("Failed to start STDIO server:", error);
         process.exit(1);
@@ -237,63 +236,63 @@ export async function startServer(
  * Parse command line arguments and start the server
  */
 export function parseArgsAndStart() {
-    const args = process.argv.slice(2);
-    let transportType: TransportType = "stdio";
-    let port = DEFAULT_PORT;
-    let apiKey: string | undefined;
+    try {
+        const args = process.argv.slice(2);
+        let transportType: TransportType = "stdio";
+        let port = DEFAULT_PORT;
+        let apiKey: string | undefined;
 
-    // Simple argument parsing
-    for (let i = 0; i < args.length; i++) {
-        const arg = args[i];
-        switch (arg) {
-            case "--transport":
-            case "-t": {
-                const transport = args[i + 1];
-                if (!transport) {
-                    console.error("Transport type is required");
-                    process.exit(1);
+        // Simple argument parsing
+        for (let i = 0; i < args.length; i++) {
+            const arg = args[i];
+            switch (arg) {
+                case "--transport":
+                case "-t": {
+                    const transport = args[i + 1];
+                    if (!transport) {
+                        throw new Error("Transport type is required");
+                    }
+                    if (transport === "stdio" || transport === "http") {
+                        transportType = transport;
+                        i++; // Skip next argument
+                    } else {
+                        throw new Error(
+                            `Invalid transport type: ${transport}. Supported: stdio, http`
+                        );
+                    }
+                    break;
                 }
-                if (transport === "stdio" || transport === "http") {
-                    transportType = transport;
+                case "--port":
+                case "-p": {
+                    const portStr = args[i + 1];
+                    if (!portStr) {
+                        throw new Error("Port value is required");
+                    }
+                    const parsedPort = parseInt(portStr, 10);
+                    if (
+                        isNaN(parsedPort) ||
+                        parsedPort < 1 ||
+                        parsedPort > 65535
+                    ) {
+                        throw new Error(`Invalid port: ${portStr}`);
+                    }
+                    port = parsedPort;
                     i++; // Skip next argument
-                } else {
-                    console.error(
-                        `Invalid transport type: ${transport}. Supported: stdio, http`
-                    );
-                    process.exit(1);
+                    break;
                 }
-                break;
-            }
-            case "--port":
-            case "-p": {
-                const portStr = args[i + 1];
-                if (!portStr) {
-                    console.error("Port value is required");
-                    process.exit(1);
+                case "--api-key":
+                case "-k": {
+                    const keyValue = args[i + 1];
+                    if (!keyValue) {
+                        throw new Error("API key cannot be empty");
+                    }
+                    apiKey = keyValue;
+                    i++; // Skip next argument
+                    break;
                 }
-                const parsedPort = parseInt(portStr, 10);
-                if (isNaN(parsedPort) || parsedPort < 1 || parsedPort > 65535) {
-                    console.error(`Invalid port: ${portStr}`);
-                    process.exit(1);
-                }
-                port = parsedPort;
-                i++; // Skip next argument
-                break;
-            }
-            case "--api-key":
-            case "-k": {
-                const keyValue = args[i + 1];
-                if (!keyValue) {
-                    console.error("API key cannot be empty");
-                    process.exit(1);
-                }
-                apiKey = keyValue;
-                i++; // Skip next argument
-                break;
-            }
-            case "--help":
-            case "-h":
-                console.log(`
+                case "--help":
+                case "-h":
+                    console.log(`
 GoldRush MCP Server v${version}
 
 Usage: goldrush-mcp-server [options]
@@ -310,14 +309,24 @@ Examples:
   goldrush-mcp-server -t http -p 8080           # HTTP transport on port 8080
   goldrush-mcp-server -k your_api_key          # With API key argument
 `);
-                process.exit(0);
-                break;
+                    process.exit(0);
+                    break;
+                default:
+                    if (arg && arg.startsWith("-")) {
+                        throw new Error(`Unknown argument: ${arg}`);
+                    }
+                    // Ignore non-option arguments
+                    break;
+            }
         }
-    }
 
-    // Start the server
-    startServer(transportType, { port, apiKey }).catch((error) => {
-        console.error("Failed to start server:", error);
+        // Start the server
+        startServer(transportType, { port, apiKey }).catch((error) => {
+            console.error("Failed to start server:", error);
+            process.exit(1);
+        });
+    } catch (error) {
+        console.error("Error:", error instanceof Error ? error.message : error);
         process.exit(1);
-    });
+    }
 }
