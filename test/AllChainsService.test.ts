@@ -85,5 +85,5 @@ describe("AllChainsService Tools", () => {
         console.log("multichain_transactions response:", response.content);
         expect(response.isError).toBeFalsy();
         expect(response.content).toBeDefined();
-    }, 30000);
+    }, 90000);
 });

@@ -36,6 +36,8 @@
     "scripts": {
         "build": "tsc",
         "start": "node dist/index.js",
+        "start:stdio": "node dist/index.js --transport stdio",
+        "start:http": "node dist/index.js --transport http",
         "lint": "eslint .",
         "prepublishOnly": "npm run clean && npm run build",
         "clean": "rimraf dist",
@@ -67,24 +69,26 @@
     "license": "MIT",
     "dependencies": {
         "@covalenthq/client-sdk": "^2.2.6",
-        "@modelcontextprotocol/sdk": "^1.7.0",
-        "dotenv": "^16.4.7",
-        "zod": "^3.24.2"
+        "@modelcontextprotocol/sdk": "^1.13.1",
+        "dotenv": "^16.5.0",
+        "express": "^5.1.0",
+        "zod": "^3.25.30"
     },
     "devDependencies": {
-        "@eslint/eslintrc": "^3.3.0",
-        "@eslint/js": "^9.21.0",
+        "@eslint/eslintrc": "^3.3.1",
+        "@eslint/js": "^9.27.0",
         "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-        "@types/node": "^22.14.0",
-        "@typescript-eslint/eslint-plugin": "^8.25.0",
-        "@typescript-eslint/parser": "^8.25.0",
-        "eslint": "^9.21.0",
-        "eslint-config-prettier": "^10.0.2",
-        "eslint-plugin-prettier": "^5.2.3",
+        "@types/express": "^5.0.2",
+        "@types/node": "^22.15.23",
+        "@typescript-eslint/eslint-plugin": "^8.33.0",
+        "@typescript-eslint/parser": "^8.33.0",
+        "eslint": "^9.27.0",
+        "eslint-config-prettier": "^10.1.5",
+        "eslint-plugin-prettier": "^5.4.0",
         "prettier": "^3.5.3",
         "rimraf": "^6.0.1",
         "ts-node": "^10.9.2",
-        "typescript": "^5.8.2",
-        "vitest": "^3.0.9"
+        "typescript": "^5.8.3",
+        "vitest": "^3.1.4"
     }
 }

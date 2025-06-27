@@ -42,16 +42,55 @@ export function addAllChainsServiceTools(
                         z.number(),
                     ])
                 )
-                .optional(),
-            addresses: z.array(z.string()).optional(),
-            limit: z.number().optional().default(10),
-            before: z.string().optional(),
-            after: z.string().optional(),
-            withLogs: z.boolean().optional().default(false),
-            withDecodedLogs: z.boolean().optional().default(false),
+                .optional()
+                .describe(
+                    "Array of blockchain networks to query. Can be chain names (e.g., 'eth-mainnet') or chain IDs (e.g., 1). If not specified, queries all supported chains."
+                ),
+            addresses: z
+                .array(z.string())
+                .optional()
+                .describe(
+                    "Array of wallet addresses to get transactions for. Each address should be a valid blockchain address."
+                ),
+            limit: z
+                .number()
+                .optional()
+                .default(10)
+                .describe(
+                    "Maximum number of transactions to return per request. Default is 10, maximum is 100."
+                ),
+            before: z
+                .string()
+                .optional()
+                .describe(
+                    "Pagination cursor to get transactions before this point. Use the 'before' value from previous response."
+                ),
+            after: z
+                .string()
+                .optional()
+                .describe(
+                    "Pagination cursor to get transactions after this point. Use the 'after' value from previous response."
+                ),
+            withLogs: z
+                .boolean()
+                .optional()
+                .default(false)
+                .describe(
+                    "Include transaction logs in the response. Default is false."
+                ),
+            withDecodedLogs: z
+                .boolean()
+                .optional()
+                .default(false)
+                .describe(
+                    "Include decoded transaction logs in the response. Only applicable when withLogs is true. Default is false."
+                ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
+                .optional()
+                .describe(
+                    "Currency to quote token values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."
+                ),
         },
         async (params) => {
             try {
@@ -93,12 +132,30 @@ export function addAllChainsServiceTools(
             "and cutoffTimestamp to filter by time. " +
             "Use this to get a comprehensive view of token holdings across different blockchains.",
         {
-            walletAddress: z.string(),
+            walletAddress: z
+                .string()
+                .describe(
+                    "The wallet address to get token balances for. Must be a valid blockchain address."
+                ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
-            before: z.string().optional(),
-            limit: z.number().optional().default(10),
+                .optional()
+                .describe(
+                    "Currency to quote token values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."
+                ),
+            before: z
+                .string()
+                .optional()
+                .describe(
+                    "Pagination cursor to get balances before this point. Use the 'before' value from previous response."
+                ),
+            limit: z
+                .number()
+                .optional()
+                .default(10)
+                .describe(
+                    "Maximum number of token balances to return. Default is 10, maximum is 100."
+                ),
             chains: z
                 .array(
                     z.union([
@@ -108,8 +165,16 @@ export function addAllChainsServiceTools(
                         z.number(),
                     ])
                 )
-                .optional(),
-            cutoffTimestamp: z.number().optional(),
+                .optional()
+                .describe(
+                    "Array of blockchain networks to query balances from. Can be chain names or chain IDs. If not specified, queries all supported chains."
+                ),
+            cutoffTimestamp: z
+                .number()
+                .optional()
+                .describe(
+                    "Unix timestamp to filter balances by last activity. Only returns tokens with activity after this time."
+                ),
         },
         async (params) => {
             try {
@@ -149,8 +214,18 @@ export function addAllChainsServiceTools(
             "Returns a comprehensive summary of chain activity including transaction counts, " +
             "first/last activity timestamps, and activity status across all networks.",
         {
-            walletAddress: z.string(),
-            testnets: z.boolean().optional().default(false),
+            walletAddress: z
+                .string()
+                .describe(
+                    "The wallet address to analyze activity for. Must be a valid blockchain address."
+                ),
+            testnets: z
+                .boolean()
+                .optional()
+                .default(false)
+                .describe(
+                    "Whether to include testnet activity in the analysis. Default is false (mainnet only)."
+                ),
         },
         async (params) => {
             try {

@@ -28,10 +28,16 @@ export function addSecurityServiceTools(
             "Required: chainName (blockchain network, e.g. eth-mainnet or 1), walletAddress (wallet address, supports ENS, RNS, Lens Handle, or Unstoppable Domain).\n" +
             "Returns a list of ERC20 token approvals and their associated security risk levels.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            walletAddress: z.string(),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            walletAddress: z
+                .string()
+                .describe(
+                    "The wallet address to get token approvals for. Supports wallet addresses, ENS, RNS, Lens Handle, or Unstoppable Domain names."
+                ),
         },
         async (params) => {
             try {

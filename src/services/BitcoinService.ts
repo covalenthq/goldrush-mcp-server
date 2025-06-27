@@ -29,10 +29,17 @@ export function addBitcoinServiceTools(
             "Optional: quoteCurrency - The currency for price conversion (USD, EUR, etc).\n" +
             "Returns complete balance details including total balance, available balance, and transaction history summary.",
         {
-            walletAddress: z.string(),
+            walletAddress: z
+                .string()
+                .describe(
+                    "The xpub key of the Bitcoin HD wallet to get balances for. Must be a valid extended public key."
+                ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
+                .optional()
+                .describe(
+                    "Currency to quote Bitcoin values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."
+                ),
         },
         async (params) => {
             try {
@@ -68,9 +75,25 @@ export function addBitcoinServiceTools(
             "Optional: pageNumber - Page number for pagination (default: 0, first page).\n" +
             "Returns comprehensive transaction details including timestamps, amounts, and transaction IDs.",
         {
-            address: z.string(),
-            pageSize: z.number().optional().default(10),
-            pageNumber: z.number().optional().default(0),
+            address: z
+                .string()
+                .describe(
+                    "The Bitcoin address to get transaction history for. Must be a valid Bitcoin address."
+                ),
+            pageSize: z
+                .number()
+                .optional()
+                .default(10)
+                .describe(
+                    "Number of transactions to return per page. Default is 10, maximum is 100."
+                ),
+            pageNumber: z
+                .number()
+                .optional()
+                .default(0)
+                .describe(
+                    "Page number for pagination, starting from 0. Default is 0."
+                ),
         },
         async (params) => {
             try {
@@ -107,10 +130,17 @@ export function addBitcoinServiceTools(
             "Optional: quoteCurrency - The currency for price conversion (USD, EUR, etc).\n" +
             "Returns complete balance details including total balance, available balance, and transaction count.",
         {
-            walletAddress: z.string(),
+            walletAddress: z
+                .string()
+                .describe(
+                    "The Bitcoin address to get balance for. Must be a valid non-HD Bitcoin address."
+                ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
+                .optional()
+                .describe(
+                    "Currency to quote Bitcoin values in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."
+                ),
         },
         async (params) => {
             try {

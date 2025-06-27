@@ -33,13 +33,22 @@ export function addBaseServiceTools(
             "Optional parameter quoteCurrency allows conversion to different currencies (USD, EUR, etc). " +
             "Returns estimated gas prices for low, medium, and high priority transactions for the specified event type.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            eventType: z.enum(["erc20", "nativetokens", "uniswapv3"]),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to get gas prices for (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            eventType: z
+                .enum(["erc20", "nativetokens", "uniswapv3"])
+                .describe(
+                    "Type of transaction to estimate gas for: 'erc20' for token transfers, 'nativetokens' for native transfers, 'uniswapv3' for DEX swaps."
+                ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
-                .optional(),
+                .optional()
+                .describe(
+                    "Currency to quote gas costs in (e.g., 'USD', 'EUR'). If not specified, uses default quote currency."
+                ),
         },
         async (params) => {
             try {
@@ -74,10 +83,16 @@ export function addBaseServiceTools(
             "Returns comprehensive block data including timestamp, transaction count, size, " +
             "miner information, and other blockchain-specific details.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            blockHeight: z.string(),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            blockHeight: z
+                .string()
+                .describe(
+                    "The block number to retrieve. Can be a specific block number or 'latest' for the most recent block."
+                ),
         },
         async (params) => {
             try {
@@ -110,13 +125,35 @@ export function addBaseServiceTools(
             "Returns block heights, timestamps, and related data for blocks within the specified date range, " +
             "useful for historical analysis and time-based blockchain queries.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            startDate: z.string(),
-            endDate: z.union([z.string(), z.literal("latest")]),
-            pageSize: z.number().optional().default(10),
-            pageNumber: z.number().optional().default(0),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            startDate: z
+                .string()
+                .describe(
+                    "Start date for the query in YYYY-MM-DD format (e.g., '2023-01-01')."
+                ),
+            endDate: z
+                .union([z.string(), z.literal("latest")])
+                .describe(
+                    "End date for the query in YYYY-MM-DD format or 'latest' for current date."
+                ),
+            pageSize: z
+                .number()
+                .optional()
+                .default(10)
+                .describe(
+                    "Number of block heights to return per page. Default is 10, maximum is 100."
+                ),
+            pageNumber: z
+                .number()
+                .optional()
+                .default(0)
+                .describe(
+                    "Page number for pagination, starting from 0. Default is 0."
+                ),
         },
         async (params) => {
             try {
@@ -157,14 +194,42 @@ export function addBaseServiceTools(
             "Returns decoded event logs for the specified contract, useful for monitoring specific " +
             "smart contract activity and analyzing on-chain events.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            contractAddress: z.string(),
-            startingBlock: z.union([z.string(), z.number()]).optional(),
-            endingBlock: z.union([z.string(), z.number()]).optional(),
-            pageSize: z.number().optional().default(10),
-            pageNumber: z.number().optional().default(0),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            contractAddress: z
+                .string()
+                .describe(
+                    "The smart contract address to get event logs from. Must be a valid contract address."
+                ),
+            startingBlock: z
+                .union([z.string(), z.number()])
+                .optional()
+                .describe(
+                    "Starting block number to begin search from. Use with endingBlock to define a range."
+                ),
+            endingBlock: z
+                .union([z.string(), z.number()])
+                .optional()
+                .describe(
+                    "Ending block number to search until. Use with startingBlock to define a range."
+                ),
+            pageSize: z
+                .number()
+                .optional()
+                .default(10)
+                .describe(
+                    "Number of log events to return per page. Default is 10, maximum is 100."
+                ),
+            pageNumber: z
+                .number()
+                .optional()
+                .default(0)
+                .describe(
+                    "Page number for pagination, starting from 0. Default is 0."
+                ),
         },
         async (params) => {
             try {
@@ -206,15 +271,48 @@ export function addBaseServiceTools(
             "Returns decoded event logs matching the specified topic hash, ideal for tracking specific " +
             "event types across multiple contracts on a blockchain.",
         {
-            chainName: z.enum(
-                Object.values(ChainName) as [string, ...string[]]
-            ),
-            topicHash: z.string(),
-            startingBlock: z.union([z.string(), z.number()]).optional(),
-            endingBlock: z.union([z.string(), z.number()]).optional(),
-            secondaryTopics: z.string().optional(),
-            pageSize: z.number().optional().default(10),
-            pageNumber: z.number().optional().default(0),
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            topicHash: z
+                .string()
+                .describe(
+                    "The event signature hash (topic[0]) to search for. This is the keccak256 hash of the event signature."
+                ),
+            startingBlock: z
+                .union([z.string(), z.number()])
+                .optional()
+                .describe(
+                    "Starting block number to begin search from. Use with endingBlock to define a range."
+                ),
+            endingBlock: z
+                .union([z.string(), z.number()])
+                .optional()
+                .describe(
+                    "Ending block number to search until. Use with startingBlock to define a range."
+                ),
+            secondaryTopics: z
+                .string()
+                .optional()
+                .describe(
+                    "Additional topic filters (topic[1], topic[2], topic[3]) to narrow down the search."
+                ),
+            pageSize: z
+                .number()
+                .optional()
+                .default(10)
+                .describe(
+                    "Number of log events to return per page. Default is 10, maximum is 100."
+                ),
+            pageNumber: z
+                .number()
+                .optional()
+                .default(0)
+                .describe(
+                    "Page number for pagination, starting from 0. Default is 0."
+                ),
         },
         async (params) => {
             try {

@@ -1,7 +1,8 @@
 /**
- * The main server implementation for the GoldRush MCP Server.
+ * Unified server implementation for the GoldRush MCP Server.
  *
- * This file sets up an MCP server providing tools for Covalent GoldRush services.
+ * This file sets up an MCP server providing tools for Covalent GoldRush services
+ * with support for multiple transport options: STDIO and HTTP.
  */
 import packageJson from "../package.json" with { type: "json" };
 import { addRealTimeChainStatusResources } from "./resources/dynamicResources.js";
@@ -17,35 +18,47 @@ import { addTransactionServiceTools } from "./services/TransactionService.js";
 import { GoldRushClient } from "@covalenthq/client-sdk";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import dotenv from "dotenv";
-
-// Get the version from the package.json file
-const { version } = packageJson;
+import express, { type Request, type Response } from "express";
 
 // Load environment variables
 dotenv.config();
 
+// Get the version from the package.json file
+const { version } = packageJson;
+
+// Transport types
+type TransportType = "stdio" | "http";
+
+// Default configuration
+const DEFAULT_PORT = 3000;
+
 /**
- * Create a Covalent GoldRush client using the provided API key.
+ * Create a Covalent GoldRush client using the provided API key or environment variable.
  */
-export function createGoldRushClient() {
-    const apiKey = process.env["GOLDRUSH_API_KEY"];
-    if (!apiKey) {
-        console.error("GOLDRUSH_API_KEY environment variable is not set.");
-        process.exit(1);
+export function createGoldRushClient(apiKey?: string) {
+    const key = apiKey || process.env["GOLDRUSH_API_KEY"];
+    if (!key) {
+        throw new Error(
+            "GOLDRUSH_API_KEY is required. Provide it as a parameter or set the environment variable."
+        );
     }
-    return new GoldRushClient(apiKey);
+    return new GoldRushClient(key);
 }
 
 /**
  * Create and configure an MCP server instance
  */
-export function createServer() {
-    const goldRushClient = createGoldRushClient();
-    const server = new McpServer({
-        name: "GoldRush MCP Server",
-        version: version,
-    });
+export function createServer(apiKey?: string) {
+    const goldRushClient = createGoldRushClient(apiKey);
+    const server = new McpServer(
+        {
+            name: "GoldRush MCP Server",
+            version: version,
+        },
+        { capabilities: { logging: {} } }
+    );
 
     // Add resources
     addStaticResources(server);
@@ -64,15 +77,256 @@ export function createServer() {
 }
 
 /**
- * Initializes the server using STDIO transport for communication.
+ * Start the server with STDIO transport
  */
-export async function startServer() {
+export async function startStdioServer(apiKey?: string) {
     try {
-        const server = createServer();
+        const server = createServer(apiKey);
         const transport = new StdioServerTransport();
         await server.connect(transport);
     } catch (error) {
-        console.error("Failed to start server:", error);
+        console.error("Failed to start STDIO server:", error);
+        process.exit(1);
+    }
+}
+
+/**
+ * Start the server with HTTP transport
+ */
+export function startHttpServer(port: number = DEFAULT_PORT) {
+    const app = express();
+    app.use(express.json());
+
+    app.post("/mcp", async (req: Request, res: Response) => {
+        // In stateless mode, create a new instance of transport and server for each request
+        // to ensure complete isolation. A single instance would cause request ID collisions
+        // when multiple clients connect concurrently.
+
+        try {
+            // Get the API key from the Authorization header
+            const authHeader = req.headers.authorization;
+            const requestId = (() => {
+                try {
+                    return req.body?.id || null;
+                } catch {
+                    return null;
+                }
+            })();
+            if (!authHeader || !authHeader.startsWith("Bearer ")) {
+                console.log("Received invalid Authorization header");
+                res.writeHead(401).end(
+                    JSON.stringify({
+                        jsonrpc: "2.0",
+                        error: {
+                            code: -32001,
+                            message:
+                                "Missing or invalid Authorization header. Expected format: Bearer <GOLDRUSH_API_KEY>",
+                        },
+                        id: requestId,
+                    })
+                );
+                return;
+            }
+
+            const apiKey = authHeader?.split(" ")[1];
+            if (!apiKey || apiKey.trim() === "") {
+                console.log("Received invalid API key");
+                res.writeHead(401).end(
+                    JSON.stringify({
+                        jsonrpc: "2.0",
+                        error: {
+                            code: -32001,
+                            message: "API key is empty or invalid",
+                        },
+                        id: requestId,
+                    })
+                );
+                return;
+            }
+
+            const server = createServer(apiKey);
+            const transport: StreamableHTTPServerTransport =
+                new StreamableHTTPServerTransport({
+                    sessionIdGenerator: undefined,
+                });
+            res.on("close", () => {
+                console.log("Request closed");
+                transport.close();
+                server.close();
+            });
+            await server.connect(transport);
+            await transport.handleRequest(req, res, req.body);
+        } catch (error) {
+            console.error("Error handling MCP request:", error);
+            if (!res.headersSent) {
+                res.status(500).json({
+                    jsonrpc: "2.0",
+                    error: {
+                        code: -32603,
+                        message: "Internal server error",
+                    },
+                    id: null,
+                });
+            }
+        }
+    });
+
+    app.get("/mcp", async (req: Request, res: Response) => {
+        console.log("Received GET MCP request");
+        res.writeHead(405).end(
+            JSON.stringify({
+                jsonrpc: "2.0",
+                error: {
+                    code: -32000,
+                    message: "Method not allowed.",
+                },
+                id: null,
+            })
+        );
+    });
+
+    app.delete("/mcp", async (req: Request, res: Response) => {
+        console.log("Received DELETE MCP request");
+        res.writeHead(405).end(
+            JSON.stringify({
+                jsonrpc: "2.0",
+                error: {
+                    code: -32000,
+                    message: "Method not allowed.",
+                },
+                id: null,
+            })
+        );
+    });
+
+    // Start the server
+    app.listen(port, () => {
+        console.log(`MCP Streamable HTTP Server listening on port ${port}`);
+    });
+
+    // Handle server shutdown
+    process.on("SIGINT", async () => {
+        console.log("Shutting down HTTP server...");
+        process.exit(0);
+    });
+}
+
+/**
+ * Start the server with the specified transport type
+ */
+export async function startServer(
+    transportType: TransportType = "stdio",
+    options: { port?: number; apiKey?: string } = {}
+) {
+    const { port = DEFAULT_PORT, apiKey } = options;
+
+    switch (transportType) {
+        case "stdio":
+            await startStdioServer(apiKey);
+            break;
+        case "http":
+            startHttpServer(port);
+            break;
+        default:
+            throw new Error(`Unsupported transport type: ${transportType}`);
+    }
+}
+
+/**
+ * Parse command line arguments and start the server
+ */
+export function parseArgsAndStart() {
+    try {
+        const args = process.argv.slice(2);
+        let transportType: TransportType = "stdio";
+        let port = DEFAULT_PORT;
+        let apiKey: string | undefined;
+
+        // Simple argument parsing
+        for (let i = 0; i < args.length; i++) {
+            const arg = args[i];
+            switch (arg) {
+                case "--transport":
+                case "-t": {
+                    const transport = args[i + 1];
+                    if (!transport) {
+                        throw new Error("Transport type is required");
+                    }
+                    if (transport === "stdio" || transport === "http") {
+                        transportType = transport;
+                        i++; // Skip next argument
+                    } else {
+                        throw new Error(
+                            `Invalid transport type: ${transport}. Supported: stdio, http`
+                        );
+                    }
+                    break;
+                }
+                case "--port":
+                case "-p": {
+                    const portStr = args[i + 1];
+                    if (!portStr) {
+                        throw new Error("Port value is required");
+                    }
+                    const parsedPort = parseInt(portStr, 10);
+                    if (
+                        isNaN(parsedPort) ||
+                        parsedPort < 1 ||
+                        parsedPort > 65535
+                    ) {
+                        throw new Error(`Invalid port: ${portStr}`);
+                    }
+                    port = parsedPort;
+                    i++; // Skip next argument
+                    break;
+                }
+                case "--api-key":
+                case "-k": {
+                    const keyValue = args[i + 1];
+                    if (!keyValue) {
+                        throw new Error("API key cannot be empty");
+                    }
+                    apiKey = keyValue;
+                    i++; // Skip next argument
+                    break;
+                }
+                case "--help":
+                case "-h":
+                    console.log(`
+GoldRush MCP Server v${version}
+
+Usage: goldrush-mcp-server [options]
+
+Options:
+  -t, --transport <type>    Transport type: stdio (default) or http
+  -p, --port <number>       Port for HTTP transport (default: ${DEFAULT_PORT})
+  -k, --api-key <key>       GoldRush API key (or set GOLDRUSH_API_KEY env var)
+  -h, --help                Show this help message
+
+Examples:
+  goldrush-mcp-server                           # STDIO transport
+  goldrush-mcp-server -t http                   # HTTP transport on default port
+  goldrush-mcp-server -t http -p 8080           # HTTP transport on port 8080
+  goldrush-mcp-server -k your_api_key          # With API key argument
+`);
+                    process.exit(0);
+                    break;
+                default:
+                    if (arg && arg.startsWith("-")) {
+                        throw new Error(`Unknown argument: ${arg}`);
+                    }
+                    // Ignore non-option arguments
+                    break;
+            }
+        }
+
+        // Start the server
+        startServer(transportType, { port, apiKey }).catch((error) => {
+            console.error("Failed to start server:", error);
+            process.exit(1);
+        });
+    } catch (error) {
+        console.error("Error:", error instanceof Error ? error.message : error);
         process.exit(1);
     }
 }

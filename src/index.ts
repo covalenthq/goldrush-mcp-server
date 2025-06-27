@@ -1,8 +1,5 @@
 #!/usr/bin/env node
-import { createGoldRushClient, createServer, startServer } from "./server.js";
+import { parseArgsAndStart } from "./server.js";
 
-// Start the server
-startServer().catch(console.error);
-
-// Re-export for external usage
-export { createGoldRushClient, createServer, startServer };
+// Parse command line arguments and start the server
+parseArgsAndStart();
