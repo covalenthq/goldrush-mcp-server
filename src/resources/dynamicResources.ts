@@ -2,6 +2,7 @@ import { stringifyWithBigInt } from "../utils/helpers.js";
 import type { GoldRushClient } from "@covalenthq/client-sdk";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * @function addRealTimeChainStatusResources
@@ -22,28 +23,38 @@ export function addRealTimeChainStatusResources(
     goldRushClient: GoldRushClient
 ) {
     // status://all-chains
-    server.resource("all-chains-status", "status://all-chains", async (uri) => {
-        // Make a fresh call each time
-        const response = await goldRushClient.BaseService.getAllChainStatus();
-        return {
-            contents: [
-                {
-                    uri: uri.href,
-                    text: stringifyWithBigInt(response.data),
-                },
-            ],
-        };
-    });
-
-    // status://chain/{chainName}
-    const chainStatusTemplate = new ResourceTemplate(
-        "status://chain/{chainName}",
-        { list: undefined }
+    server.registerResource(
+        "all-chains-status",
+        "status://all-chains",
+        {
+            title: "All Chains Status",
+            description: "All chains status",
+            mimeType: "application/json",
+        },
+        async (): Promise<ReadResourceResult> => {
+            // Make a fresh call each time
+            const response =
+                await goldRushClient.BaseService.getAllChainStatus();
+            return {
+                contents: [
+                    {
+                        uri: "status://all-chains",
+                        text: stringifyWithBigInt(response.data),
+                    },
+                ],
+            };
+        }
     );
+
     server.resource(
         "chain-status",
-        chainStatusTemplate,
-        async (uri, { chainName }) => {
+        new ResourceTemplate("status://chain/{chainName}", { list: undefined }),
+        {
+            title: "Chain Status",
+            description: "Chain status",
+            mimeType: "application/json",
+        },
+        async (uri, { chainName }): Promise<ReadResourceResult> => {
             // For single chain, we again call getAllChainStatus
             const response =
                 await goldRushClient.BaseService.getAllChainStatus();

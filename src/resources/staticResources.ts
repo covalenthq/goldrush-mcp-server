@@ -1,6 +1,7 @@
 import { validQuoteValues } from "../utils/constants.js";
 import { ChainName } from "@covalenthq/client-sdk";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import type { ReadResourceResult } from "@modelcontextprotocol/sdk/types.js";
 
 /**
  * Adds static resources for configuration data.
@@ -18,10 +19,15 @@ export function addStaticResources(server: McpServer) {
     server.resource(
         "supported-chains",
         "config://supported-chains",
-        async (uri) => ({
+        {
+            title: "Supported Chains",
+            description: "List of supported chain names",
+            mimeType: "application/json",
+        },
+        async (): Promise<ReadResourceResult> => ({
             contents: [
                 {
-                    uri: uri.href,
+                    uri: "config://supported-chains",
                     text: JSON.stringify(Object.values(ChainName), null, 2),
                 },
             ],
@@ -31,13 +37,18 @@ export function addStaticResources(server: McpServer) {
     /**
      * Provide a static resource listing the supported Covalent quote currencies.
      */
-    server.resource(
+    server.registerResource(
         "quote-currencies",
         "config://quote-currencies",
-        async (uri) => ({
+        {
+            title: "Quote Currencies",
+            description: "List of supported quote currencies",
+            mimeType: "application/json",
+        },
+        async (): Promise<ReadResourceResult> => ({
             contents: [
                 {
-                    uri: uri.href,
+                    uri: "config://quote-currencies",
                     text: JSON.stringify(
                         Object.values(validQuoteValues),
                         null,
