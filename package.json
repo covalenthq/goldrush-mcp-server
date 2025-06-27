@@ -1,6 +1,6 @@
 {
     "name": "@covalenthq/goldrush-mcp-server",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "description": "GoldRush MCP Server for interacting with Covalent GoldRush API",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
