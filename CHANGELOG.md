@@ -2,6 +2,34 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.3] - 2025-07-02
+
+### Added
+- Multi-transport support for MCP server
+  - Added HTTP transport option alongside existing STDIO transport
+  - New CLI commands: `npm run start:stdio` and `npm run start:http`
+  - Command-line arguments: `--transport`, `--port`, `--api-key`, `--help`
+  - HTTP transport supports Bearer token authentication
+  - Configurable port for HTTP transport (default: 3000)
+- Enhanced CLI interface with comprehensive argument parsing
+- Graceful server shutdown handling for both transport types
+- Enhanced resource metadata with title, description, and mimeType
+- Improved parameter documentation across all service tools
+
+### Changed
+- Refactored server architecture to support multiple transport types
+- Updated server implementation to use streamable HTTP transport
+- Enhanced authorization header validation for HTTP transport
+- Improved error handling with proper exception throwing instead of console.error
+- Updated dependencies:
+  - @modelcontextprotocol/sdk from 1.12.0 to 1.13.1
+  - Various other dependency updates for performance and security
+- Enhanced request ID extraction with try-catch for robustness
+- Improved .gitignore for better project management
+
+### Removed
+- Removed unused server-stdio.ts file
+
 ## [0.0.2] - 2025-04-30
 
 ### Added
