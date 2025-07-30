@@ -1,6 +1,6 @@
 {
     "name": "@covalenthq/goldrush-mcp-server",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "description": "GoldRush MCP Server for interacting with Covalent GoldRush API",
     "main": "dist/index.js",
     "types": "dist/index.d.ts",
@@ -68,7 +68,7 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@covalenthq/client-sdk": "^2.2.6",
+        "@covalenthq/client-sdk": "^2.3.2",
         "@modelcontextprotocol/sdk": "^1.13.1",
         "dotenv": "^16.5.0",
         "express": "^5.1.0",
