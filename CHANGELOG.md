@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4] - 2025-07-30
+
+### Changed
+- Updated @covalenthq/client-sdk from 2.2.6 to 2.3.2
+  - Better error response standardization
+  - Executable pagination functions
+  - Various performance and stability improvements
+
 ## [0.0.3] - 2025-07-02
 
 ### Added
