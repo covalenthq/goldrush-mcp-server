@@ -1,0 +1,8 @@
+runtime: "container"
+startCommand:
+  type: "http"
+build:
+  dockerfile: "Dockerfile"
+  dockerBuildPath: "."
+env:
+  NODE_ENV: "production"
