@@ -1,6 +1,7 @@
 runtime: "container"
 startCommand:
   type: "http"
+  port: 3000
 build:
   dockerfile: "Dockerfile"
   dockerBuildPath: "."
