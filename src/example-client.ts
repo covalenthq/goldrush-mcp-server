@@ -121,12 +121,7 @@ async function main() {
             name: "GoldRush MCP Example Client",
             version: "1.0.0",
         },
-        {
-            capabilities: {
-                tools: {},
-                resources: {}, // Add resources capability
-            },
-        }
+        {}
     );
 
     try {

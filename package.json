@@ -68,18 +68,18 @@
     },
     "license": "MIT",
     "dependencies": {
-        "@covalenthq/client-sdk": "^2.3.2",
+        "@covalenthq/client-sdk": "^2.3.7",
         "@modelcontextprotocol/sdk": "^1.13.1",
-        "dotenv": "^16.5.0",
+        "dotenv": "^17.2.3",
         "express": "^5.1.0",
-        "zod": "^3.25.30"
+        "zod": "^4.2.1"
     },
     "devDependencies": {
         "@eslint/eslintrc": "^3.3.1",
         "@eslint/js": "^9.27.0",
-        "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+        "@trivago/prettier-plugin-sort-imports": "^6.0.0",
         "@types/express": "^5.0.2",
-        "@types/node": "^22.15.23",
+        "@types/node": "^25.0.2",
         "@typescript-eslint/eslint-plugin": "^8.33.0",
         "@typescript-eslint/parser": "^8.33.0",
         "eslint": "^9.27.0",
@@ -89,6 +89,6 @@
         "rimraf": "^6.0.1",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.3",
-        "vitest": "^3.1.4"
+        "vitest": "^4.0.15"
     }
 }
