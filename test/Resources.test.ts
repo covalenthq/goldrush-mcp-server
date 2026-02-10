@@ -23,7 +23,9 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import path from "path";
 import { describe, it, beforeAll, expect } from "vitest";
 
-describe("Resources", () => {
+const HAS_GOLDRUSH_API_KEY = Boolean(process.env["GOLDRUSH_API_KEY"]);
+
+describe.skipIf(!HAS_GOLDRUSH_API_KEY)("Resources", () => {
     let client: Client;
 
     beforeAll(async () => {
