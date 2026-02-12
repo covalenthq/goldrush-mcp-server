@@ -1,0 +1,995 @@
+#!/usr/bin/env node
+
+// Sync checker: compares MCP server tool definitions against conjure-output.json
+// and dato-apiendpoints.json. Prints inconsistencies and optionally auto-corrects.
+
+import { readFileSync, writeFileSync, readdirSync } from "fs";
+import { join, basename } from "path";
+
+const ROOT = new URL("..", import.meta.url).pathname;
+const CONJURE_PATH = join(ROOT, "data/conjure-output.json");
+const DATO_PATH = join(ROOT, "data/dato-apiendpoints.json");
+const SERVICES_DIR = join(ROOT, "src/services");
+
+// ── Parse conjure ──────────────────────────────────────────────────────────
+
+function parseConjure() {
+    const raw = JSON.parse(readFileSync(CONJURE_PATH, "utf-8"));
+    // Build map: serviceName → endpointName → { args[], httpPath, tags[] }
+    const services = new Map();
+    for (const svc of raw.services) {
+        const svcName = svc.serviceName.name; // e.g. "BalanceService"
+        const endpoints = new Map();
+        for (const ep of svc.endpoints) {
+            endpoints.set(ep.endpointName, {
+                args: ep.args,
+                httpPath: ep.httpPath,
+                tags: ep.tags || [],
+                returns: ep.returns,
+            });
+        }
+        services.set(svcName, { endpoints, docs: svc.docs });
+    }
+    return services;
+}
+
+// ── Parse dato ─────────────────────────────────────────────────────────────
+
+function parseDato() {
+    let raw;
+    try {
+        raw = JSON.parse(readFileSync(DATO_PATH, "utf-8"));
+    } catch {
+        return null;
+    }
+    const allEndpoints = raw?.data?.allApiendpoints;
+    if (!Array.isArray(allEndpoints)) return null;
+
+    // Build map: slug → dato entry (skip phantom/grouping entries)
+    const bySlug = new Map();
+    for (const ep of allEndpoints) {
+        if (ep.phantom) continue; // phantom = grouping node, not a real endpoint
+        if (ep.slug) bySlug.set(ep.slug, ep);
+    }
+    return bySlug;
+}
+
+// ── Parse MCP service files ────────────────────────────────────────────────
+
+function parseMcpServices() {
+    const files = readdirSync(SERVICES_DIR).filter((f) => f.endsWith(".ts"));
+    const tools = [];
+
+    for (const file of files) {
+        const src = readFileSync(join(SERVICES_DIR, file), "utf-8");
+        const serviceName = file.replace(".ts", "");
+
+        // Extract each server.tool(...) call
+        // Strategy: find `server.tool(` then track paren depth to find the full call
+        const toolPattern = /server\.tool\(\s*\n?\s*"([^"]+)"/g;
+        let match;
+        while ((match = toolPattern.exec(src)) !== null) {
+            const toolName = match[1];
+            const startIdx = match.index;
+
+            // Find the SDK method call: goldRushClient.ServiceName.methodName(
+            const toolBlock = src.slice(startIdx, startIdx + 5000);
+            const sdkMatch = toolBlock.match(
+                /goldRushClient\.(\w+)\.(\w+)\(/
+            );
+            const sdkService = sdkMatch ? sdkMatch[1] : null;
+            const sdkMethod = sdkMatch ? sdkMatch[2] : null;
+
+            // Extract the description string (concatenated string literals)
+            const descStart = toolBlock.indexOf('"', toolBlock.indexOf(toolName) + toolName.length + 1);
+            let descEnd = descStart;
+            let desc = "";
+            // Walk through concatenated strings: "..." + "..." + "..."
+            let pos = descStart;
+            while (pos < toolBlock.length) {
+                // skip whitespace
+                while (pos < toolBlock.length && /[\s+]/.test(toolBlock[pos])) pos++;
+                if (toolBlock[pos] === '"') {
+                    // find closing quote (handle escaped quotes)
+                    let end = pos + 1;
+                    while (end < toolBlock.length && toolBlock[end] !== '"') {
+                        if (toolBlock[end] === '\\') end++;
+                        end++;
+                    }
+                    desc += toolBlock.slice(pos + 1, end);
+                    pos = end + 1;
+                    // skip whitespace and +
+                    while (pos < toolBlock.length && /[\s+]/.test(toolBlock[pos])) pos++;
+                    if (toolBlock[pos] !== '"') break;
+                } else {
+                    break;
+                }
+            }
+
+            // Extract Zod params: find the `{` after description, match param names with their .describe()
+            const params = extractZodParams(toolBlock);
+
+            tools.push({
+                toolName,
+                sdkService,
+                sdkMethod,
+                description: desc,
+                params,
+                file,
+                startIdx,
+            });
+        }
+    }
+    return tools;
+}
+
+function extractZodParams(block) {
+    // Find the opening { of the schema object (after the description string ends and comma)
+    // Look for pattern: }, \n { or ,\n        {
+    const schemaStart = findSchemaStart(block);
+    if (schemaStart === -1) return [];
+
+    const params = [];
+    // Match paramName: z. patterns
+    const paramPattern = /(\w+):\s*z\s*\./g;
+    const asyncIdx = block.indexOf("async (");
+    const searchBlock = block.slice(schemaStart, asyncIdx > 0 ? asyncIdx : schemaStart + 3000);
+
+    let m;
+    while ((m = paramPattern.exec(searchBlock)) !== null) {
+        const paramName = m[1];
+        // Extract the .describe("...") for this param
+        const afterParam = searchBlock.slice(m.index);
+        const descMatch = afterParam.match(/\.describe\(\s*\n?\s*"([^"]*(?:\\.[^"]*)*)"\s*\n?\s*\)/);
+        const describe = descMatch ? descMatch[1].replace(/\\"/g, '"') : null;
+
+        // Check if optional
+        const isOptional = /\.optional\(\)/.test(afterParam.slice(0, 300));
+        // Check for default
+        const defaultMatch = afterParam.slice(0, 300).match(/\.default\(([^)]+)\)/);
+        const defaultValue = defaultMatch ? defaultMatch[1].trim() : null;
+
+        // Determine Zod type
+        let zodType = "unknown";
+        const typeMatch = afterParam.match(/^(\w+):\s*z\s*\.(\w+)/);
+        if (!typeMatch) {
+            // try from the z. after the colon
+            const zt = afterParam.match(/z\s*\.(\w+)/);
+            if (zt) zodType = zt[1];
+        } else {
+            zodType = typeMatch[2];
+        }
+        // Refine: z.enum, z.string, z.number, z.boolean, z.union, z.array
+        const ztMatch = afterParam.match(/z\s*\.(\w+)/);
+        if (ztMatch) zodType = ztMatch[1];
+
+        params.push({
+            name: paramName,
+            describe,
+            isOptional,
+            defaultValue,
+            zodType,
+        });
+    }
+    return params;
+}
+
+function findSchemaStart(block) {
+    // The schema is the 3rd argument to server.tool()
+    // Pattern: server.tool("name", "desc..." + "...", { ... }, async (...) => { ... })
+    // Find after the description string ends, skip the comma, find the {
+    // We look for the pattern `,\n        {` or `},\n        {` after the description
+    // More reliable: count the commas at the server.tool argument level
+
+    let depth = 0;
+    let commaCount = 0;
+    const toolStart = block.indexOf("server.tool(");
+    if (toolStart === -1) return -1;
+
+    let pos = toolStart + "server.tool(".length;
+    let inString = false;
+    let stringChar = "";
+
+    while (pos < block.length && commaCount < 2) {
+        const ch = block[pos];
+        if (inString) {
+            if (ch === "\\" && pos + 1 < block.length) {
+                pos += 2;
+                continue;
+            }
+            if (ch === stringChar) inString = false;
+        } else {
+            if (ch === '"' || ch === "'") {
+                inString = true;
+                stringChar = ch;
+            } else if (ch === "(" || ch === "{" || ch === "[") {
+                depth++;
+            } else if (ch === ")" || ch === "}" || ch === "]") {
+                depth--;
+            } else if (ch === "," && depth === 0) {
+                commaCount++;
+            }
+        }
+        pos++;
+    }
+
+    // Now pos is right after the 2nd comma (after description). Find the next {
+    while (pos < block.length && block[pos] !== "{") pos++;
+    return pos;
+}
+
+// ── Conjure type to human-readable ─────────────────────────────────────────
+
+function conjureTypeStr(type) {
+    if (!type) return "unknown";
+    if (type.type === "primitive") return type.primitive.toLowerCase();
+    if (type.type === "list") return `list<${conjureTypeStr(type.list.itemType)}>`;
+    if (type.type === "optional") return `optional<${conjureTypeStr(type.optional.itemType)}>`;
+    if (type.type === "reference") return type.reference.name;
+    return type.type;
+}
+
+function conjureToZodType(type) {
+    if (!type) return null;
+    if (type.type === "primitive") {
+        switch (type.primitive) {
+            case "STRING": return "string";
+            case "INTEGER": return "number";
+            case "BOOLEAN": return "boolean";
+            case "DOUBLE": return "number";
+            case "DATETIME": return "string";
+            default: return "string";
+        }
+    }
+    if (type.type === "list") return "array";
+    if (type.type === "optional") return conjureToZodType(type.optional.itemType);
+    return null;
+}
+
+// ── Find matching conjure endpoint for an MCP tool ─────────────────────────
+
+function findConjureEndpoint(conjureServices, sdkService, sdkMethod) {
+    // Direct match
+    for (const [svcName, svc] of conjureServices) {
+        const ep = svc.endpoints.get(sdkMethod);
+        if (ep) return { ep, svcName, epName: sdkMethod };
+    }
+
+    // Fallback: SDK methods often have ByPage suffix not in conjure
+    const candidates = [
+        sdkMethod.replace(/ByPage$/, ""),
+        ...(sdkService === "AllChainsService"
+            ? [
+                  { getMultiChainMultiAddressTransactions: "getTransactions",
+                    getMultiChainBalances: "getTokenBalances",
+                    getAddressActivity: "getAddressActivity" }[sdkMethod],
+              ]
+            : []),
+        ...(sdkMethod === "getPaginatedTransactionsForAddress"
+            ? ["getTransactionsForAddressV3"]
+            : []),
+    ].filter(Boolean);
+
+    for (const alt of candidates) {
+        for (const [svcName, svc] of conjureServices) {
+            const ep = svc.endpoints.get(alt);
+            if (ep) return { ep, svcName, epName: alt };
+        }
+    }
+    return null;
+}
+
+// ── Comparison ─────────────────────────────────────────────────────────────
+
+function compare(conjureServices, mcpTools) {
+    const issues = [];
+    const matched = new Set(); // track matched conjure endpoints
+
+    for (const tool of mcpTools) {
+        const { toolName, sdkService, sdkMethod, params, file } = tool;
+
+        // Find the matching conjure endpoint
+        let conjureEndpoint = null;
+        let conjureServiceName = null;
+
+        const found = findConjureEndpoint(conjureServices, sdkService, sdkMethod);
+        if (found) {
+            conjureEndpoint = found.ep;
+            conjureServiceName = found.svcName;
+            matched.add(`${found.svcName}.${found.epName}`);
+        }
+
+        if (!conjureEndpoint) {
+            issues.push({
+                type: "no_conjure_match",
+                tool: toolName,
+                sdkMethod,
+                sdkService,
+                file,
+                message: `MCP tool "${toolName}" (${sdkService}.${sdkMethod}) has no matching conjure endpoint`,
+            });
+            continue;
+        }
+
+        // Compare params
+        const conjureArgs = conjureEndpoint.args;
+        const conjureArgMap = new Map(conjureArgs.map((a) => [a.argName, a]));
+        const mcpParamMap = new Map(params.map((p) => [p.name, p]));
+
+        // Params in conjure but not in MCP
+        for (const [argName, arg] of conjureArgMap) {
+            if (!mcpParamMap.has(argName)) {
+                // Check if it's a renamed param (e.g. walletAddress → address)
+                const isPathParam = arg.paramType.type === "path";
+                issues.push({
+                    type: "missing_in_mcp",
+                    tool: toolName,
+                    file,
+                    param: argName,
+                    conjureDocs: arg.docs,
+                    conjureType: conjureTypeStr(arg.type),
+                    paramLocation: arg.paramType.type,
+                    message: `Conjure param "${argName}" (${arg.paramType.type}, ${conjureTypeStr(arg.type)}) missing from MCP tool "${toolName}"`,
+                });
+            }
+        }
+
+        // Params in MCP but not in conjure
+        for (const [paramName, param] of mcpParamMap) {
+            if (!conjureArgMap.has(paramName)) {
+                issues.push({
+                    type: "extra_in_mcp",
+                    tool: toolName,
+                    file,
+                    param: paramName,
+                    zodType: param.zodType,
+                    describe: param.describe,
+                    message: `MCP param "${paramName}" in tool "${toolName}" not found in conjure spec`,
+                });
+            }
+        }
+
+        // Compare shared params
+        for (const [paramName, param] of mcpParamMap) {
+            const conjureArg = conjureArgMap.get(paramName);
+            if (!conjureArg) continue;
+
+            // Type mismatch
+            const expectedZod = conjureToZodType(conjureArg.type);
+            if (expectedZod && param.zodType !== expectedZod && param.zodType !== "enum" && param.zodType !== "union") {
+                issues.push({
+                    type: "type_mismatch",
+                    tool: toolName,
+                    file,
+                    param: paramName,
+                    mcpType: param.zodType,
+                    conjureType: conjureTypeStr(conjureArg.type),
+                    expectedZod,
+                    message: `Type mismatch for "${paramName}" in "${toolName}": MCP has z.${param.zodType}, conjure expects ${conjureTypeStr(conjureArg.type)} (z.${expectedZod})`,
+                });
+            }
+
+            // Description comparison (conjure docs vs MCP .describe())
+            if (param.describe && conjureArg.docs) {
+                // Check if the MCP description contains the key info from conjure
+                const conjureKey = conjureArg.docs.replace(/[`]/g, "").toLowerCase().trim();
+                const mcpDesc = param.describe.toLowerCase().trim();
+                // Flag if conjure has specific info that MCP omits
+                if (conjureKey.includes("ens") && !mcpDesc.includes("ens") && conjureArg.paramType.type === "path") {
+                    issues.push({
+                        type: "description_gap",
+                        tool: toolName,
+                        file,
+                        param: paramName,
+                        conjureDocs: conjureArg.docs,
+                        mcpDescribe: param.describe,
+                        message: `"${paramName}" in "${toolName}": conjure mentions ENS/domain support but MCP description doesn't`,
+                    });
+                }
+            }
+        }
+    }
+
+    // Conjure endpoints not covered by MCP
+    for (const [svcName, svc] of conjureServices) {
+        for (const [epName, ep] of svc.endpoints) {
+            const key = `${svcName}.${epName}`;
+            if (!matched.has(key)) {
+                issues.push({
+                    type: "not_in_mcp",
+                    service: svcName,
+                    endpoint: epName,
+                    httpPath: ep.httpPath,
+                    argCount: ep.args.length,
+                    tags: ep.tags,
+                    message: `Conjure endpoint ${svcName}.${epName} (${ep.httpPath}) not exposed as MCP tool`,
+                });
+            }
+        }
+    }
+
+    return issues;
+}
+
+// ── Dato comparison ────────────────────────────────────────────────────────
+
+function compareDato(datoBySlug, conjureServices, mcpTools) {
+    if (!datoBySlug) return [];
+
+    const issues = [];
+
+    for (const tool of mcpTools) {
+        const { toolName, sdkService, sdkMethod, description } = tool;
+
+        // Find conjure endpoint to get tags (which map to dato slugs)
+        const found = findConjureEndpoint(conjureServices, sdkService, sdkMethod);
+        if (!found) continue;
+
+        const tags = found.ep.tags || [];
+        const datoEntry = tags.reduce((acc, tag) => acc || datoBySlug.get(tag), null);
+        if (!datoEntry) continue;
+
+        // Compare MCP tool description against dato usecase
+        if (datoEntry.usecase && description) {
+            const mcpLower = description.toLowerCase();
+            const usecaseLower = datoEntry.usecase.toLowerCase();
+            // Check if MCP description starts with / contains dato usecase
+            if (!mcpLower.includes(usecaseLower.slice(0, 40))) {
+                issues.push({
+                    type: "dato_usecase_mismatch",
+                    tool: toolName,
+                    datoSlug: datoEntry.slug,
+                    datoUsecase: datoEntry.usecase,
+                    mcpDescription: description.slice(0, 120) + (description.length > 120 ? "..." : ""),
+                });
+            }
+        }
+
+        // Flag beta endpoints
+        if (datoEntry.beta) {
+            const mcpLower = description?.toLowerCase() || "";
+            if (!mcpLower.includes("beta")) {
+                issues.push({
+                    type: "dato_beta_missing",
+                    tool: toolName,
+                    datoSlug: datoEntry.slug,
+                });
+            }
+        }
+
+        // Flag typescriptSdkSupport: false (tool exists but dato says no SDK support)
+        if (datoEntry.typescriptSdkSupport === false) {
+            issues.push({
+                type: "dato_no_sdk_support",
+                tool: toolName,
+                datoSlug: datoEntry.slug,
+            });
+        }
+
+        // Credit rate info gap: dato has cost info, MCP description doesn't mention it
+        if (datoEntry.creditrate != null && datoEntry.creditratemodel) {
+            const rateStr = `${datoEntry.creditrate} credit${datoEntry.creditrate !== 1 ? "s" : ""}/${datoEntry.creditrateunit || "call"} (${datoEntry.creditratemodel})`;
+            issues.push({
+                type: "dato_credit_info",
+                tool: toolName,
+                datoSlug: datoEntry.slug,
+                creditrate: datoEntry.creditrate,
+                creditratemodel: datoEntry.creditratemodel,
+                creditrateunit: datoEntry.creditrateunit,
+                rateStr,
+            });
+        }
+
+        // Supported chains: dato has specific chain list, MCP doesn't mention limitations
+        if (datoEntry.supportedchains?.length > 0 && !datoEntry.allChainsSupported) {
+            const chains = datoEntry.supportedchains.map((c) => c.chainname);
+            issues.push({
+                type: "dato_limited_chains",
+                tool: toolName,
+                datoSlug: datoEntry.slug,
+                chains,
+                chainCount: chains.length,
+            });
+        }
+    }
+
+    // Dato endpoints not covered by any MCP tool
+    const matchedSlugs = new Set();
+    for (const tool of mcpTools) {
+        const found = findConjureEndpoint(conjureServices, tool.sdkService, tool.sdkMethod);
+        if (found) {
+            for (const tag of found.ep.tags || []) {
+                matchedSlugs.add(tag);
+            }
+        }
+    }
+    for (const [slug, ep] of datoBySlug) {
+        if (!matchedSlugs.has(slug) && ep.usecase && ep._status === "published") {
+            issues.push({
+                type: "dato_not_in_mcp",
+                datoSlug: slug,
+                title: ep.title,
+                grouping: ep.grouping,
+                usecase: ep.usecase,
+                sdkSupport: ep.typescriptSdkSupport,
+            });
+        }
+    }
+
+    return issues;
+}
+
+// ── Auto-correct: patch MCP files to fix param name mismatches ─────────────
+
+function buildCorrections(conjureServices, mcpTools, issues) {
+    const corrections = [];
+
+    // Fix param naming: where conjure has `walletAddress` (path) but MCP uses `address`
+    for (const tool of mcpTools) {
+        const { toolName, sdkService, sdkMethod, params, file } = tool;
+
+        const found = findConjureEndpoint(conjureServices, sdkService, sdkMethod);
+        if (!found) continue;
+        const conjureEndpoint = found.ep;
+
+        const conjureArgs = conjureEndpoint.args;
+        const mcpParamNames = new Set(params.map((p) => p.name));
+
+        // Find conjure path/query params missing from MCP
+        for (const arg of conjureArgs) {
+            if (!mcpParamNames.has(arg.argName)) {
+                // Check if there's a similar param name in MCP (possible rename)
+                const similar = params.find((p) => {
+                    const pLower = p.name.toLowerCase();
+                    const aLower = arg.argName.toLowerCase();
+                    return (
+                        pLower.includes(aLower) ||
+                        aLower.includes(pLower) ||
+                        (aLower === "walletaddress" && (pLower === "address" || pLower === "tokenaddress"))
+                    );
+                });
+                if (similar) {
+                    corrections.push({
+                        type: "param_rename",
+                        tool: toolName,
+                        file,
+                        from: similar.name,
+                        to: arg.argName,
+                        message: `Consider: "${similar.name}" → "${arg.argName}" in "${toolName}" to match conjure spec`,
+                    });
+                }
+            }
+        }
+    }
+
+    return corrections;
+}
+
+// ── Pretty print ───────────────────────────────────────────────────────────
+
+const COLORS = {
+    red: "\x1b[31m",
+    yellow: "\x1b[33m",
+    green: "\x1b[32m",
+    blue: "\x1b[34m",
+    cyan: "\x1b[36m",
+    dim: "\x1b[2m",
+    bold: "\x1b[1m",
+    reset: "\x1b[0m",
+};
+
+function printReport(issues, corrections, datoIssues) {
+    const grouped = {};
+    for (const issue of issues) {
+        const key = issue.type;
+        if (!grouped[key]) grouped[key] = [];
+        grouped[key].push(issue);
+    }
+    const datoGrouped = {};
+    for (const issue of datoIssues) {
+        const key = issue.type;
+        if (!datoGrouped[key]) datoGrouped[key] = [];
+        datoGrouped[key].push(issue);
+    }
+
+    console.log(`\n${COLORS.bold}═══════════════════════════════════════════════════════════════${COLORS.reset}`);
+    console.log(`${COLORS.bold}  MCP Server ↔ Conjure + Dato Sync Report${COLORS.reset}`);
+    console.log(`${COLORS.bold}═══════════════════════════════════════════════════════════════${COLORS.reset}\n`);
+
+    // 1. Missing conjure endpoints (not exposed as MCP tools)
+    if (grouped.not_in_mcp) {
+        console.log(`${COLORS.cyan}${COLORS.bold}▸ Conjure endpoints NOT exposed as MCP tools (${grouped.not_in_mcp.length})${COLORS.reset}\n`);
+        const byService = {};
+        for (const i of grouped.not_in_mcp) {
+            if (!byService[i.service]) byService[i.service] = [];
+            byService[i.service].push(i);
+        }
+        for (const [svc, items] of Object.entries(byService)) {
+            console.log(`  ${COLORS.bold}${svc}${COLORS.reset}`);
+            for (const i of items) {
+                console.log(`    ${COLORS.dim}─${COLORS.reset} ${i.endpoint} ${COLORS.dim}${i.httpPath}${COLORS.reset} ${COLORS.dim}(${i.argCount} params)${COLORS.reset}`);
+            }
+        }
+        console.log();
+    }
+
+    // 2. MCP tools with no conjure match
+    if (grouped.no_conjure_match) {
+        console.log(`${COLORS.yellow}${COLORS.bold}▸ MCP tools with NO conjure match (${grouped.no_conjure_match.length})${COLORS.reset}\n`);
+        for (const i of grouped.no_conjure_match) {
+            console.log(`  ${COLORS.yellow}⚠${COLORS.reset}  ${i.tool} ${COLORS.dim}→ ${i.sdkService}.${i.sdkMethod} (${i.file})${COLORS.reset}`);
+        }
+        console.log();
+    }
+
+    // 3. Missing params (in conjure but not MCP)
+    if (grouped.missing_in_mcp) {
+        console.log(`${COLORS.red}${COLORS.bold}▸ Params in conjure but MISSING from MCP tools (${grouped.missing_in_mcp.length})${COLORS.reset}\n`);
+        for (const i of grouped.missing_in_mcp) {
+            console.log(
+                `  ${COLORS.red}✗${COLORS.reset}  ${COLORS.bold}${i.tool}${COLORS.reset}.${i.param} ` +
+                `${COLORS.dim}(${i.paramLocation}, ${i.conjureType})${COLORS.reset}`
+            );
+            if (i.conjureDocs) {
+                console.log(`     ${COLORS.dim}conjure: "${i.conjureDocs}"${COLORS.reset}`);
+            }
+        }
+        console.log();
+    }
+
+    // 4. Extra params (in MCP but not conjure)
+    if (grouped.extra_in_mcp) {
+        console.log(`${COLORS.blue}${COLORS.bold}▸ Params in MCP but NOT in conjure (${grouped.extra_in_mcp.length})${COLORS.reset}\n`);
+        for (const i of grouped.extra_in_mcp) {
+            console.log(
+                `  ${COLORS.blue}+${COLORS.reset}  ${COLORS.bold}${i.tool}${COLORS.reset}.${i.param} ` +
+                `${COLORS.dim}(z.${i.zodType})${COLORS.reset}`
+            );
+            if (i.describe) {
+                console.log(`     ${COLORS.dim}mcp: "${i.describe}"${COLORS.reset}`);
+            }
+        }
+        console.log();
+    }
+
+    // 5. Type mismatches
+    if (grouped.type_mismatch) {
+        console.log(`${COLORS.red}${COLORS.bold}▸ Type mismatches (${grouped.type_mismatch.length})${COLORS.reset}\n`);
+        for (const i of grouped.type_mismatch) {
+            console.log(
+                `  ${COLORS.red}≠${COLORS.reset}  ${COLORS.bold}${i.tool}${COLORS.reset}.${i.param}: ` +
+                `MCP z.${i.mcpType} vs conjure ${i.conjureType}`
+            );
+        }
+        console.log();
+    }
+
+    // 6. Description gaps
+    if (grouped.description_gap) {
+        console.log(`${COLORS.yellow}${COLORS.bold}▸ Description gaps (${grouped.description_gap.length})${COLORS.reset}\n`);
+        for (const i of grouped.description_gap) {
+            console.log(`  ${COLORS.yellow}~${COLORS.reset}  ${COLORS.bold}${i.tool}${COLORS.reset}.${i.param}`);
+            console.log(`     ${COLORS.dim}conjure: "${i.conjureDocs}"${COLORS.reset}`);
+            console.log(`     ${COLORS.dim}mcp:     "${i.mcpDescribe}"${COLORS.reset}`);
+        }
+        console.log();
+    }
+
+    // 7. Suggested corrections
+    if (corrections.length > 0) {
+        console.log(`${COLORS.green}${COLORS.bold}▸ Suggested corrections (${corrections.length})${COLORS.reset}\n`);
+        for (const c of corrections) {
+            console.log(`  ${COLORS.green}→${COLORS.reset}  ${c.message}`);
+        }
+        console.log();
+    }
+
+    // ── Dato sections ──
+
+    if (datoIssues.length > 0) {
+        console.log(`${COLORS.bold}── Dato ──────────────────────────────────────────────────────${COLORS.reset}\n`);
+    }
+
+    // Dato: endpoints not in MCP
+    if (datoGrouped.dato_not_in_mcp) {
+        console.log(`${COLORS.cyan}${COLORS.bold}▸ Dato endpoints NOT exposed as MCP tools (${datoGrouped.dato_not_in_mcp.length})${COLORS.reset}\n`);
+        const byGroup = {};
+        for (const i of datoGrouped.dato_not_in_mcp) {
+            const g = i.grouping || "other";
+            if (!byGroup[g]) byGroup[g] = [];
+            byGroup[g].push(i);
+        }
+        for (const [group, items] of Object.entries(byGroup)) {
+            console.log(`  ${COLORS.bold}${group}${COLORS.reset}`);
+            for (const i of items) {
+                const sdk = i.sdkSupport ? "" : ` ${COLORS.red}(no SDK)${COLORS.reset}`;
+                console.log(`    ${COLORS.dim}─${COLORS.reset} ${i.datoSlug}${sdk}`);
+                console.log(`      ${COLORS.dim}${i.usecase}${COLORS.reset}`);
+            }
+        }
+        console.log();
+    }
+
+    // Dato: usecase mismatch
+    if (datoGrouped.dato_usecase_mismatch) {
+        console.log(`${COLORS.yellow}${COLORS.bold}▸ Dato usecase vs MCP description mismatches (${datoGrouped.dato_usecase_mismatch.length})${COLORS.reset}\n`);
+        for (const i of datoGrouped.dato_usecase_mismatch) {
+            console.log(`  ${COLORS.yellow}~${COLORS.reset}  ${COLORS.bold}${i.tool}${COLORS.reset} ${COLORS.dim}(${i.datoSlug})${COLORS.reset}`);
+            console.log(`     ${COLORS.dim}dato: "${i.datoUsecase}"${COLORS.reset}`);
+            console.log(`     ${COLORS.dim}mcp:  "${i.mcpDescription}"${COLORS.reset}`);
+        }
+        console.log();
+    }
+
+    // Dato: beta not mentioned
+    if (datoGrouped.dato_beta_missing) {
+        console.log(`${COLORS.yellow}${COLORS.bold}▸ Beta endpoints missing beta flag in MCP description (${datoGrouped.dato_beta_missing.length})${COLORS.reset}\n`);
+        for (const i of datoGrouped.dato_beta_missing) {
+            console.log(`  ${COLORS.yellow}!${COLORS.reset}  ${COLORS.bold}${i.tool}${COLORS.reset} ${COLORS.dim}(${i.datoSlug})${COLORS.reset}`);
+        }
+        console.log();
+    }
+
+    // Dato: limited chain support
+    if (datoGrouped.dato_limited_chains) {
+        console.log(`${COLORS.blue}${COLORS.bold}▸ Endpoints with limited chain support (${datoGrouped.dato_limited_chains.length})${COLORS.reset}\n`);
+        for (const i of datoGrouped.dato_limited_chains) {
+            console.log(
+                `  ${COLORS.blue}⊂${COLORS.reset}  ${COLORS.bold}${i.tool}${COLORS.reset} ${COLORS.dim}(${i.chainCount} chains: ${i.chains.slice(0, 5).join(", ")}${i.chainCount > 5 ? "..." : ""})${COLORS.reset}`
+            );
+        }
+        console.log();
+    }
+
+    // Dato: credit rate info
+    if (datoGrouped.dato_credit_info) {
+        console.log(`${COLORS.dim}${COLORS.bold}▸ Credit rate info from Dato (${datoGrouped.dato_credit_info.length} tools)${COLORS.reset}\n`);
+        for (const i of datoGrouped.dato_credit_info) {
+            console.log(`  ${COLORS.dim}$${COLORS.reset}  ${COLORS.bold}${i.tool}${COLORS.reset}: ${COLORS.dim}${i.rateStr}${COLORS.reset}`);
+        }
+        console.log();
+    }
+
+    // Summary
+    const total = issues.length + datoIssues.length;
+    const allGrouped = { ...grouped };
+    for (const [k, v] of Object.entries(datoGrouped)) {
+        allGrouped[k] = v;
+    }
+    const byType = Object.entries(allGrouped)
+        .map(([k, v]) => `${k}: ${v.length}`)
+        .join(", ");
+    console.log(`${COLORS.bold}───────────────────────────────────────────────────────────────${COLORS.reset}`);
+    console.log(`${COLORS.bold}Total issues: ${total}${COLORS.reset} (${byType})`);
+    console.log(`${COLORS.bold}───────────────────────────────────────────────────────────────${COLORS.reset}\n`);
+}
+
+// ── Auto-correct: dato usecase → MCP description leading sentence ──────────
+
+function autoCorrectDatoDescriptions(datoBySlug, conjureServices, mcpTools) {
+    if (!datoBySlug) return [];
+    const fixes = [];
+
+    // Group tools by file for efficient file I/O
+    const toolsByFile = new Map();
+    for (const tool of mcpTools) {
+        if (!toolsByFile.has(tool.file)) toolsByFile.set(tool.file, []);
+        toolsByFile.get(tool.file).push(tool);
+    }
+
+    for (const [file, tools] of toolsByFile) {
+        const filePath = join(SERVICES_DIR, file);
+        let src = readFileSync(filePath, "utf-8");
+        let modified = false;
+
+        for (const tool of tools) {
+            const { toolName, sdkService, sdkMethod, description } = tool;
+
+            // Find matching dato entry via conjure tags
+            const found = findConjureEndpoint(conjureServices, sdkService, sdkMethod);
+            if (!found) continue;
+            const tags = found.ep.tags || [];
+            const datoEntry = tags.reduce((acc, tag) => acc || datoBySlug.get(tag), null);
+            if (!datoEntry || !datoEntry.usecase) continue;
+
+            // Check if there's a mismatch (same logic as compareDato)
+            const mcpLower = description.toLowerCase();
+            const usecaseLower = datoEntry.usecase.toLowerCase();
+            if (mcpLower.includes(usecaseLower.slice(0, 40))) continue;
+
+            const datoUsecase = datoEntry.usecase.trim();
+
+            // Find the first string literal of the description in source
+            const toolMarker = `"${toolName}"`;
+            const toolIdx = src.indexOf(toolMarker);
+            if (toolIdx === -1) continue;
+
+            // Skip to the comma after tool name, then find first " of description
+            const commaIdx = src.indexOf(",", toolIdx + toolMarker.length);
+            if (commaIdx === -1) continue;
+
+            let descQuoteStart = commaIdx + 1;
+            while (descQuoteStart < src.length && src[descQuoteStart] !== '"') descQuoteStart++;
+            if (descQuoteStart >= src.length) continue;
+
+            // Find the closing quote of the first string literal
+            let descQuoteEnd = descQuoteStart + 1;
+            while (descQuoteEnd < src.length && src[descQuoteEnd] !== '"') {
+                if (src[descQuoteEnd] === '\\') descQuoteEnd++; // skip escaped chars
+                descQuoteEnd++;
+            }
+
+            // Extract old content (between quotes)
+            const oldContent = src.slice(descQuoteStart + 1, descQuoteEnd);
+
+            // Determine suffix: does it end with \n or trailing space?
+            let suffix = "";
+            if (oldContent.endsWith("\\n")) {
+                suffix = "\\n";
+            } else if (oldContent.endsWith(" ")) {
+                suffix = " ";
+            }
+
+            // Build new content: dato usecase + suffix
+            let newContent = datoUsecase;
+            if (!newContent.endsWith(".")) newContent += ".";
+            newContent += suffix;
+
+            // Replace in source
+            const oldStr = `"${oldContent}"`;
+            const newStr = `"${newContent}"`;
+            src = src.replace(oldStr, newStr);
+            modified = true;
+
+            fixes.push({
+                file,
+                tool: toolName,
+                datoSlug: datoEntry.slug,
+                old: oldContent.replace(/\\n$/, "").trim(),
+                new: datoUsecase,
+            });
+        }
+
+        if (modified) {
+            writeFileSync(filePath, src, "utf-8");
+        }
+    }
+
+    return fixes;
+}
+
+// ── Auto-correct mode ──────────────────────────────────────────────────────
+
+function autoCorrectDescriptions(conjureServices, mcpTools) {
+    const fixes = [];
+
+    for (const tool of mcpTools) {
+        const { toolName, sdkService, sdkMethod, params, file } = tool;
+
+        const found = findConjureEndpoint(conjureServices, sdkService, sdkMethod);
+        if (!found) continue;
+        const conjureEndpoint = found.ep;
+
+        const filePath = join(SERVICES_DIR, file);
+        let src = readFileSync(filePath, "utf-8");
+        let modified = false;
+
+        for (const param of params) {
+            const conjureArg = conjureEndpoint.args.find(
+                (a) => a.argName === param.name
+            );
+            if (!conjureArg || !conjureArg.docs) continue;
+            if (!param.describe) continue;
+
+            // Only fix if MCP description is missing ENS/domain support info that conjure has
+            const conjureLower = conjureArg.docs.toLowerCase();
+            const mcpLower = param.describe.toLowerCase();
+
+            if (
+                conjureLower.includes("ens") &&
+                !mcpLower.includes("ens") &&
+                conjureArg.paramType.type === "path"
+            ) {
+                const oldDescribe = param.describe;
+                let newDescribe = param.describe;
+
+                // Replace various "Must be a valid ..." patterns with ENS info
+                const replacements = [
+                    [/Must be a valid blockchain address\./, "Passing in an ENS, RNS, Lens Handle, or an Unstoppable Domain resolves automatically."],
+                    [/Must be a valid blockchain address/, "Supports ENS, RNS, Lens Handle, and Unstoppable Domain resolution"],
+                    [/Must be a valid ERC20 or ERC721 contract address\./, "Supports ENS, RNS, Lens Handle, and Unstoppable Domain resolution."],
+                    [/Must be a valid contract address\./, "Supports ENS, RNS, Lens Handle, and Unstoppable Domain resolution."],
+                ];
+                for (const [pattern, replacement] of replacements) {
+                    const next = newDescribe.replace(pattern, replacement);
+                    if (next !== newDescribe) { newDescribe = next; break; }
+                }
+
+                // If no pattern matched but still missing ENS, append it
+                if (newDescribe === oldDescribe && !mcpLower.includes("ens")) {
+                    newDescribe = oldDescribe.replace(/\.$/, "") + ". Supports ENS, RNS, Lens Handle, and Unstoppable Domain resolution.";
+                }
+
+                if (newDescribe !== oldDescribe) {
+                    src = src.replace(
+                        `"${oldDescribe}"`,
+                        `"${newDescribe}"`
+                    );
+                    modified = true;
+                    fixes.push({
+                        file,
+                        tool: toolName,
+                        param: param.name,
+                        old: oldDescribe,
+                        new: newDescribe,
+                    });
+                }
+            }
+        }
+
+        if (modified) {
+            writeFileSync(filePath, src, "utf-8");
+        }
+    }
+
+    return fixes;
+}
+
+// ── Main ───────────────────────────────────────────────────────────────────
+
+const autoFix = process.argv.includes("--fix");
+
+console.log("Parsing conjure-output.json...");
+const conjureServices = parseConjure();
+
+console.log("Parsing dato-apiendpoints.json...");
+const datoBySlug = parseDato();
+
+console.log("Parsing MCP service files...");
+const mcpTools = parseMcpServices();
+
+const conjureCount = Array.from(conjureServices.values()).reduce((sum, s) => sum + s.endpoints.size, 0);
+const datoCount = datoBySlug ? datoBySlug.size : 0;
+console.log(
+    `Found ${mcpTools.length} MCP tools, ${conjureCount} conjure endpoints, ${datoCount} dato endpoints.\n`
+);
+
+const issues = compare(conjureServices, mcpTools);
+const datoIssues = compareDato(datoBySlug, conjureServices, mcpTools);
+const corrections = buildCorrections(conjureServices, mcpTools, issues);
+printReport(issues, corrections, datoIssues);
+
+if (autoFix) {
+    console.log(`${COLORS.green}${COLORS.bold}Running auto-corrections...${COLORS.reset}\n`);
+
+    // 1. Fix dato usecase → MCP description leading sentence
+    const datoFixes = autoCorrectDatoDescriptions(datoBySlug, conjureServices, mcpTools);
+    if (datoFixes.length > 0) {
+        console.log(`${COLORS.green}Applied ${datoFixes.length} dato description fixes:${COLORS.reset}`);
+        for (const f of datoFixes) {
+            console.log(`  ${f.file} → ${f.tool} ${COLORS.dim}(${f.datoSlug})${COLORS.reset}`);
+            console.log(`    ${COLORS.dim}old: "${f.old}"${COLORS.reset}`);
+            console.log(`    ${COLORS.green}new: "${f.new}"${COLORS.reset}`);
+        }
+        console.log();
+    }
+
+    // 2. Fix ENS/domain support info from conjure (re-parse after dato fixes)
+    const mcpToolsUpdated = parseMcpServices();
+    const fixes = autoCorrectDescriptions(conjureServices, mcpToolsUpdated);
+    if (fixes.length > 0) {
+        console.log(`${COLORS.green}Applied ${fixes.length} conjure description fixes:${COLORS.reset}`);
+        for (const f of fixes) {
+            console.log(`  ${f.file} → ${f.tool}.${f.param}`);
+            console.log(`    ${COLORS.dim}old: "${f.old}"${COLORS.reset}`);
+            console.log(`    ${COLORS.green}new: "${f.new}"${COLORS.reset}`);
+        }
+    }
+
+    if (datoFixes.length === 0 && fixes.length === 0) {
+        console.log("No auto-corrections needed.");
+    }
+    console.log();
+} else {
+    console.log(`${COLORS.dim}Run with --fix to auto-correct descriptions.${COLORS.reset}\n`);
+}

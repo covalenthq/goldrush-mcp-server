@@ -16,6 +16,7 @@ import { z } from "zod";
  * This function creates tools:
  * - nft_for_address
  * - nft_check_ownership
+ * - nft_check_ownership_token_id
  */
 export function addNftServiceTools(
     server: McpServer,
@@ -105,7 +106,7 @@ export function addNftServiceTools(
             walletAddress: z
                 .string()
                 .describe(
-                    "The wallet address to check NFT ownership for. Must be a valid blockchain address."
+                    "The wallet address to check NFT ownership for. Passing in an ENS, RNS, Lens Handle, or an Unstoppable Domain resolves automatically."
                 ),
             collectionContract: z
                 .string()
@@ -136,6 +137,59 @@ export function addNftServiceTools(
                             traitsFilter: params.traitsFilter,
                             valuesFilter: params.valuesFilter,
                         }
+                    );
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: stringifyWithBigInt(response.data),
+                        },
+                    ],
+                };
+            } catch (err) {
+                return {
+                    content: [{ type: "text", text: `Error: ${err}` }],
+                    isError: true,
+                };
+            }
+        }
+    );
+
+    server.tool(
+        "nft_check_ownership_token_id",
+        "Commonly used to verify ownership of a specific token (ERC-721 or ERC-1155) within a collection.\n" +
+            "Required: chainName (blockchain network), walletAddress (wallet address), collectionContract (NFT collection), tokenId (specific token ID).\n" +
+            "Returns ownership status for the specific token ID.",
+        {
+            chainName: z
+                .enum(Object.values(ChainName) as [string, ...string[]])
+                .describe(
+                    "The blockchain network to query (e.g., 'eth-mainnet', 'matic-mainnet', 'bsc-mainnet')."
+                ),
+            walletAddress: z
+                .string()
+                .describe(
+                    "The wallet address to check NFT ownership for. Passing in an ENS, RNS, Lens Handle, or an Unstoppable Domain resolves automatically."
+                ),
+            collectionContract: z
+                .string()
+                .describe(
+                    "The NFT collection contract address. Passing in an ENS, RNS, Lens Handle, or an Unstoppable Domain resolves automatically."
+                ),
+            tokenId: z
+                .string()
+                .describe(
+                    "The specific token ID to check ownership for."
+                ),
+        },
+        async (params) => {
+            try {
+                const response =
+                    await goldRushClient.NftService.checkOwnershipInNftForSpecificTokenId(
+                        params.chainName as Chain,
+                        params.walletAddress,
+                        params.collectionContract,
+                        params.tokenId
                     );
                 return {
                     content: [

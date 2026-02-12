@@ -125,7 +125,7 @@ export function addTransactionServiceTools(
             walletAddress: z
                 .string()
                 .describe(
-                    "The wallet address to get transaction summary for. Must be a valid blockchain address."
+                    "The wallet address to get transaction summary for. Passing in an ENS, RNS, Lens Handle, or an Unstoppable Domain resolves automatically."
                 ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
@@ -170,7 +170,7 @@ export function addTransactionServiceTools(
 
     server.tool(
         "transactions_for_address",
-        "Commonly used to fetch and render the most recent transactions involving an address.\n" +
+        "Commonly used to fetch the transactions involving an address including the decoded log events in a paginated fashion.\n" +
             "Required: chainName (blockchain network), walletAddress (wallet address), page (page number).\n" +
             "Optional: quoteCurrency, noLogs, blockSignedAtAsc (chronological order).\n" +
             "Returns transactions for the specified page of results.",
@@ -183,7 +183,7 @@ export function addTransactionServiceTools(
             walletAddress: z
                 .string()
                 .describe(
-                    "The wallet address to get transactions for. Must be a valid blockchain address."
+                    "The wallet address to get transactions for. Passing in an ENS, RNS, Lens Handle, or an Unstoppable Domain resolves automatically."
                 ),
             page: z
                 .number()

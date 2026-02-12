@@ -85,11 +85,13 @@
         "@typescript-eslint/parser": "^8.33.0",
         "eslint": "^9.27.0",
         "eslint-config-prettier": "^10.1.5",
+        "graphqurl": "^1.0.3",
         "eslint-plugin-prettier": "^5.4.0",
         "prettier": "^3.5.3",
         "rimraf": "^6.0.1",
         "ts-node": "^10.9.2",
         "typescript": "^5.8.3",
         "vitest": "^4.0.15"
-    }
+    },
+    "packageManager": "pnpm@10.28.0+sha512.05df71d1421f21399e053fde567cea34d446fa02c76571441bfc1c7956e98e363088982d940465fd34480d4d90a0668bc12362f8aa88000a64e83d0b0e47be48"
 }
