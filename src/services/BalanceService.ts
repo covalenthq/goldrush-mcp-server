@@ -225,7 +225,7 @@ export function addBalanceServiceTools(
             walletAddress: z
                 .string()
                 .describe(
-                    "The wallet address to get portfolio history for. Must be a valid blockchain address."
+                    "The wallet address to get portfolio history for. Passing in an ENS, RNS, Lens Handle, or an Unstoppable Domain resolves automatically."
                 ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
@@ -285,7 +285,7 @@ export function addBalanceServiceTools(
             walletAddress: z
                 .string()
                 .describe(
-                    "The wallet address to get ERC20 transfers for. Must be a valid blockchain address."
+                    "The wallet address to get ERC20 transfers for. Passing in an ENS, RNS, Lens Handle, or an Unstoppable Domain resolves automatically."
                 ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])
@@ -373,7 +373,7 @@ export function addBalanceServiceTools(
             tokenAddress: z
                 .string()
                 .describe(
-                    "The token contract address to get holders for. Must be a valid ERC20 or ERC721 contract address."
+                    "The token contract address to get holders for. Supports ENS, RNS, Lens Handle, and Unstoppable Domain resolution."
                 ),
             blockHeight: z
                 .union([z.string(), z.number()])
@@ -431,7 +431,7 @@ export function addBalanceServiceTools(
 
     server.tool(
         "native_token_balance",
-        "Commonly used to fetch the native token balance (ETH, MATIC, etc.) for an address. " +
+        "Lightweight endpoint to just get the native token balance for an EVM address. " +
             "Required: chainName (blockchain network), walletAddress (wallet address). " +
             "Optional: quoteCurrency for value conversion, blockHeight for historical balance. " +
             "Returns native token balance with current market value and token metadata.",
@@ -444,7 +444,7 @@ export function addBalanceServiceTools(
             walletAddress: z
                 .string()
                 .describe(
-                    "The wallet address to get native token balance for. Must be a valid blockchain address."
+                    "The wallet address to get native token balance for. Passing in an ENS, RNS, Lens Handle, or an Unstoppable Domain resolves automatically."
                 ),
             quoteCurrency: z
                 .enum(Object.values(validQuoteValues) as [string, ...string[]])

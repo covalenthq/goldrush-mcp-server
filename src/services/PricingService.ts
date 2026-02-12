@@ -27,7 +27,7 @@ export function addPricingServiceTools(
 ) {
     server.tool(
         "historical_token_prices",
-        "Commonly used to get historic prices of a token between date ranges. Supports native tokens.\n" +
+        "Get the historical prices of one (or many) large cap ERC20 tokens between specified date ranges. Also supports native tokens.\n" +
             "Required: chainName (blockchain network), quoteCurrency (price currency), contractAddress (token contract), from (start date YYYY-MM-DD), to (end date YYYY-MM-DD).\n" +
             "Optional: pricesAtAsc (set to true for chronological ascending order, default is false for descending order).\n" +
             "Returns historical token prices for the specified time range.",
@@ -45,7 +45,7 @@ export function addPricingServiceTools(
             contractAddress: z
                 .string()
                 .describe(
-                    "The token contract address to get historical prices for. Use the native token address for native token prices."
+                    "The token contract address to get historical prices for. Use the native token address for native token prices. Supports ENS, RNS, Lens Handle, and Unstoppable Domain resolution."
                 ),
             from: z
                 .string()

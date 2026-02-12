@@ -27,7 +27,7 @@ export function addAllChainsServiceTools(
 ) {
     server.tool(
         "multichain_transactions",
-        "Gets transactions for multiple wallet addresses across multiple blockchains. " +
+        "Fetch paginated transactions for up to 10 EVM addresses and 10 EVM chains with one API call. Useful for building Activity Feeds. " +
             "Requires addresses array. Optional parameters include chains array, " +
             "pagination (before/after), limit (default 10), quoteCurrency for value conversion, " +
             "and options to include logs (withLogs, withDecodedLogs). " +
@@ -126,7 +126,7 @@ export function addAllChainsServiceTools(
 
     server.tool(
         "multichain_balances",
-        "Gets token balances for a wallet address across multiple blockchains. " +
+        "Fetch paginated spot & historical native and token balances for a single address on up to 10 EVM chains with one API call. " +
             "Requires walletAddress. Optional parameters include chains array to specify networks, " +
             "quoteCurrency for value conversion, limit (default 10), pagination (before), " +
             "and cutoffTimestamp to filter by time. " +
@@ -208,7 +208,7 @@ export function addAllChainsServiceTools(
 
     server.tool(
         "multichain_address_activity",
-        "Gets a summary of wallet activity across all supported blockchains. " +
+        "Commonly used to locate chains which an address is active on with a single API call. " +
             "Requires walletAddress. Optional parameter testnets (default false) " +
             "determines whether to include testnet activity. " +
             "Returns a comprehensive summary of chain activity including transaction counts, " +
@@ -217,7 +217,7 @@ export function addAllChainsServiceTools(
             walletAddress: z
                 .string()
                 .describe(
-                    "The wallet address to analyze activity for. Must be a valid blockchain address."
+                    "The wallet address to analyze activity for. Passing in an ENS, RNS, Lens Handle, or an Unstoppable Domain resolves automatically."
                 ),
             testnets: z
                 .boolean()

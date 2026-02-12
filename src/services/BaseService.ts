@@ -202,7 +202,7 @@ export function addBaseServiceTools(
             contractAddress: z
                 .string()
                 .describe(
-                    "The smart contract address to get event logs from. Must be a valid contract address."
+                    "The smart contract address to get event logs from. Supports ENS, RNS, Lens Handle, and Unstoppable Domain resolution."
                 ),
             startingBlock: z
                 .union([z.string(), z.number()])
